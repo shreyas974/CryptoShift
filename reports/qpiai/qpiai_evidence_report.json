@@ -44,7 +44,7 @@
       "backend": "CPU Exact Combinatorial Search",
       "objective_value": 248.105,
       "feasible": true,
-      "runtime_seconds": 0.005559
+      "runtime_seconds": 0.004795
     },
     {
       "name": "QpiAI Opt Algebraic Modeller & IR Feasibility (`qpiai-opt`)",
@@ -53,7 +53,7 @@
       "backend": "qpiai_opt.opt_modeller / opt_solvers",
       "objective_value": 248.105,
       "feasible": true,
-      "runtime_seconds": 0.020677
+      "runtime_seconds": 0.015105
     },
     {
       "name": "QpiAI Opt Authenticated Local Solver (`solve(mode='local')`)",
@@ -62,7 +62,7 @@
       "backend": "qpiai_opt.opt_solvers.solve (mode='local')",
       "objective_value": null,
       "feasible": true,
-      "runtime_seconds": 0.020677
+      "runtime_seconds": 0.015105
     },
     {
       "name": "QpiAI Quantum 4-Qubit Wave-0 QUBO & QAOA Circuit (`build_circuit`)",
@@ -71,7 +71,7 @@
       "backend": "qpiai_opt.quantum.QAOA",
       "objective_value": -13.07,
       "feasible": true,
-      "runtime_seconds": 0.193366
+      "runtime_seconds": 0.044703
     },
     {
       "name": "QpiAI Quantum Local Statevector Simulator (`QpiAI-QSV-Local`)",
@@ -80,7 +80,7 @@
       "backend": "QpiAI-QSV-Local",
       "objective_value": -13.07,
       "feasible": true,
-      "runtime_seconds": 0.193366
+      "runtime_seconds": 0.044703
     },
     {
       "name": "QpiAI QCloud Authenticated Variational QAOA (`solve(..., mode='local')`)",
@@ -89,7 +89,7 @@
       "backend": "QpiAIQuantumAuth + QpiAI-QSV-Local",
       "objective_value": null,
       "feasible": true,
-      "runtime_seconds": 0.193366
+      "runtime_seconds": 0.044703
     }
   ],
   "problem_instance": {
@@ -492,7 +492,7 @@
         "settlement_batch"
       ]
     },
-    "runtime_seconds": 0.005559,
+    "runtime_seconds": 0.004795,
     "diagnostics": {
       "method": "exact_constrained_combinatorial_search",
       "candidates_evaluated": 729,
@@ -553,7 +553,7 @@
     "local_qsv_simulator_status": "run successfully (local simulator)",
     "authenticated_qaoa_status": "not attempted (offline verification mode; pass --online-auth to authorize network key check)",
     "backend": "QpiAI-QSV-Local (Local Statevector Simulator \u2014 NOT a physical QPU)",
-    "runtime_seconds": 0.193366,
+    "runtime_seconds": 0.044703,
     "circuit_metrics": {
       "qubits": 4,
       "depth": 8,
@@ -617,12 +617,12 @@
       }
     },
     "local_simulator_top_counts": {
-      "0111": 189,
-      "1100": 136,
-      "0110": 103,
-      "0011": 102,
-      "1000": 87,
-      "0101": 87
+      "0111": 183,
+      "1100": 165,
+      "0101": 94,
+      "0110": 92,
+      "1000": 85,
+      "0011": 85
     },
     "best_simulator_wave0_selection": [
       "ledger_audit",

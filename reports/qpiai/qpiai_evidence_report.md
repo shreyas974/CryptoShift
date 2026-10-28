@@ -24,12 +24,12 @@
 
 | Component | Status Label | Execution Mode | Backend / Solver | Objective Value | Feasible | Runtime (s) |
 |---|---|---|---|---:|---|---:|
-| Deterministic Dependency-Aware Fallback Scheduler | **run successfully** | `deterministic_local` | `CPU Exact Combinatorial Search` | 248.10 | `True` | 0.0056 |
-| QpiAI Opt Algebraic Modeller & IR Feasibility (`qpiai-opt`) | **run successfully** | `local_ir_validation` | `qpiai_opt.opt_modeller / opt_solvers` | 248.10 | `True` | 0.0207 |
-| QpiAI Opt Authenticated Local Solver (`solve(mode='local')`) | **not attempted (offline verification mode; pass --online-auth to authorize network key check)** | `local` | `qpiai_opt.opt_solvers.solve (mode='local')` | N/A | `True` | 0.0207 |
-| QpiAI Quantum 4-Qubit Wave-0 QUBO & QAOA Circuit (`build_circuit`) | **run successfully** | `local_circuit_build` | `qpiai_opt.quantum.QAOA` | -13.07 | `True` | 0.1934 |
-| QpiAI Quantum Local Statevector Simulator (`QpiAI-QSV-Local`) | **run successfully (local simulator)** | `local_simulator` | `QpiAI-QSV-Local` | -13.07 | `True` | 0.1934 |
-| QpiAI QCloud Authenticated Variational QAOA (`solve(..., mode='local')`) | **not attempted (offline verification mode; pass --online-auth to authorize network key check)** | `local_simulator_authenticated` | `QpiAIQuantumAuth + QpiAI-QSV-Local` | N/A | `True` | 0.1934 |
+| Deterministic Dependency-Aware Fallback Scheduler | **run successfully** | `deterministic_local` | `CPU Exact Combinatorial Search` | 248.10 | `True` | 0.0048 |
+| QpiAI Opt Algebraic Modeller & IR Feasibility (`qpiai-opt`) | **run successfully** | `local_ir_validation` | `qpiai_opt.opt_modeller / opt_solvers` | 248.10 | `True` | 0.0151 |
+| QpiAI Opt Authenticated Local Solver (`solve(mode='local')`) | **not attempted (offline verification mode; pass --online-auth to authorize network key check)** | `local` | `qpiai_opt.opt_solvers.solve (mode='local')` | N/A | `True` | 0.0151 |
+| QpiAI Quantum 4-Qubit Wave-0 QUBO & QAOA Circuit (`build_circuit`) | **run successfully** | `local_circuit_build` | `qpiai_opt.quantum.QAOA` | -13.07 | `True` | 0.0447 |
+| QpiAI Quantum Local Statevector Simulator (`QpiAI-QSV-Local`) | **run successfully (local simulator)** | `local_simulator` | `QpiAI-QSV-Local` | -13.07 | `True` | 0.0447 |
+| QpiAI QCloud Authenticated Variational QAOA (`solve(..., mode='local')`) | **not attempted (offline verification mode; pass --online-auth to authorize network key check)** | `local_simulator_authenticated` | `QpiAIQuantumAuth + QpiAI-QSV-Local` | N/A | `True` | 0.0447 |
 
 ## 4. Schedule Comparison (6 Banking Services across 3 Waves)
 

@@ -82,6 +82,10 @@ CryptoShift/
     qpiai-login.md
     qpiai-setup.md
     demo-runbook.md
+    setup/
+      project-structure.md
+    team/
+      CryptoShift_Team_Roles_36h_and_Technical_Stack.docx
   tests/
     test_cryptoshift.py
   scripts/
@@ -122,7 +126,8 @@ CryptoShift/
 ## Documentation & Project Deliverables
 
 - [Documentation Index](docs/README.md)
-- [PQC Basics & Solution Overview](docs/pqc-basics-and-solution.md) ([Word Guide](assets/CryptoShift_PQC_Concept_and_Solution_Guide.docx) | [Mentor Deck](assets/CryptoShift_Mentor_Deck.pptx))
+- [Project Structure & Organization Guide](docs/setup/project-structure.md)
+- [PQC Basics & Solution Overview](docs/pqc-basics-and-solution.md) ([Word Guide](assets/CryptoShift_PQC_Concept_and_Solution_Guide.docx) | [Mentor Deck](assets/CryptoShift_Mentor_Deck.pptx) | [Team Roles & 36h Stack](docs/team/CryptoShift_Team_Roles_36h_and_Technical_Stack.docx))
 - [Architecture & Trust Boundaries](docs/architecture.md)
 - [Dataset & Evaluation Guide](docs/dataset-and-evaluation.md) ([Verified Evaluation Report](reports/evaluation/evaluation_report.md))
 - [Migration Verification & Rollback Guide](docs/migration-and-verification.md)
