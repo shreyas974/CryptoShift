@@ -1,0 +1,5 @@
+# Core CryptoShift runs with the Python 3.10+ standard library using the deterministic fallback scheduler.
+# Optional QpiAI Opt & QpiAI Quantum SDK integration (install inside .venv):
+qpiai-opt[quantum]==0.0.9
+qpiai-quantum==0.3.0
+python-dotenv>=1.0.0

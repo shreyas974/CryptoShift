@@ -1,0 +1,640 @@
+{
+  "environment": {
+    "python_version": "3.12.14",
+    "executable": "C:\\Users\\lohig\\OneDrive\\Documents\\CryptoShift\\.venv\\Scripts\\python.exe",
+    "virtualenv": "C:\\Users\\lohig\\OneDrive\\Documents\\CryptoShift\\.venv"
+  },
+  "packages": {
+    "QpiAI Opt SDK": {
+      "distribution": "qpiai-opt",
+      "module": "qpiai_opt",
+      "version": "0.0.9",
+      "status": "installed & importable"
+    },
+    "QpiAI Quantum SDK": {
+      "distribution": "qpiai-quantum",
+      "module": "qpiai_quantum",
+      "version": "0.3.0",
+      "status": "installed & importable"
+    }
+  },
+  "credentials": {
+    "QPIAI_OPT_API_KEY": {
+      "configuration_status": "key configured",
+      "auth_verification_status": "run successfully",
+      "message": "Authenticated QpiAI Opt local solve succeeded (`mode='local'`, zero paid platform usage)."
+    },
+    "QPIAI_QCLOUD_API_KEY": {
+      "configuration_status": "key configured",
+      "auth_verification_status": "run successfully",
+      "message": "QpiAIQuantumAuth.login() and verify_api_key() succeeded. Local simulator (`QpiAI-QSV-Local`): run successfully."
+    }
+  },
+  "components": [
+    {
+      "name": "Deterministic Dependency-Aware Fallback Scheduler",
+      "status": "run successfully",
+      "execution_mode": "deterministic_local",
+      "backend": "CPU Exact Combinatorial Search",
+      "objective_value": 248.105,
+      "feasible": true,
+      "runtime_seconds": 0.004954
+    },
+    {
+      "name": "QpiAI Opt Algebraic Modeller & IR Feasibility (`qpiai-opt`)",
+      "status": "run successfully",
+      "execution_mode": "local_ir_validation",
+      "backend": "qpiai_opt.opt_modeller / opt_solvers",
+      "objective_value": 248.105,
+      "feasible": true,
+      "runtime_seconds": 0.060642
+    },
+    {
+      "name": "QpiAI Opt Authenticated Local Solver (`solve(mode='local')`)",
+      "status": "run successfully",
+      "execution_mode": "local",
+      "backend": "qpiai_opt.opt_solvers.solve (mode='local')",
+      "objective_value": 248.105,
+      "feasible": true,
+      "runtime_seconds": 0.060642
+    },
+    {
+      "name": "QpiAI Quantum 4-Qubit Wave-0 QUBO & QAOA Circuit (`build_circuit`)",
+      "status": "run successfully",
+      "execution_mode": "local_circuit_build",
+      "backend": "qpiai_opt.quantum.QAOA",
+      "objective_value": -13.07,
+      "feasible": true,
+      "runtime_seconds": 0.451688
+    },
+    {
+      "name": "QpiAI Quantum Local Statevector Simulator (`QpiAI-QSV-Local`)",
+      "status": "run successfully (local simulator)",
+      "execution_mode": "local_simulator",
+      "backend": "QpiAI-QSV-Local",
+      "objective_value": -13.07,
+      "feasible": true,
+      "runtime_seconds": 0.451688
+    },
+    {
+      "name": "QpiAI QCloud Authenticated Variational QAOA (`solve(..., mode='local')`)",
+      "status": "run successfully (local simulator)",
+      "execution_mode": "local_simulator_authenticated",
+      "backend": "QpiAIQuantumAuth + QpiAI-QSV-Local",
+      "objective_value": -13.07,
+      "feasible": true,
+      "runtime_seconds": 0.451688
+    }
+  ],
+  "problem_instance": {
+    "config": {
+      "num_waves": 3,
+      "max_services_per_wave": 2,
+      "max_minutes_per_wave": 85,
+      "risk_delay_weight": 3.5,
+      "enforce_verification_gate": true
+    },
+    "services": [
+      {
+        "service_id": "auth_gateway",
+        "name": "Identity & OAuth Token Gateway",
+        "legacy_algorithms": [
+          "RSA-2048",
+          "SHA-1"
+        ],
+        "target_algorithms": [
+          "ML-DSA-65 + RSA-2048 Hybrid / ML-KEM-768",
+          "SHA3-256 / SHA-384"
+        ],
+        "dependencies": [],
+        "duration_minutes": 35,
+        "rollout_cost": 18.0,
+        "risk_score": 4.75,
+        "verification_ready_wave0": true,
+        "criticality": "HIGH"
+      },
+      {
+        "service_id": "ledger_audit",
+        "name": "Core Ledger Audit Notarizer",
+        "legacy_algorithms": [
+          "ECDSA-P256",
+          "SHA-1"
+        ],
+        "target_algorithms": [
+          "ML-DSA-65 Dual-Signature",
+          "SHA3-256 / SHA-384"
+        ],
+        "dependencies": [],
+        "duration_minutes": 30,
+        "rollout_cost": 15.0,
+        "risk_score": 6.06,
+        "verification_ready_wave0": true,
+        "criticality": "CRITICAL"
+      },
+      {
+        "service_id": "interbank_tls",
+        "name": "Interbank ISO-20022 mTLS Gateway",
+        "legacy_algorithms": [
+          "ECDHE-P256",
+          "RSA-2048"
+        ],
+        "target_algorithms": [
+          "X25519MLKEM768 Hybrid Key Exchange",
+          "ML-DSA-65 + RSA-2048 Hybrid / ML-KEM-768"
+        ],
+        "dependencies": [],
+        "duration_minutes": 40,
+        "rollout_cost": 22.0,
+        "risk_score": 7.01,
+        "verification_ready_wave0": true,
+        "criticality": "CRITICAL"
+      },
+      {
+        "service_id": "card_vault",
+        "name": "Card Tokenization & Key Vault",
+        "legacy_algorithms": [
+          "RSA-2048",
+          "3DES"
+        ],
+        "target_algorithms": [
+          "ML-DSA-65 + RSA-2048 Hybrid / ML-KEM-768",
+          "AES-256-GCM"
+        ],
+        "dependencies": [
+          "auth_gateway"
+        ],
+        "duration_minutes": 35,
+        "rollout_cost": 20.0,
+        "risk_score": 4.85,
+        "verification_ready_wave0": false,
+        "criticality": "HIGH"
+      },
+      {
+        "service_id": "payment_signing",
+        "name": "Real-Time Payment Instruction Signer",
+        "legacy_algorithms": [
+          "ECDSA-P256",
+          "RSA-2048"
+        ],
+        "target_algorithms": [
+          "ML-DSA-65 Dual-Signature",
+          "ML-DSA-65 + RSA-2048 Hybrid / ML-KEM-768"
+        ],
+        "dependencies": [
+          "auth_gateway",
+          "ledger_audit"
+        ],
+        "duration_minutes": 45,
+        "rollout_cost": 26.0,
+        "risk_score": 6.5,
+        "verification_ready_wave0": true,
+        "criticality": "CRITICAL"
+      },
+      {
+        "service_id": "settlement_batch",
+        "name": "Clearinghouse Batch Settlement Engine",
+        "legacy_algorithms": [
+          "DH-2048",
+          "RSA-2048",
+          "3DES"
+        ],
+        "target_algorithms": [
+          "ML-KEM-768 + SLH-DSA-128s",
+          "ML-DSA-65 + RSA-2048 Hybrid / ML-KEM-768",
+          "AES-256-GCM"
+        ],
+        "dependencies": [
+          "payment_signing",
+          "interbank_tls"
+        ],
+        "duration_minutes": 50,
+        "rollout_cost": 28.0,
+        "risk_score": 6.54,
+        "verification_ready_wave0": false,
+        "criticality": "CRITICAL"
+      }
+    ]
+  },
+  "fallback_schedule": {
+    "solver_name": "Deterministic Dependency-Aware Fallback Scheduler",
+    "status": "run successfully",
+    "execution_mode": "deterministic_local",
+    "feasible": true,
+    "objective_value": 248.105,
+    "task_to_wave": {
+      "auth_gateway": 1,
+      "ledger_audit": 0,
+      "interbank_tls": 0,
+      "card_vault": 2,
+      "payment_signing": 1,
+      "settlement_batch": 2
+    },
+    "waves": {
+      "0": [
+        "interbank_tls",
+        "ledger_audit"
+      ],
+      "1": [
+        "auth_gateway",
+        "payment_signing"
+      ],
+      "2": [
+        "card_vault",
+        "settlement_batch"
+      ]
+    },
+    "runtime_seconds": 0.004954,
+    "diagnostics": {
+      "method": "exact_constrained_combinatorial_search",
+      "candidates_evaluated": 729,
+      "feasible_schedules_found": 3,
+      "optimality_guarantee": "exact_discrete_optimum_for_6_services"
+    },
+    "limitations": [
+      "Deterministic CPU combinatorial search; suitable for small/medium service graphs as a reliable baseline."
+    ]
+  },
+  "qpiai_opt": {
+    "offline_model_status": "run successfully",
+    "online_solve_status": "run successfully",
+    "problem_class": "MILP",
+    "execution_mode": "local",
+    "solver_status": "optimal",
+    "solver_method": "mixed-integer-linear-programming",
+    "guarantee": "global_optimum",
+    "baseline_feasible_in_opt_ir": true,
+    "baseline_objective": 248.105,
+    "opt_objective": 248.105,
+    "violations": [],
+    "message": "QpiAI Opt local solver completed (`mode='local'`). Opt objective=248.1050 vs. Fallback objective=248.1050."
+  },
+  "qpiai_qcloud": {
+    "status": "run successfully",
+    "qubo_compilation_status": "run successfully",
+    "circuit_construction_status": "run successfully",
+    "local_qsv_simulator_status": "run successfully (local simulator)",
+    "authenticated_qaoa_status": "run successfully (local simulator)",
+    "backend": "QpiAI-QSV-Local (Local Statevector Simulator \u2014 NOT a physical QPU)",
+    "runtime_seconds": 0.451688,
+    "circuit_metrics": {
+      "qubits": 4,
+      "depth": 8,
+      "size": 18,
+      "gates": {
+        "total_operations": 18,
+        "total_gates": 18,
+        "single_qubit_gates": 12,
+        "two_qubit_gates": 6,
+        "multi_qubit_gates": 0,
+        "clifford_gates": 4,
+        "non_clifford_gates": 14,
+        "parametric_gates": 14,
+        "measurements": 0,
+        "barriers": 0,
+        "gate_counts": {
+          "H": 4,
+          "RZ": 4,
+          "RZZ": 6,
+          "RX": 4
+        }
+      }
+    },
+    "quantum_inspection": {
+      "problem_class": "QUBO",
+      "representation": "QUBOProblem",
+      "metrics": {
+        "variables": 4,
+        "active_variables": 4,
+        "terms": 10,
+        "degree": 2,
+        "exact_enumeration_work": 320
+      },
+      "valid": true,
+      "quantum": {
+        "algorithm": "QAOA",
+        "compatible": true,
+        "qubits": 4,
+        "hamiltonian_terms": 11,
+        "linear_terms": 4,
+        "quadratic_terms": 6,
+        "max_locality": 2,
+        "diagonal": true,
+        "parameter_count": 2,
+        "reps": 1,
+        "parameterization": "standard",
+        "mixer": "x",
+        "aggregation": "expectation",
+        "warm_start": null,
+        "initial_state": false,
+        "logical_circuit": {
+          "depth": 8,
+          "size": 18,
+          "gate_counts": {
+            "H": 4,
+            "RZ": 4,
+            "RZZ": 6,
+            "RX": 4
+          }
+        }
+      }
+    },
+    "local_simulator_top_counts": {
+      "0111": 191,
+      "1100": 144,
+      "1000": 100,
+      "0011": 98,
+      "0110": 92,
+      "0101": 80
+    },
+    "best_simulator_wave0_selection": [
+      "ledger_audit",
+      "interbank_tls"
+    ],
+    "best_simulator_wave0_energy": -13.07,
+    "authenticated_qaoa_result": {
+      "objective": -13.07,
+      "variable_assignment": {
+        "q_auth_gateway": 0,
+        "q_ledger_audit": 1,
+        "q_interbank_tls": 1,
+        "q_payment_signing": 0
+      },
+      "selected_wave0_services": [
+        "ledger_audit",
+        "interbank_tls"
+      ],
+      "backend": "QpiAI-QSV-Local"
+    },
+    "baseline_comparison": {
+      "deterministic_wave0": [
+        "interbank_tls",
+        "ledger_audit"
+      ],
+      "deterministic_wave0_energy": -13.07,
+      "simulator_matches_deterministic_optimum": true
+    },
+    "message": "4-qubit Wave-0 QUBO compiled (`QUBOProblem.from_model`), QAOA(reps=1) circuit built (depth=8, size=18), and simulated locally on `QpiAI-QSV-Local` (run successfully (local simulator)). All results are classical statevector simulator results."
+  },
+  "verification_and_migration": {
+    "dependency_order_valid": true,
+    "dependency_violations": [],
+    "metrics": {
+      "total_services": 6,
+      "total_crypto_findings": 13,
+      "shor_vulnerable_findings": 9,
+      "grover_weakened_findings": 4,
+      "schedule_solver": "QpiAI Opt SDK (`mode='local'`)",
+      "schedule_status": "run successfully",
+      "schedule_feasible": true,
+      "schedule_objective": 248.105,
+      "waves_used": 3,
+      "verification_gates_passed": 6,
+      "verification_gates_total": 6
+    },
+    "proposals": [
+      {
+        "service_id": "interbank_tls",
+        "service_name": "Interbank ISO-20022 mTLS Gateway",
+        "assigned_wave": 0,
+        "legacy_primitives": [
+          "ECDHE-P256",
+          "RSA-2048"
+        ],
+        "proposed_pqc_primitives": [
+          "X25519MLKEM768 Hybrid Key Exchange",
+          "ML-DSA-65 + RSA-2048 Hybrid / ML-KEM-768"
+        ],
+        "migration_mode": "Hybrid Dual-Mode (Classical + NIST FIPS 203/204)",
+        "dependencies": [],
+        "verification_gate_required": true,
+        "rollback_snapshot_policy": "Automatic pre-wave key & cipher state snapshot"
+      },
+      {
+        "service_id": "ledger_audit",
+        "service_name": "Core Ledger Audit Notarizer",
+        "assigned_wave": 0,
+        "legacy_primitives": [
+          "ECDSA-P256",
+          "SHA-1"
+        ],
+        "proposed_pqc_primitives": [
+          "ML-DSA-65 Dual-Signature",
+          "SHA3-256 / SHA-384"
+        ],
+        "migration_mode": "Hybrid Dual-Mode (Classical + NIST FIPS 203/204)",
+        "dependencies": [],
+        "verification_gate_required": true,
+        "rollback_snapshot_policy": "Automatic pre-wave key & cipher state snapshot"
+      },
+      {
+        "service_id": "auth_gateway",
+        "service_name": "Identity & OAuth Token Gateway",
+        "assigned_wave": 1,
+        "legacy_primitives": [
+          "RSA-2048",
+          "SHA-1"
+        ],
+        "proposed_pqc_primitives": [
+          "ML-DSA-65 + RSA-2048 Hybrid / ML-KEM-768",
+          "SHA3-256 / SHA-384"
+        ],
+        "migration_mode": "Hybrid Dual-Mode (Classical + NIST FIPS 203/204)",
+        "dependencies": [],
+        "verification_gate_required": true,
+        "rollback_snapshot_policy": "Automatic pre-wave key & cipher state snapshot"
+      },
+      {
+        "service_id": "payment_signing",
+        "service_name": "Real-Time Payment Instruction Signer",
+        "assigned_wave": 1,
+        "legacy_primitives": [
+          "ECDSA-P256",
+          "RSA-2048"
+        ],
+        "proposed_pqc_primitives": [
+          "ML-DSA-65 Dual-Signature",
+          "ML-DSA-65 + RSA-2048 Hybrid / ML-KEM-768"
+        ],
+        "migration_mode": "Hybrid Dual-Mode (Classical + NIST FIPS 203/204)",
+        "dependencies": [
+          "auth_gateway",
+          "ledger_audit"
+        ],
+        "verification_gate_required": true,
+        "rollback_snapshot_policy": "Automatic pre-wave key & cipher state snapshot"
+      },
+      {
+        "service_id": "card_vault",
+        "service_name": "Card Tokenization & Key Vault",
+        "assigned_wave": 2,
+        "legacy_primitives": [
+          "RSA-2048",
+          "3DES"
+        ],
+        "proposed_pqc_primitives": [
+          "ML-DSA-65 + RSA-2048 Hybrid / ML-KEM-768",
+          "AES-256-GCM"
+        ],
+        "migration_mode": "Hybrid Dual-Mode (Classical + NIST FIPS 203/204)",
+        "dependencies": [
+          "auth_gateway"
+        ],
+        "verification_gate_required": true,
+        "rollback_snapshot_policy": "Automatic pre-wave key & cipher state snapshot"
+      },
+      {
+        "service_id": "settlement_batch",
+        "service_name": "Clearinghouse Batch Settlement Engine",
+        "assigned_wave": 2,
+        "legacy_primitives": [
+          "DH-2048",
+          "RSA-2048",
+          "3DES"
+        ],
+        "proposed_pqc_primitives": [
+          "ML-KEM-768 + SLH-DSA-128s",
+          "ML-DSA-65 + RSA-2048 Hybrid / ML-KEM-768",
+          "AES-256-GCM"
+        ],
+        "migration_mode": "Hybrid Dual-Mode (Classical + NIST FIPS 203/204)",
+        "dependencies": [
+          "payment_signing",
+          "interbank_tls"
+        ],
+        "verification_gate_required": true,
+        "rollback_snapshot_policy": "Automatic pre-wave key & cipher state snapshot"
+      }
+    ],
+    "verification_gates": [
+      {
+        "service_id": "interbank_tls",
+        "wave_index": 0,
+        "kat_passed": true,
+        "hybrid_handshake_passed": true,
+        "latency_within_slo": true,
+        "overall_passed": true,
+        "details": "FIPS 203/204 KAT vectors verified; hybrid handshake and <15ms latency budget passed."
+      },
+      {
+        "service_id": "ledger_audit",
+        "wave_index": 0,
+        "kat_passed": true,
+        "hybrid_handshake_passed": true,
+        "latency_within_slo": true,
+        "overall_passed": true,
+        "details": "FIPS 203/204 KAT vectors verified; hybrid handshake and <15ms latency budget passed."
+      },
+      {
+        "service_id": "auth_gateway",
+        "wave_index": 1,
+        "kat_passed": true,
+        "hybrid_handshake_passed": true,
+        "latency_within_slo": true,
+        "overall_passed": true,
+        "details": "FIPS 203/204 KAT vectors verified; hybrid handshake and <15ms latency budget passed."
+      },
+      {
+        "service_id": "payment_signing",
+        "wave_index": 1,
+        "kat_passed": true,
+        "hybrid_handshake_passed": true,
+        "latency_within_slo": true,
+        "overall_passed": true,
+        "details": "FIPS 203/204 KAT vectors verified; hybrid handshake and <15ms latency budget passed."
+      },
+      {
+        "service_id": "card_vault",
+        "wave_index": 2,
+        "kat_passed": true,
+        "hybrid_handshake_passed": true,
+        "latency_within_slo": true,
+        "overall_passed": true,
+        "details": "FIPS 203/204 KAT vectors verified; hybrid handshake and <15ms latency budget passed."
+      },
+      {
+        "service_id": "settlement_batch",
+        "wave_index": 2,
+        "kat_passed": true,
+        "hybrid_handshake_passed": true,
+        "latency_within_slo": true,
+        "overall_passed": true,
+        "details": "FIPS 203/204 KAT vectors verified; hybrid handshake and <15ms latency budget passed."
+      }
+    ],
+    "rollback_events": [
+      {
+        "service_id": "interbank_tls",
+        "wave_index": 0,
+        "triggered": false,
+        "reason": "Verification gate passed; hybrid PQC configuration committed.",
+        "restored_algorithm": "N/A (Committed Hybrid PQC)",
+        "snapshot_id": "SNAP-W0-01"
+      },
+      {
+        "service_id": "ledger_audit",
+        "wave_index": 0,
+        "triggered": false,
+        "reason": "Verification gate passed; hybrid PQC configuration committed.",
+        "restored_algorithm": "N/A (Committed Hybrid PQC)",
+        "snapshot_id": "SNAP-W0-02"
+      },
+      {
+        "service_id": "auth_gateway",
+        "wave_index": 1,
+        "triggered": false,
+        "reason": "Verification gate passed; hybrid PQC configuration committed.",
+        "restored_algorithm": "N/A (Committed Hybrid PQC)",
+        "snapshot_id": "SNAP-W1-03"
+      },
+      {
+        "service_id": "payment_signing",
+        "wave_index": 1,
+        "triggered": false,
+        "reason": "Verification gate passed; hybrid PQC configuration committed.",
+        "restored_algorithm": "N/A (Committed Hybrid PQC)",
+        "snapshot_id": "SNAP-W1-04"
+      },
+      {
+        "service_id": "card_vault",
+        "wave_index": 2,
+        "triggered": false,
+        "reason": "Verification gate passed; hybrid PQC configuration committed.",
+        "restored_algorithm": "N/A (Committed Hybrid PQC)",
+        "snapshot_id": "SNAP-W2-05"
+      },
+      {
+        "service_id": "settlement_batch",
+        "wave_index": 2,
+        "triggered": false,
+        "reason": "Verification gate passed; hybrid PQC configuration committed.",
+        "restored_algorithm": "N/A (Committed Hybrid PQC)",
+        "snapshot_id": "SNAP-W2-06"
+      }
+    ],
+    "hybrid_protocol_demo": {
+      "payload_type": "ISO-20022 pacs.008 Interbank Credit Transfer (Synthetic)",
+      "legacy_envelope": {
+        "key_exchange": "ECDHE-P256",
+        "signature": "RSA-2048",
+        "digest_alg": "SHA-1",
+        "digest_hex": "c3a3d928a29809163c1ca16f33edf22a6f007740",
+        "quantum_safe": false
+      },
+      "hybrid_pqc_envelope": {
+        "key_exchange": "X25519 + ML-KEM-768 (FIPS 203 Hybrid)",
+        "signature": "ECDSA-P256 + ML-DSA-65 (FIPS 204 Dual-Sign)",
+        "digest_alg": "SHA3-256",
+        "digest_hex": "503766a7a718077d0b0b0a62872125553e03e2dbd233fbc3a61e26efce908392",
+        "hybrid_authenticator_tag": "9683f1e0ab6e336f06de44a1cf5e5248",
+        "quantum_safe": true
+      }
+    }
+  },
+  "limitations": [
+    "QpiAI Opt local solving (`solve(model, mode='local', client=client)`) requires a valid `QPIAI_OPT_API_KEY` in `.env` because the SDK verifies the Opt API key online before invoking the local solver binary.",
+    "QpiAI Quantum variational solving (`solve(qubo, mode='local', algorithm=QAOA(...))`) requires a valid `QPIAI_QCLOUD_API_KEY` in `.env` because `qpiai_opt.quantum` verifies the QCloud key online before running the local simulator.",
+    "Direct `qpiai_quantum.Circuit.run(device_name='QpiAI-QSV-Local')`, `QUBOProblem.from_model()`, `build_circuit()`, `classify()`, `inspect()`, and `feasibility()` execute locally without credentials.",
+    "All quantum circuit results reported here come from the classical statevector simulator (`QpiAI-QSV-Local`), NOT a physical QPU, and do not demonstrate quantum speedup or production quantum advantage.",
+    "Platform mode (`mode='platform'`), `submit()`, and remote QPUs (`QpiAI-Indus-1`) are intentionally disabled to prevent unintended credit consumption."
+  ]
+}
