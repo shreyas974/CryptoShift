@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CryptoShiftLabelledInstance",
+  "type": "object",
+  "required": [
+    "instance_id",
+    "repository_id",
+    "repository_split",
+    "relative_path",
+    "has_migration_relevant_crypto",
+    "expected_algorithm",
+    "expected_purpose",
+    "review_status",
+    "notes"
+  ],
+  "properties": {
+    "instance_id": { "type": "string" },
+    "repository_id": { "type": "string" },
+    "repository_split": { "type": "string", "enum": ["calibration", "held_out_test"] },
+    "relative_path": { "type": "string" },
+    "has_migration_relevant_crypto": { "type": "boolean" },
+    "expected_algorithm": { "type": ["string", "null"] },
+    "expected_purpose": {
+      "type": ["string", "null"],
+      "enum": ["key_establishment", "digital_signature", "symmetric_encryption", "message_digest", "unknown", null]
+    },
+    "review_status": { "type": "string" },
+    "notes": { "type": "string" }
+  }
+}
+

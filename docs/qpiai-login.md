@@ -21,14 +21,14 @@ This guide explains how to register for your free **QpiAI Opt** and **QpiAI QClo
 2. Sign in to **QpiAI QCloud** at <https://qcloud.qpiai.tech/> and copy your **QCloud API Key**.
 
 ### Step B: Paste Your Keys into the Ignored `.env` File
-1. In the `CryptoShift` project root (`c:\Users\lohig\OneDrive\Documents\CryptoShift`), open the local `.env` file (created automatically from `.env.example`, or run `.\.venv\Scripts\python.exe cryptoshift_cli.py init-env`).
+1. In the `CryptoShift` project root directory, open the local `.env` file (created automatically from `.env.example`, or run `.\.venv\Scripts\python.exe cryptoshift_cli.py init-env`).
 2. Paste your keys directly after the `=` signs:
    ```ini
-   QPIAI_OPT_API_KEY=paste_your_opt_api_key_here
-   QPIAI_QCLOUD_API_KEY=paste_your_qcloud_api_key_here
+   QPIAI_OPT_API_KEY=
+   QPIAI_QCLOUD_API_KEY=
    ```
 3. Save `.env`.
-   - **Security Check:** `.env` and `qcloud.env` are listed in [.gitignore](file:///c:/Users/lohig/OneDrive/Documents/CryptoShift/.gitignore) so Git will never track or commit them.
+   - **Security Check:** `.env` and `qcloud.env` are listed in [`.gitignore`](../.gitignore) so Git will never track or commit them.
    - **Compatibility Note:** `cryptoshift` automatically bridges `QPIAI_QCLOUD_API_KEY` to `API_KEY` in memory so both `qpiai-opt[quantum]` (`QPIAI_QCLOUD_API_KEY`) and standalone `qpiai-quantum` (`API_KEY` / `qcloud.env`) work seamlessly from `.env`.
 
 ---

@@ -1,11 +1,13 @@
 """Safe credential loading, secret redaction, and local-only smoke checks for QpiAI Opt & QCloud.
 
 Security Guarantees:
-- Never prints, logs, or returns API key values.
+- Never prints, logs, or returns API key values or local user filesystem paths in reports.
 - Reports ONLY `'key configured'` or `'key missing'`.
 - Scrubs any configured secret or Bearer token from exception messages before returning or logging.
 - Strictly uses local execution (`mode="local"` / `device_name="QpiAI-QSV-Local"`). Never calls
   `mode="platform"`, `submit()`, or remote QPUs.
+- Online key-validation network requests are skipped by default (`allow_online_auth=False`) unless
+  explicitly authorized via `--online-auth`.
 """
 
 from __future__ import annotations
@@ -17,9 +19,9 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
 PLACEHOLDER_VALUES = {
     "",
@@ -27,6 +29,8 @@ PLACEHOLDER_VALUES = {
     "your_qpiai_qcloud_api_key_here",
     "your_api_key_here",
     "your_qpiai_access_token",
+    "paste_your_opt_key_here",
+    "paste_your_qcloud_key_here",
     "changeme",
     "none",
     "null",
@@ -64,7 +68,6 @@ def load_project_env_files(project_root: Path | None = None) -> None:
                 if not os.environ.get(k):
                     os.environ[k] = v
 
-    # Bridge QPIAI_QCLOUD_API_KEY <-> API_KEY (used by qpiai-quantum's qcloud.env loader)
     qcloud_key = os.environ.get("QPIAI_QCLOUD_API_KEY", "").strip()
     legacy_api_key = os.environ.get("API_KEY", "").strip()
     if qcloud_key and qcloud_key.lower() not in PLACEHOLDER_VALUES and not legacy_api_key:
@@ -83,7 +86,7 @@ def _is_valid_secret(value: str | None) -> bool:
 
 
 def redact_secrets(text: str) -> str:
-    """Remove any configured API keys or Bearer tokens from error/status strings."""
+    """Remove any configured API keys, Bearer tokens, or local user paths from error/status strings."""
     if not text:
         return ""
     sanitized = str(text)
@@ -92,7 +95,13 @@ def redact_secrets(text: str) -> str:
         if val and len(val) >= 4:
             sanitized = sanitized.replace(val, "[REDACTED]")
     sanitized = re.sub(r"(Bearer\s+)[A-Za-z0-9._\-]+", r"\1[REDACTED]", sanitized, flags=re.IGNORECASE)
-    sanitized = re.sub(r"(api[_-]?key\s*[=:]\s*)['\"]?[A-Za-z0-9._\-]+['\"]?", r"\1[REDACTED]", sanitized, flags=re.IGNORECASE)
+    sanitized = re.sub(
+        r"(api[_-]?key\s*[=:]\s*)['\"]?[A-Za-z0-9._\-]+['\"]?",
+        r"\1[REDACTED]",
+        sanitized,
+        flags=re.IGNORECASE,
+    )
+    sanitized = re.sub(r"[A-Za-z]:\\Users\\[^\\/\s\"']+", "<LOCAL_USER_PATH>", sanitized)
     return sanitized
 
 
@@ -116,11 +125,12 @@ def check_credentials_status(project_root: Path | None = None) -> Dict[str, Dict
 
 
 def get_installed_package_versions() -> Dict[str, Dict[str, str]]:
-    """Inspect installed versions of `qpiai-opt` and `qpiai-quantum` inside the active Python environment."""
+    """Inspect installed versions of `qpiai-opt`, `qpiai-quantum`, and `python-dotenv` from package metadata."""
     packages: Dict[str, Dict[str, str]] = {}
     for label, dist_name, module_name in (
         ("QpiAI Opt SDK", "qpiai-opt", "qpiai_opt"),
         ("QpiAI Quantum SDK", "qpiai-quantum", "qpiai_quantum"),
+        ("Python Dotenv", "python-dotenv", "dotenv"),
     ):
         try:
             ver = importlib.metadata.version(dist_name)
@@ -148,8 +158,8 @@ def get_installed_package_versions() -> Dict[str, Dict[str, str]]:
     return packages
 
 
-def verify_opt_local_auth() -> Dict[str, Any]:
-    """Verify QpiAI Opt using the documented local-solver example (`Client` + `solve(model, mode='local')`)."""
+def verify_opt_local_auth(allow_online_auth: bool = False) -> Dict[str, Any]:
+    """Verify QpiAI Opt offline modeller and (only if `allow_online_auth=True`) online local-solver auth."""
     load_project_env_files()
     cred_status = "key configured" if _is_valid_secret(os.environ.get("QPIAI_OPT_API_KEY")) else "key missing"
     try:
@@ -164,7 +174,7 @@ def verify_opt_local_auth() -> Dict[str, Any]:
             "message": f"qpiai-opt import failed: {redact_secrets(str(exc))}",
         }
 
-    # 1. Credential-free documented model construction & inspection check
+    # 1. Credential-free documented model construction & inspection check (100% offline)
     x = Binary("x")
     y = Binary("y")
     model = Model("selection")
@@ -172,6 +182,25 @@ def verify_opt_local_auth() -> Dict[str, Any]:
     model.add_constraint(x + y <= 1, label="capacity")
     prob_class = classify(model)
     inspection = inspect(model)
+
+    if not allow_online_auth:
+        return {
+            "configuration_status": cred_status,
+            "auth_verification_status": "not attempted (offline verification mode; pass --online-auth to authorize network key check)",
+            "offline_modeller_status": "run successfully",
+            "problem_class": prob_class,
+            "execution_mode": "local_offline_ir_only",
+            "message": (
+                "Offline algebraic model built and classified as MILP (`classify(model) == 'MILP'`). "
+                "Online key-validation network check was not run in default offline mode (pass `--online-auth` to run)."
+            ),
+            "inspection_summary": {
+                "problem_class": prob_class,
+                "num_variables": inspection.get("metrics", {}).get("variables", 2)
+                if isinstance(inspection, dict)
+                else 2,
+            },
+        }
 
     if cred_status != "key configured":
         return {
@@ -182,12 +211,8 @@ def verify_opt_local_auth() -> Dict[str, Any]:
             "execution_mode": "local",
             "message": (
                 "Offline algebraic model built and classified as MILP (`classify(model) == 'MILP'`). "
-                "Local solve skipped because QPIAI_OPT_API_KEY is missing in .env."
+                "Local solve skipped because QPIAI_OPT_API_KEY is missing in .env (check https://opt.qpiai.tech/)."
             ),
-            "inspection_summary": {
-                "problem_class": prob_class,
-                "num_variables": inspection.get("num_variables", 2) if isinstance(inspection, dict) else 2,
-            },
         }
 
     # 2. Documented local solve check (verifies Opt key online, runs solver locally, never uses platform mode)
@@ -220,8 +245,8 @@ def verify_opt_local_auth() -> Dict[str, Any]:
         }
 
 
-def verify_qcloud_local_auth_and_sim() -> Dict[str, Any]:
-    """Verify QpiAI QCloud authentication and run a documented local simulator check (`QpiAI-QSV-Local`)."""
+def verify_qcloud_local_auth_and_sim(allow_online_auth: bool = False) -> Dict[str, Any]:
+    """Run documented local simulator check (`QpiAI-QSV-Local`) and (only if `allow_online_auth=True`) QCloud auth."""
     load_project_env_files()
     raw_key = os.environ.get("QPIAI_QCLOUD_API_KEY", "").strip() or os.environ.get("API_KEY", "").strip()
     cred_status = "key configured" if _is_valid_secret(raw_key) else "key missing"
@@ -248,17 +273,25 @@ def verify_qcloud_local_auth_and_sim() -> Dict[str, Any]:
         "gates": circuit.list_gates(),
     }
 
-    auth_status = "blocked (key missing)"
-    auth_msg = "QPIAI_QCLOUD_API_KEY is missing in .env / qcloud.env."
-
-    if cred_status == "key configured":
+    if not allow_online_auth:
+        auth_status = "not attempted (offline verification mode; pass --online-auth to authorize network key check)"
+        auth_msg = "Online QCloud key-validation network check skipped in default offline mode."
+    elif cred_status != "key configured":
+        auth_status = "blocked (key missing)"
+        auth_msg = "QPIAI_QCLOUD_API_KEY is missing in .env (check https://qcloud.qpiai.tech/)."
+    else:
         buf = io.StringIO()
         try:
             with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
                 QpiAIQuantumAuth.login(api_key=raw_key)
                 verified = QpiAIQuantumAuth.verify_api_key()
             sdk_out = redact_secrets(buf.getvalue()).strip()
-            if verified is False or "invalid" in sdk_out.lower() or "error" in sdk_out.lower() or "failed" in sdk_out.lower():
+            if (
+                verified is False
+                or "invalid" in sdk_out.lower()
+                or "error" in sdk_out.lower()
+                or "failed" in sdk_out.lower()
+            ):
                 auth_status = "blocked (invalid/rejected key)"
                 auth_msg = (
                     f"QpiAIQuantumAuth key verification did not succeed ({sdk_out or 'rejected'}). "
@@ -274,7 +307,7 @@ def verify_qcloud_local_auth_and_sim() -> Dict[str, Any]:
                 "Please verify your QPIAI_QCLOUD_API_KEY at https://qcloud.qpiai.tech/."
             )
 
-    # 2. Try documented local statevector simulator ("QpiAI-QSV-Local")
+    # 2. Try documented local statevector simulator ("QpiAI-QSV-Local" — 100% local CPU, no network call)
     local_sim_status = "not attempted"
     sim_counts: Dict[str, int] = {}
     sim_buf = io.StringIO()
@@ -303,18 +336,18 @@ def verify_qcloud_local_auth_and_sim() -> Dict[str, Any]:
     }
 
 
-def run_full_auth_and_smoke_checks() -> Dict[str, Any]:
+def run_full_auth_and_smoke_checks(allow_online_auth: bool = False) -> Dict[str, Any]:
     """Run all non-sensitive package, credential, Opt local, and QCloud local simulator checks."""
     pkgs = get_installed_package_versions()
     creds = check_credentials_status()
-    opt_check = verify_opt_local_auth()
-    qcloud_check = verify_qcloud_local_auth_and_sim()
+    opt_check = verify_opt_local_auth(allow_online_auth=allow_online_auth)
+    qcloud_check = verify_qcloud_local_auth_and_sim(allow_online_auth=allow_online_auth)
 
     return {
         "environment": {
             "python_version": sys.version.split()[0],
-            "executable": sys.executable,
-            "virtualenv": str(Path(sys.prefix)),
+            "virtualenv_name": f"{Path(sys.prefix).name} (Python {sys.version.split()[0]})",
+            "online_auth_executed": bool(allow_online_auth),
         },
         "packages": pkgs,
         "credentials": {

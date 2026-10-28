@@ -6,20 +6,23 @@ build-backend = "setuptools.build_meta"
 name = "cryptoshift"
 version = "0.1.0"
 description = "Quant-A-Maze 3.0 (PQC-01): Verification-Gated Cryptographic Migration Across Banking Applications"
-readme = "docs/qpiai-setup.md"
+readme = "README.md"
 requires-python = ">=3.10,<3.15"
-license = { text = "MIT" }
 dependencies = []
 
 [project.optional-dependencies]
 qpiai = [
     "qpiai-opt[quantum]==0.0.9",
     "qpiai-quantum==0.3.0",
+    "python-dotenv>=1.0.0",
 ]
 
 [project.scripts]
 cryptoshift = "cryptoshift.cli:main"
 
+[tool.setuptools]
+package-dir = {"" = "src"}
+
 [tool.setuptools.packages.find]
-where = ["."]
+where = ["src"]
 include = ["cryptoshift*"]

@@ -34,3 +34,4 @@ def validate_dependency_order(tasks: List[MigrationTask], task_to_wave: Dict[str
                     f"'{task.service_id}' (wave {w_down})."
                 )
     return (len(violations) == 0, violations)
+

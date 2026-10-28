@@ -1,20 +1,27 @@
-"""Verification gates enforcing KAT, hybrid handshake compatibility, and latency SLOs per wave."""
+"""Verification gates enforcing KAT, hybrid peer compatibility matrix, and overhead budgets per wave."""
 
 from __future__ import annotations
 
 from typing import Dict, List
 
-from cryptoshift.models import MigrationTask, VerificationGateResult
+from cryptoshift.models import CryptoFinding, MigrationTask, VerificationGateResult
 
 
 def run_verification_gates(
     tasks: List[MigrationTask],
     task_to_wave: Dict[str, int],
+    findings: List[CryptoFinding] | None = None,
     simulate_failure_service: str | None = None,
 ) -> List[VerificationGateResult]:
     """Run deterministic pre-promotion verification checks for each scheduled service."""
     results: List[VerificationGateResult] = []
     task_map = {t.service_id: t for t in tasks}
+    finding_map: Dict[str, List[str]] = {t.service_id: [] for t in tasks}
+    if findings:
+        for f in findings:
+            if f.service_id in finding_map:
+                finding_map[f.service_id].append(f.finding_id)
+
     for service_id, wave_idx in sorted(task_to_wave.items(), key=lambda kv: (kv[1], kv[0])):
         task = task_map[service_id]
         kat_ok = True
@@ -26,7 +33,7 @@ def run_verification_gates(
             latency_ok = False
         overall = kat_ok and handshake_ok and latency_ok
         details = (
-            "FIPS 203/204 KAT vectors verified; hybrid handshake and <15ms latency budget passed."
+            "Modelled FIPS 203/204 KAT vectors verified; dual-mode peer matrix and <15ms budget passed (prototype gate)."
             if overall
             else "Verification gate blocked promotion: prerequisite or latency threshold failed."
         )
@@ -39,6 +46,9 @@ def run_verification_gates(
                 latency_within_slo=latency_ok,
                 overall_passed=overall,
                 details=details,
+                finding_ids=finding_map.get(service_id, []),
+                dependency_prerequisites=list(task.dependencies),
             )
         )
     return results
+

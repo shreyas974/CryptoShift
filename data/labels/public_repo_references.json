@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0.0",
+  "collection_date": "2026-10-28",
+  "redistribution_policy": "Reference-only metadata. Do not commit raw third-party source trees into CryptoShift; fetch at pinned commit SHA when running external evaluations.",
+  "repositories": [
+    {
+      "repository_id": "pyca-cryptography-vectors",
+      "url": "https://github.com/pyca/cryptography",
+      "pinned_commit": "f86cc742a9d2fd6b9f11a4f78831f1085719d050",
+      "license": "Apache-2.0 OR BSD-3-Clause",
+      "file_scope": "docs/development/custom-vectors/ and tests/hazmat/primitives/",
+      "language": "Python",
+      "purpose": "Reference RSA, ECDSA, ECDH, TripleDES, and SHA-1 primitive usage patterns in Python.",
+      "reproducible_fetch_command": "git clone --no-checkout https://github.com/pyca/cryptography.git && cd cryptography && git checkout f86cc742a9d2fd6b9f11a4f78831f1085719d050"
+    },
+    {
+      "repository_id": "open-quantum-safe-liboqs-python",
+      "url": "https://github.com/open-quantum-safe/liboqs-python",
+      "pinned_commit": "1b8e9a95c07d1a4b6d89941621e0a480f685a264",
+      "license": "MIT",
+      "file_scope": "examples/kem.py and examples/sig.py",
+      "language": "Python",
+      "purpose": "Reference NIST FIPS 203 (ML-KEM) key encapsulation and FIPS 204 (ML-DSA) digital signature usage.",
+      "reproducible_fetch_command": "git clone --no-checkout https://github.com/open-quantum-safe/liboqs-python.git && cd liboqs-python && git checkout 1b8e9a95c07d1a4b6d89941621e0a480f685a264"
+    },
+    {
+      "repository_id": "tlsfuzzer-tlslite-ng",
+      "url": "https://github.com/tlsfuzzer/tlslite-ng",
+      "pinned_commit": "09b4b6a1524a78b4b9c871225d3629873d0857e4",
+      "license": "LGPL-2.1-only OR BSD-3-Clause",
+      "file_scope": "tlslite/handshakesettings.py",
+      "language": "Python",
+      "purpose": "Reference TLS cipher suite and key exchange configuration patterns.",
+      "reproducible_fetch_command": "git clone --no-checkout https://github.com/tlsfuzzer/tlslite-ng.git && cd tlslite-ng && git checkout 09b4b6a1524a78b4b9c871225d3629873d0857e4"
+    }
+  ]
+}
+

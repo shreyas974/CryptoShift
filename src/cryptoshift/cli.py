@@ -1,15 +1,14 @@
-"""Command-line interface for CryptoShift (PQC-01) and QpiAI Opt / QCloud integration."""
+"""Canonical command-line interface for CryptoShift (PQC-01) under `src/cryptoshift/cli.py`."""
 
 from __future__ import annotations
 
 import argparse
-import json
 import shutil
 from pathlib import Path
 from typing import Any, Dict, List
 
 from cryptoshift.dependencies import validate_dependency_order
-from cryptoshift.metrics import compute_migration_metrics
+from cryptoshift.metrics import compute_migration_metrics, evaluate_labelled_dataset
 from cryptoshift.models import WaveScheduleConfig
 from cryptoshift.optimization.auth_check import (
     PROJECT_ROOT,
@@ -21,7 +20,7 @@ from cryptoshift.optimization.qcloud_experiment import run_qcloud_wave0_qubo_exp
 from cryptoshift.optimization.qpiai_opt_adapter import solve_with_qpiai_opt
 from cryptoshift.proposals import generate_migration_proposals
 from cryptoshift.protocol_demo import run_hybrid_protocol_demo
-from cryptoshift.reporting import write_qpiai_evidence_reports
+from cryptoshift.reporting import write_evaluation_reports, write_qpiai_evidence_reports
 from cryptoshift.rollback import evaluate_rollbacks
 from cryptoshift.scanner import scan_banking_services
 from cryptoshift.scoring import build_migration_tasks
@@ -37,21 +36,21 @@ def init_local_env_file() -> Path:
     return env_path
 
 
-def build_complete_evidence_bundle() -> Dict[str, Any]:
+def build_complete_evidence_bundle(allow_online_auth: bool = False) -> Dict[str, Any]:
     """Run all CryptoShift + QpiAI checks and return a non-sensitive evidence dictionary."""
-    smoke = run_full_auth_and_smoke_checks()
+    smoke = run_full_auth_and_smoke_checks(allow_online_auth=allow_online_auth)
     findings = scan_banking_services()
     tasks = build_migration_tasks()
     cfg = WaveScheduleConfig()
 
     fallback_res = solve_with_fallback_scheduler(tasks, cfg)
-    opt_res, opt_meta = solve_with_qpiai_opt(tasks, cfg)
-    qcloud_meta = run_qcloud_wave0_qubo_experiment()
+    opt_res, opt_meta = solve_with_qpiai_opt(tasks, cfg, allow_online_auth=allow_online_auth)
+    qcloud_meta = run_qcloud_wave0_qubo_experiment(allow_online_auth=allow_online_auth)
 
     active_schedule = opt_res if opt_res.status == "run successfully" else fallback_res
     dep_ok, dep_violations = validate_dependency_order(tasks, active_schedule.task_to_wave)
     proposals = generate_migration_proposals(tasks, active_schedule.task_to_wave)
-    gates = run_verification_gates(tasks, active_schedule.task_to_wave)
+    gates = run_verification_gates(tasks, active_schedule.task_to_wave, findings=findings)
     rollbacks = evaluate_rollbacks(tasks, gates)
     protocol_demo = run_hybrid_protocol_demo()
     metrics = compute_migration_metrics(findings, tasks, active_schedule, gates)
@@ -77,7 +76,7 @@ def build_complete_evidence_bundle() -> Dict[str, Any]:
         },
         {
             "name": "QpiAI Opt Authenticated Local Solver (`solve(mode='local')`)",
-            "status": opt_meta.get("online_solve_status", "blocked"),
+            "status": opt_meta.get("online_solve_status", "not attempted"),
             "execution_mode": "local",
             "backend": "qpiai_opt.opt_solvers.solve (mode='local')",
             "objective_value": opt_res.objective_value if opt_res.status == "run successfully" else None,
@@ -104,7 +103,7 @@ def build_complete_evidence_bundle() -> Dict[str, Any]:
         },
         {
             "name": "QpiAI QCloud Authenticated Variational QAOA (`solve(..., mode='local')`)",
-            "status": qcloud_meta.get("authenticated_qaoa_status", "blocked"),
+            "status": qcloud_meta.get("authenticated_qaoa_status", "not attempted"),
             "execution_mode": "local_simulator_authenticated",
             "backend": "QpiAIQuantumAuth + QpiAI-QSV-Local",
             "objective_value": qcloud_meta.get("authenticated_qaoa_result", {}).get("objective"),
@@ -119,8 +118,10 @@ def build_complete_evidence_bundle() -> Dict[str, Any]:
         "credentials": smoke["credentials"],
         "components": components,
         "problem_instance": {
+            "scope": "Synthetic Banking Fixture (`demo_bank_app/services.py` — 6 services, 13 findings)",
             "config": cfg.to_dict(),
             "services": [t.to_dict() for t in tasks],
+            "findings": [f.to_dict() for f in findings],
         },
         "fallback_schedule": fallback_res.to_dict(),
         "qpiai_opt": opt_meta,
@@ -135,25 +136,25 @@ def build_complete_evidence_bundle() -> Dict[str, Any]:
             "hybrid_protocol_demo": protocol_demo,
         },
         "limitations": [
-            "QpiAI Opt local solving (`solve(model, mode='local', client=client)`) requires a valid `QPIAI_OPT_API_KEY` in `.env` because the SDK verifies the Opt API key online before invoking the local solver binary.",
-            "QpiAI Quantum variational solving (`solve(qubo, mode='local', algorithm=QAOA(...))`) requires a valid `QPIAI_QCLOUD_API_KEY` in `.env` because `qpiai_opt.quantum` verifies the QCloud key online before running the local simulator.",
-            "Direct `qpiai_quantum.Circuit.run(device_name='QpiAI-QSV-Local')`, `QUBOProblem.from_model()`, `build_circuit()`, `classify()`, `inspect()`, and `feasibility()` execute locally without credentials.",
+            "By default, `cryptoshift` runs in safe offline verification mode (`allow_online_auth=False`) so no online key-validation network requests are sent unless `--online-auth` is explicitly passed.",
+            "Direct `qpiai_quantum.Circuit.run(device_name='QpiAI-QSV-Local')`, `QUBOProblem.from_model()`, `build_circuit()`, `classify()`, `inspect()`, and `feasibility()` execute 100% locally without network calls or credentials.",
             "All quantum circuit results reported here come from the classical statevector simulator (`QpiAI-QSV-Local`), NOT a physical QPU, and do not demonstrate quantum speedup or production quantum advantage.",
-            "Platform mode (`mode='platform'`), `submit()`, and remote QPUs (`QpiAI-Indus-1`) are intentionally disabled to prevent unintended credit consumption.",
+            "The protocol envelope trace is an explicitly labelled mocked/modelled trace combining real `hashlib` SHA-1/SHA3-256 digests with analytical NIST FIPS 203/204 wire-size parameters.",
+            "Platform mode (`mode='platform'`), `submit()`, and remote QPUs (`QpiAI-Indus-1`) are disabled to prevent unintended credit consumption.",
         ],
     }
     return evidence
 
 
-def cmd_check_auth() -> int:
+def cmd_check_auth(allow_online_auth: bool = False) -> int:
     """Run safe credential and local solver/simulator checks without printing any secret values."""
-    env_path = init_local_env_file()
+    init_local_env_file()
     creds = check_credentials_status()
-    smoke = run_full_auth_and_smoke_checks()
+    smoke = run_full_auth_and_smoke_checks(allow_online_auth=allow_online_auth)
 
     print("=== CryptoShift: QpiAI Credential & SDK Local Check ===")
-    print(f"Python Runtime     : {smoke['environment']['python_version']} ({smoke['environment']['virtualenv']})")
-    print(f"Local .env File    : {env_path} (git-ignored)")
+    print(f"Python Runtime     : {smoke['environment']['python_version']} ({smoke['environment']['virtualenv_name']})")
+    print(f"Online Auth Check  : {'ENABLED (--online-auth)' if allow_online_auth else 'SKIPPED (safe offline mode)'}")
     print("")
     print("1. Installed Official Packages:")
     for name, info in smoke["packages"].items():
@@ -175,11 +176,33 @@ def cmd_check_auth() -> int:
     return 0
 
 
-def cmd_demo() -> int:
-    """Run the full CryptoShift PQC-01 migration & QpiAI scheduling workflow and save evidence reports."""
+def cmd_evaluate() -> int:
+    """Evaluate the detector on the documented synthetic fixture dataset and write `reports/evaluation/`."""
+    eval_data = evaluate_labelled_dataset(PROJECT_ROOT)
+    paths = write_evaluation_reports(eval_data, PROJECT_ROOT / "reports" / "evaluation")
+    counts = eval_data.get("counts", {})
+    metrics = eval_data.get("metrics", {})
+    print("=== CryptoShift: Labelled Synthetic Fixture Evaluation ===")
+    print(f"Total Instances    : {eval_data.get('total_instances', 0)}")
+    print(
+        f"Confusion Counts   : TP={counts.get('TP', 0)}, FP={counts.get('FP', 0)}, "
+        f"FN={counts.get('FN', 0)}, TN={counts.get('TN', 0)}"
+    )
+    print(f"Precision          : {metrics.get('precision', 0.0):.4f}")
+    print(f"Recall             : {metrics.get('recall', 0.0):.4f}")
+    print("Evaluation reports written to:")
+    print(f"  - JSON     : {Path(paths['json']).relative_to(PROJECT_ROOT)}")
+    print(f"  - Markdown : {Path(paths['markdown']).relative_to(PROJECT_ROOT)}")
+    return 0
+
+
+def cmd_demo(allow_online_auth: bool = False) -> int:
+    """Run the full CryptoShift PQC-01 migration, QpiAI scheduling, and dataset evaluation workflow."""
     init_local_env_file()
-    evidence = build_complete_evidence_bundle()
+    evidence = build_complete_evidence_bundle(allow_online_auth=allow_online_auth)
     report_paths = write_qpiai_evidence_reports(evidence, PROJECT_ROOT / "reports" / "qpiai")
+    eval_data = evaluate_labelled_dataset(PROJECT_ROOT)
+    eval_paths = write_evaluation_reports(eval_data, PROJECT_ROOT / "reports" / "evaluation")
 
     print("=== CryptoShift (PQC-01): Verification-Gated Cryptographic Migration ===")
     print(f"Services Scanned   : {evidence['verification_and_migration']['metrics']['total_services']}")
@@ -200,11 +223,21 @@ def cmd_demo() -> int:
     print("--- Verification Gates & Rollback Readiness ---")
     for gate in evidence["verification_and_migration"]["verification_gates"]:
         status_str = "PASS" if gate["overall_passed"] else "ROLLBACK"
-        print(f"  [Wave {gate['wave_index']}] {gate['service_id']:18s}: {status_str} — {gate['details']}")
+        print(f"  [Wave {gate['wave_index']}] {gate['service_id']:18s}: {status_str} - {gate['details']}")
+    print("")
+    print("--- Labelled Synthetic Fixture Detection Evaluation ---")
+    c = eval_data.get("counts", {})
+    m = eval_data.get("metrics", {})
+    print(
+        f"  TP={c.get('TP', 0)}, FP={c.get('FP', 0)}, FN={c.get('FN', 0)}, TN={c.get('TN', 0)} | "
+        f"Precision={m.get('precision', 0.0):.4f}, Recall={m.get('recall', 0.0):.4f}"
+    )
     print("")
     print("Evidence reports written to:")
-    print(f"  - JSON     : {report_paths['json']}")
-    print(f"  - Markdown : {report_paths['markdown']}")
+    print(f"  - QpiAI JSON : {Path(report_paths['json']).relative_to(PROJECT_ROOT)}")
+    print(f"  - QpiAI MD   : {Path(report_paths['markdown']).relative_to(PROJECT_ROOT)}")
+    print(f"  - Eval JSON  : {Path(eval_paths['json']).relative_to(PROJECT_ROOT)}")
+    print(f"  - Eval MD    : {Path(eval_paths['markdown']).relative_to(PROJECT_ROOT)}")
     return 0
 
 
@@ -213,23 +246,48 @@ def main(argv: List[str] | None = None) -> int:
         prog="cryptoshift",
         description="CryptoShift (PQC-01): Verification-Gated Cryptographic Migration & QpiAI Wave Scheduler",
     )
+    parser.add_argument(
+        "--online-auth",
+        action="store_true",
+        help="Authorize online API key validation for local QpiAI Opt solving and QCloud login (disabled by default)",
+    )
     sub = parser.add_subparsers(dest="command")
-    sub.add_parser("check-auth", help="Verify QpiAI credentials ('key configured' / 'key missing') & local SDK checks")
+
+    p_auth = sub.add_parser(
+        "check-auth",
+        help="Verify QpiAI credentials ('key configured' / 'key missing') & local SDK checks",
+    )
+    p_auth.add_argument("--online-auth", action="store_true", help="Authorize online key validation check")
+
     sub.add_parser("init-env", help="Create a git-ignored local .env file from .env.example if missing")
-    sub.add_parser("schedule", help="Run migration-wave scheduling comparison and write reports/qpiai/")
-    sub.add_parser("demo", help="Run full CryptoShift PQC-01 discovery, scheduling, verification, and reporting")
+
+    p_sched = sub.add_parser("schedule", help="Run migration-wave scheduling comparison and write reports/qpiai/")
+    p_sched.add_argument("--online-auth", action="store_true", help="Authorize online key validation check")
+
+    sub.add_parser("evaluate", help="Run detection evaluation on labelled synthetic fixtures and write reports/evaluation/")
+
+    p_demo = sub.add_parser(
+        "demo",
+        help="Run full CryptoShift PQC-01 discovery, scheduling, verification, evaluation, and reporting",
+    )
+    p_demo.add_argument("--online-auth", action="store_true", help="Authorize online key validation check")
 
     args = parser.parse_args(argv)
+    online_flag = bool(getattr(args, "online_auth", False))
+
     if args.command == "check-auth":
-        return cmd_check_auth()
+        return cmd_check_auth(allow_online_auth=online_flag)
     if args.command == "init-env":
         path = init_local_env_file()
-        print(f"Local credential file ready at: {path} (git-ignored). Open it locally and paste your API keys.")
+        print(f"Local credential file ready at: {path.name} (git-ignored). Open it locally and paste your API keys.")
         return 0
+    if args.command == "evaluate":
+        return cmd_evaluate()
     if args.command in ("schedule", "demo", None):
-        return cmd_demo()
+        return cmd_demo(allow_online_auth=online_flag)
     return 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

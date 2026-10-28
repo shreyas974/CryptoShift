@@ -1,8 +1,8 @@
 {
   "environment": {
     "python_version": "3.12.14",
-    "executable": "C:\\Users\\lohig\\OneDrive\\Documents\\CryptoShift\\.venv\\Scripts\\python.exe",
-    "virtualenv": "C:\\Users\\lohig\\OneDrive\\Documents\\CryptoShift\\.venv"
+    "virtualenv_name": ".venv (Python 3.12.14)",
+    "online_auth_executed": false
   },
   "packages": {
     "QpiAI Opt SDK": {
@@ -16,18 +16,24 @@
       "module": "qpiai_quantum",
       "version": "0.3.0",
       "status": "installed & importable"
+    },
+    "Python Dotenv": {
+      "distribution": "python-dotenv",
+      "module": "dotenv",
+      "version": "1.2.4",
+      "status": "installed & importable"
     }
   },
   "credentials": {
     "QPIAI_OPT_API_KEY": {
       "configuration_status": "key configured",
-      "auth_verification_status": "run successfully",
-      "message": "Authenticated QpiAI Opt local solve succeeded (`mode='local'`, zero paid platform usage)."
+      "auth_verification_status": "not attempted (offline verification mode; pass --online-auth to authorize network key check)",
+      "message": "Offline algebraic model built and classified as MILP (`classify(model) == 'MILP'`). Online key-validation network check was not run in default offline mode (pass `--online-auth` to run)."
     },
     "QPIAI_QCLOUD_API_KEY": {
       "configuration_status": "key configured",
-      "auth_verification_status": "run successfully",
-      "message": "QpiAIQuantumAuth.login() and verify_api_key() succeeded. Local simulator (`QpiAI-QSV-Local`): run successfully."
+      "auth_verification_status": "not attempted (offline verification mode; pass --online-auth to authorize network key check)",
+      "message": "Online QCloud key-validation network check skipped in default offline mode. Local simulator (`QpiAI-QSV-Local`): run successfully."
     }
   },
   "components": [
@@ -38,7 +44,7 @@
       "backend": "CPU Exact Combinatorial Search",
       "objective_value": 248.105,
       "feasible": true,
-      "runtime_seconds": 0.004954
+      "runtime_seconds": 0.005559
     },
     {
       "name": "QpiAI Opt Algebraic Modeller & IR Feasibility (`qpiai-opt`)",
@@ -47,16 +53,16 @@
       "backend": "qpiai_opt.opt_modeller / opt_solvers",
       "objective_value": 248.105,
       "feasible": true,
-      "runtime_seconds": 0.060642
+      "runtime_seconds": 0.020677
     },
     {
       "name": "QpiAI Opt Authenticated Local Solver (`solve(mode='local')`)",
-      "status": "run successfully",
+      "status": "not attempted (offline verification mode; pass --online-auth to authorize network key check)",
       "execution_mode": "local",
       "backend": "qpiai_opt.opt_solvers.solve (mode='local')",
-      "objective_value": 248.105,
+      "objective_value": null,
       "feasible": true,
-      "runtime_seconds": 0.060642
+      "runtime_seconds": 0.020677
     },
     {
       "name": "QpiAI Quantum 4-Qubit Wave-0 QUBO & QAOA Circuit (`build_circuit`)",
@@ -65,7 +71,7 @@
       "backend": "qpiai_opt.quantum.QAOA",
       "objective_value": -13.07,
       "feasible": true,
-      "runtime_seconds": 0.451688
+      "runtime_seconds": 0.193366
     },
     {
       "name": "QpiAI Quantum Local Statevector Simulator (`QpiAI-QSV-Local`)",
@@ -74,19 +80,20 @@
       "backend": "QpiAI-QSV-Local",
       "objective_value": -13.07,
       "feasible": true,
-      "runtime_seconds": 0.451688
+      "runtime_seconds": 0.193366
     },
     {
       "name": "QpiAI QCloud Authenticated Variational QAOA (`solve(..., mode='local')`)",
-      "status": "run successfully (local simulator)",
+      "status": "not attempted (offline verification mode; pass --online-auth to authorize network key check)",
       "execution_mode": "local_simulator_authenticated",
       "backend": "QpiAIQuantumAuth + QpiAI-QSV-Local",
-      "objective_value": -13.07,
+      "objective_value": null,
       "feasible": true,
-      "runtime_seconds": 0.451688
+      "runtime_seconds": 0.193366
     }
   ],
   "problem_instance": {
+    "scope": "Synthetic Banking Fixture (`demo_bank_app/services.py` \u2014 6 services, 13 findings)",
     "config": {
       "num_waves": 3,
       "max_services_per_wave": 2,
@@ -103,15 +110,16 @@
           "SHA-1"
         ],
         "target_algorithms": [
-          "ML-DSA-65 + RSA-2048 Hybrid / ML-KEM-768",
-          "SHA3-256 / SHA-384"
+          "ML-DSA-65 + RSA-2048 Hybrid Signature [digital_signature]",
+          "SHA3-256 / SHA-384 [message_digest]"
         ],
         "dependencies": [],
         "duration_minutes": 35,
         "rollout_cost": 18.0,
         "risk_score": 4.75,
         "verification_ready_wave0": true,
-        "criticality": "HIGH"
+        "criticality": "HIGH",
+        "owner": "Identity & Access Team"
       },
       {
         "service_id": "ledger_audit",
@@ -121,15 +129,16 @@
           "SHA-1"
         ],
         "target_algorithms": [
-          "ML-DSA-65 Dual-Signature",
-          "SHA3-256 / SHA-384"
+          "ML-DSA-65 + ECDSA-P256 Dual-Signature [digital_signature]",
+          "SHA3-256 / SHA-384 [message_digest]"
         ],
         "dependencies": [],
         "duration_minutes": 30,
         "rollout_cost": 15.0,
         "risk_score": 6.06,
         "verification_ready_wave0": true,
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
+        "owner": "Core Ledger Team"
       },
       {
         "service_id": "interbank_tls",
@@ -139,15 +148,16 @@
           "RSA-2048"
         ],
         "target_algorithms": [
-          "X25519MLKEM768 Hybrid Key Exchange",
-          "ML-DSA-65 + RSA-2048 Hybrid / ML-KEM-768"
+          "X25519MLKEM768 Hybrid Key Establishment [key_establishment]",
+          "ML-DSA-65 + RSA-2048 Hybrid Signature [digital_signature]"
         ],
         "dependencies": [],
         "duration_minutes": 40,
         "rollout_cost": 22.0,
         "risk_score": 7.01,
         "verification_ready_wave0": true,
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
+        "owner": "Network & Interbank Connectivity Team"
       },
       {
         "service_id": "card_vault",
@@ -157,8 +167,8 @@
           "3DES"
         ],
         "target_algorithms": [
-          "ML-DSA-65 + RSA-2048 Hybrid / ML-KEM-768",
-          "AES-256-GCM"
+          "ML-KEM-768 (FIPS 203) Hybrid Key Encapsulation [key_establishment]",
+          "AES-256-GCM [symmetric_encryption]"
         ],
         "dependencies": [
           "auth_gateway"
@@ -167,7 +177,8 @@
         "rollout_cost": 20.0,
         "risk_score": 4.85,
         "verification_ready_wave0": false,
-        "criticality": "HIGH"
+        "criticality": "HIGH",
+        "owner": "Card Security & PCI Vault Team"
       },
       {
         "service_id": "payment_signing",
@@ -177,8 +188,8 @@
           "RSA-2048"
         ],
         "target_algorithms": [
-          "ML-DSA-65 Dual-Signature",
-          "ML-DSA-65 + RSA-2048 Hybrid / ML-KEM-768"
+          "ML-DSA-65 + ECDSA-P256 Dual-Signature [digital_signature]",
+          "ML-DSA-65 + RSA-2048 Hybrid Signature [digital_signature]"
         ],
         "dependencies": [
           "auth_gateway",
@@ -188,7 +199,8 @@
         "rollout_cost": 26.0,
         "risk_score": 6.5,
         "verification_ready_wave0": true,
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
+        "owner": "Real-Time Payments Team"
       },
       {
         "service_id": "settlement_batch",
@@ -199,9 +211,9 @@
           "3DES"
         ],
         "target_algorithms": [
-          "ML-KEM-768 + SLH-DSA-128s",
-          "ML-DSA-65 + RSA-2048 Hybrid / ML-KEM-768",
-          "AES-256-GCM"
+          "ML-KEM-768 Hybrid Key Establishment [key_establishment]",
+          "ML-DSA-65 + RSA-2048 Hybrid Signature [digital_signature]",
+          "AES-256-GCM [symmetric_encryption]"
         ],
         "dependencies": [
           "payment_signing",
@@ -211,7 +223,244 @@
         "rollout_cost": 28.0,
         "risk_score": 6.54,
         "verification_ready_wave0": false,
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
+        "owner": "Settlement & Treasury Operations"
+      }
+    ],
+    "findings": [
+      {
+        "finding_id": "CS-F001",
+        "service_id": "auth_gateway",
+        "file_path": "demo_bank_app/services.py",
+        "line_number": 40,
+        "legacy_algorithm": "RSA-2048",
+        "quantum_threat": "Shor-CRQC (Integer factorization broken by cryptanalytically relevant quantum computer)",
+        "target_pqc_algorithm": "ML-DSA-65 + RSA-2048 Hybrid Signature",
+        "nist_standard": "FIPS 204 (ML-DSA)",
+        "severity": "CRITICAL",
+        "evidence_type": "service_descriptor",
+        "operation_purpose": "digital_signature",
+        "confidence": "high",
+        "rationale": "Service issues signed JWT bearer tokens using RS256.",
+        "owner": "Identity & Access Team",
+        "library_or_protocol": "OAuth2 / OIDC JWT RS256 Token Signing",
+        "human_review_status": "requires_human_review"
+      },
+      {
+        "finding_id": "CS-F002",
+        "service_id": "auth_gateway",
+        "file_path": "demo_bank_app/services.py",
+        "line_number": 40,
+        "legacy_algorithm": "SHA-1",
+        "quantum_threat": "Classical collision broken + Grover preimage reduction",
+        "target_pqc_algorithm": "SHA3-256 / SHA-384",
+        "nist_standard": "FIPS 202 (SHA-3)",
+        "severity": "HIGH",
+        "evidence_type": "service_descriptor",
+        "operation_purpose": "message_digest",
+        "confidence": "high",
+        "rationale": "Certificate thumbprint calculation uses SHA-1.",
+        "owner": "Identity & Access Team",
+        "library_or_protocol": "Legacy Token Thumbprint Digest",
+        "human_review_status": "requires_human_review"
+      },
+      {
+        "finding_id": "CS-F003",
+        "service_id": "ledger_audit",
+        "file_path": "demo_bank_app/services.py",
+        "line_number": 44,
+        "legacy_algorithm": "ECDSA-P256",
+        "quantum_threat": "Shor-CRQC (Elliptic curve discrete logarithm broken)",
+        "target_pqc_algorithm": "ML-DSA-65 + ECDSA-P256 Dual-Signature",
+        "nist_standard": "FIPS 204 (ML-DSA)",
+        "severity": "CRITICAL",
+        "evidence_type": "service_descriptor",
+        "operation_purpose": "digital_signature",
+        "confidence": "high",
+        "rationale": "Signs immutable audit batches with ECDSA secp256r1.",
+        "owner": "Core Ledger Team",
+        "library_or_protocol": "Core Ledger Merkle-Root Notarization",
+        "human_review_status": "requires_human_review"
+      },
+      {
+        "finding_id": "CS-F004",
+        "service_id": "ledger_audit",
+        "file_path": "demo_bank_app/services.py",
+        "line_number": 44,
+        "legacy_algorithm": "SHA-1",
+        "quantum_threat": "Classical collision broken + Grover preimage reduction",
+        "target_pqc_algorithm": "SHA3-256 / SHA-384",
+        "nist_standard": "FIPS 202 (SHA-3)",
+        "severity": "HIGH",
+        "evidence_type": "service_descriptor",
+        "operation_purpose": "message_digest",
+        "confidence": "high",
+        "rationale": "Secondary legacy digest computed with SHA-1.",
+        "owner": "Core Ledger Team",
+        "library_or_protocol": "Legacy Audit Record Digest",
+        "human_review_status": "requires_human_review"
+      },
+      {
+        "finding_id": "CS-F005",
+        "service_id": "interbank_tls",
+        "file_path": "demo_bank_app/services.py",
+        "line_number": 48,
+        "legacy_algorithm": "ECDHE-P256",
+        "quantum_threat": "Shor-CRQC (Harvest-Now-Decrypt-Later ephemeral key exchange risk)",
+        "target_pqc_algorithm": "X25519MLKEM768 Hybrid Key Establishment",
+        "nist_standard": "FIPS 203 (ML-KEM)",
+        "severity": "CRITICAL",
+        "evidence_type": "service_descriptor",
+        "operation_purpose": "key_establishment",
+        "confidence": "high",
+        "rationale": "TLS session key establishment uses ECDHE over P-256.",
+        "owner": "Network & Interbank Connectivity Team",
+        "library_or_protocol": "Interbank ISO-20022 mTLS Ephemeral Key Exchange",
+        "human_review_status": "requires_human_review"
+      },
+      {
+        "finding_id": "CS-F006",
+        "service_id": "interbank_tls",
+        "file_path": "demo_bank_app/services.py",
+        "line_number": 48,
+        "legacy_algorithm": "RSA-2048",
+        "quantum_threat": "Shor-CRQC (Integer factorization broken by cryptanalytically relevant quantum computer)",
+        "target_pqc_algorithm": "ML-DSA-65 + RSA-2048 Hybrid Signature",
+        "nist_standard": "FIPS 204 (ML-DSA)",
+        "severity": "CRITICAL",
+        "evidence_type": "service_descriptor",
+        "operation_purpose": "digital_signature",
+        "confidence": "high",
+        "rationale": "mTLS leaf and intermediate certificates use RSA-2048 signatures.",
+        "owner": "Network & Interbank Connectivity Team",
+        "library_or_protocol": "Interbank mTLS Peer Certificate Authentication",
+        "human_review_status": "requires_human_review"
+      },
+      {
+        "finding_id": "CS-F007",
+        "service_id": "card_vault",
+        "file_path": "demo_bank_app/services.py",
+        "line_number": 52,
+        "legacy_algorithm": "RSA-2048",
+        "quantum_threat": "Shor-CRQC (Harvest-Now-Decrypt-Later key transport/wrapping exposure)",
+        "target_pqc_algorithm": "ML-KEM-768 (FIPS 203) Hybrid Key Encapsulation",
+        "nist_standard": "FIPS 203 (ML-KEM)",
+        "severity": "CRITICAL",
+        "evidence_type": "service_descriptor",
+        "operation_purpose": "key_establishment",
+        "confidence": "high",
+        "rationale": "RSA-2048 wraps symmetric data encryption keys (key establishment/encapsulation role).",
+        "owner": "Card Security & PCI Vault Team",
+        "library_or_protocol": "PKCS#11 Vault DEK Key Wrapping (RSA-OAEP)",
+        "human_review_status": "requires_human_review"
+      },
+      {
+        "finding_id": "CS-F008",
+        "service_id": "card_vault",
+        "file_path": "demo_bank_app/services.py",
+        "line_number": 52,
+        "legacy_algorithm": "3DES",
+        "quantum_threat": "Grover-Weakened + Sweet32 64-bit block collision vulnerability",
+        "target_pqc_algorithm": "AES-256-GCM",
+        "nist_standard": "NIST SP 800-38D",
+        "severity": "HIGH",
+        "evidence_type": "service_descriptor",
+        "operation_purpose": "symmetric_encryption",
+        "confidence": "high",
+        "rationale": "Legacy payment HSM slot configured for Triple-DES.",
+        "owner": "Card Security & PCI Vault Team",
+        "library_or_protocol": "Legacy Card PIN Block / Track Envelope Encryption",
+        "human_review_status": "requires_human_review"
+      },
+      {
+        "finding_id": "CS-F009",
+        "service_id": "payment_signing",
+        "file_path": "demo_bank_app/services.py",
+        "line_number": 56,
+        "legacy_algorithm": "ECDSA-P256",
+        "quantum_threat": "Shor-CRQC (Elliptic curve discrete logarithm broken)",
+        "target_pqc_algorithm": "ML-DSA-65 + ECDSA-P256 Dual-Signature",
+        "nist_standard": "FIPS 204 (ML-DSA)",
+        "severity": "CRITICAL",
+        "evidence_type": "service_descriptor",
+        "operation_purpose": "digital_signature",
+        "confidence": "high",
+        "rationale": "Signs outbound payment instructions with ECDSA-P256.",
+        "owner": "Real-Time Payments Team",
+        "library_or_protocol": "RTGS / UPI Payment Instruction Signature",
+        "human_review_status": "requires_human_review"
+      },
+      {
+        "finding_id": "CS-F010",
+        "service_id": "payment_signing",
+        "file_path": "demo_bank_app/services.py",
+        "line_number": 56,
+        "legacy_algorithm": "RSA-2048",
+        "quantum_threat": "Shor-CRQC (Integer factorization broken by cryptanalytically relevant quantum computer)",
+        "target_pqc_algorithm": "ML-DSA-65 + RSA-2048 Hybrid Signature",
+        "nist_standard": "FIPS 204 (ML-DSA)",
+        "severity": "CRITICAL",
+        "evidence_type": "service_descriptor",
+        "operation_purpose": "digital_signature",
+        "confidence": "high",
+        "rationale": "Fallback XMLDSig envelope signing uses RSA-2048.",
+        "owner": "Real-Time Payments Team",
+        "library_or_protocol": "ISO-20022 XMLDSig Detached Signature",
+        "human_review_status": "requires_human_review"
+      },
+      {
+        "finding_id": "CS-F011",
+        "service_id": "settlement_batch",
+        "file_path": "demo_bank_app/services.py",
+        "line_number": 60,
+        "legacy_algorithm": "DH-2048",
+        "quantum_threat": "Shor-CRQC (Finite-field Diffie-Hellman key exchange broken)",
+        "target_pqc_algorithm": "ML-KEM-768 Hybrid Key Establishment",
+        "nist_standard": "FIPS 203 (ML-KEM)",
+        "severity": "CRITICAL",
+        "evidence_type": "service_descriptor",
+        "operation_purpose": "key_establishment",
+        "confidence": "high",
+        "rationale": "Batch transfer channel negotiates finite-field DH-2048 key exchange.",
+        "owner": "Settlement & Treasury Operations",
+        "library_or_protocol": "Clearinghouse SFTP/SSH Group14 Key Exchange",
+        "human_review_status": "requires_human_review"
+      },
+      {
+        "finding_id": "CS-F012",
+        "service_id": "settlement_batch",
+        "file_path": "demo_bank_app/services.py",
+        "line_number": 60,
+        "legacy_algorithm": "RSA-2048",
+        "quantum_threat": "Shor-CRQC (Integer factorization broken by cryptanalytically relevant quantum computer)",
+        "target_pqc_algorithm": "ML-DSA-65 + RSA-2048 Hybrid Signature",
+        "nist_standard": "FIPS 204 (ML-DSA)",
+        "severity": "CRITICAL",
+        "evidence_type": "service_descriptor",
+        "operation_purpose": "digital_signature",
+        "confidence": "high",
+        "rationale": "Batch settlement manifest is signed with RSA-2048.",
+        "owner": "Settlement & Treasury Operations",
+        "library_or_protocol": "End-of-Day Settlement Manifest Signature",
+        "human_review_status": "requires_human_review"
+      },
+      {
+        "finding_id": "CS-F013",
+        "service_id": "settlement_batch",
+        "file_path": "demo_bank_app/services.py",
+        "line_number": 60,
+        "legacy_algorithm": "3DES",
+        "quantum_threat": "Grover-Weakened + Sweet32 64-bit block collision vulnerability",
+        "target_pqc_algorithm": "AES-256-GCM",
+        "nist_standard": "NIST SP 800-38D",
+        "severity": "HIGH",
+        "evidence_type": "service_descriptor",
+        "operation_purpose": "symmetric_encryption",
+        "confidence": "high",
+        "rationale": "Archive payload encrypted with 3DES-CBC for legacy partner.",
+        "owner": "Settlement & Treasury Operations",
+        "library_or_protocol": "Legacy Clearinghouse Batch Archive Cipher",
+        "human_review_status": "requires_human_review"
       }
     ]
   },
@@ -243,7 +492,7 @@
         "settlement_batch"
       ]
     },
-    "runtime_seconds": 0.004954,
+    "runtime_seconds": 0.005559,
     "diagnostics": {
       "method": "exact_constrained_combinatorial_search",
       "candidates_evaluated": 729,
@@ -256,26 +505,55 @@
   },
   "qpiai_opt": {
     "offline_model_status": "run successfully",
-    "online_solve_status": "run successfully",
+    "online_solve_status": "not attempted (offline verification mode; pass --online-auth to authorize network key check)",
     "problem_class": "MILP",
-    "execution_mode": "local",
-    "solver_status": "optimal",
-    "solver_method": "mixed-integer-linear-programming",
-    "guarantee": "global_optimum",
+    "model_inspection": {
+      "problem_class": "MILP",
+      "representation": "Model",
+      "metrics": {
+        "variables": 18,
+        "constraints": 19,
+        "nonzeros": 76
+      },
+      "valid": true
+    },
     "baseline_feasible_in_opt_ir": true,
-    "baseline_objective": 248.105,
-    "opt_objective": 248.105,
-    "violations": [],
-    "message": "QpiAI Opt local solver completed (`mode='local'`). Opt objective=248.1050 vs. Fallback objective=248.1050."
+    "feasibility_check": {
+      "feasible": true,
+      "objective": 248.10500000000002,
+      "violations": {
+        "assign_auth_gateway": 0.0,
+        "assign_ledger_audit": 0.0,
+        "assign_interbank_tls": 0.0,
+        "assign_card_vault": 0.0,
+        "assign_payment_signing": 0.0,
+        "assign_settlement_batch": 0.0,
+        "wave_cap_w0": 0.0,
+        "wave_cap_w1": 0.0,
+        "wave_cap_w2": 0.0,
+        "wave_time_w0": 0.0,
+        "wave_time_w1": 0.0,
+        "wave_time_w2": 0.0,
+        "dep_auth_gateway_before_card_vault": 0.0,
+        "dep_auth_gateway_before_payment_signing": 0.0,
+        "dep_ledger_audit_before_payment_signing": 0.0,
+        "dep_payment_signing_before_settlement_batch": 0.0,
+        "dep_interbank_tls_before_settlement_batch": 0.0,
+        "verify_gate_w0_card_vault": 0.0,
+        "verify_gate_w0_settlement_batch": 0.0
+      },
+      "tolerance": 1e-06
+    },
+    "message": "Algebraic MILP model (18 binary variables, 19 constraints) built, validated, and verified offline with `qpiai_opt.opt_solvers.classify()`, `inspect()`, and `feasibility()`. Online key-validation network check (`solve(model, mode='local', client=...)`) was skipped by default in offline verification mode; deterministic fallback schedule is active."
   },
   "qpiai_qcloud": {
     "status": "run successfully",
     "qubo_compilation_status": "run successfully",
     "circuit_construction_status": "run successfully",
     "local_qsv_simulator_status": "run successfully (local simulator)",
-    "authenticated_qaoa_status": "run successfully (local simulator)",
+    "authenticated_qaoa_status": "not attempted (offline verification mode; pass --online-auth to authorize network key check)",
     "backend": "QpiAI-QSV-Local (Local Statevector Simulator \u2014 NOT a physical QPU)",
-    "runtime_seconds": 0.451688,
+    "runtime_seconds": 0.193366,
     "circuit_metrics": {
       "qubits": 4,
       "depth": 8,
@@ -339,32 +617,19 @@
       }
     },
     "local_simulator_top_counts": {
-      "0111": 191,
-      "1100": 144,
-      "1000": 100,
-      "0011": 98,
-      "0110": 92,
-      "0101": 80
+      "0111": 189,
+      "1100": 136,
+      "0110": 103,
+      "0011": 102,
+      "1000": 87,
+      "0101": 87
     },
     "best_simulator_wave0_selection": [
       "ledger_audit",
       "interbank_tls"
     ],
     "best_simulator_wave0_energy": -13.07,
-    "authenticated_qaoa_result": {
-      "objective": -13.07,
-      "variable_assignment": {
-        "q_auth_gateway": 0,
-        "q_ledger_audit": 1,
-        "q_interbank_tls": 1,
-        "q_payment_signing": 0
-      },
-      "selected_wave0_services": [
-        "ledger_audit",
-        "interbank_tls"
-      ],
-      "backend": "QpiAI-QSV-Local"
-    },
+    "authenticated_qaoa_result": {},
     "baseline_comparison": {
       "deterministic_wave0": [
         "interbank_tls",
@@ -383,7 +648,7 @@
       "total_crypto_findings": 13,
       "shor_vulnerable_findings": 9,
       "grover_weakened_findings": 4,
-      "schedule_solver": "QpiAI Opt SDK (`mode='local'`)",
+      "schedule_solver": "Deterministic Dependency-Aware Fallback Scheduler",
       "schedule_status": "run successfully",
       "schedule_feasible": true,
       "schedule_objective": 248.105,
@@ -395,96 +660,107 @@
       {
         "service_id": "interbank_tls",
         "service_name": "Interbank ISO-20022 mTLS Gateway",
+        "owner": "Network & Interbank Connectivity Team",
         "assigned_wave": 0,
         "legacy_primitives": [
           "ECDHE-P256",
           "RSA-2048"
         ],
         "proposed_pqc_primitives": [
-          "X25519MLKEM768 Hybrid Key Exchange",
-          "ML-DSA-65 + RSA-2048 Hybrid / ML-KEM-768"
+          "X25519MLKEM768 Hybrid Key Establishment [key_establishment]",
+          "ML-DSA-65 + RSA-2048 Hybrid Signature [digital_signature]"
         ],
-        "migration_mode": "Hybrid Dual-Mode (Classical + NIST FIPS 203/204)",
+        "migration_mode": "Hybrid Dual-Mode (Classical + NIST FIPS 203 ML-KEM / FIPS 204 ML-DSA)",
         "dependencies": [],
         "verification_gate_required": true,
-        "rollback_snapshot_policy": "Automatic pre-wave key & cipher state snapshot"
+        "human_approval_required": true,
+        "rollback_snapshot_policy": "Pre-wave configuration & feature-flag snapshot with automatic stop trigger"
       },
       {
         "service_id": "ledger_audit",
         "service_name": "Core Ledger Audit Notarizer",
+        "owner": "Core Ledger Team",
         "assigned_wave": 0,
         "legacy_primitives": [
           "ECDSA-P256",
           "SHA-1"
         ],
         "proposed_pqc_primitives": [
-          "ML-DSA-65 Dual-Signature",
-          "SHA3-256 / SHA-384"
+          "ML-DSA-65 + ECDSA-P256 Dual-Signature [digital_signature]",
+          "SHA3-256 / SHA-384 [message_digest]"
         ],
-        "migration_mode": "Hybrid Dual-Mode (Classical + NIST FIPS 203/204)",
+        "migration_mode": "Hybrid Dual-Mode (Classical + NIST FIPS 203 ML-KEM / FIPS 204 ML-DSA)",
         "dependencies": [],
         "verification_gate_required": true,
-        "rollback_snapshot_policy": "Automatic pre-wave key & cipher state snapshot"
+        "human_approval_required": true,
+        "rollback_snapshot_policy": "Pre-wave configuration & feature-flag snapshot with automatic stop trigger"
       },
       {
         "service_id": "auth_gateway",
         "service_name": "Identity & OAuth Token Gateway",
+        "owner": "Identity & Access Team",
         "assigned_wave": 1,
         "legacy_primitives": [
           "RSA-2048",
           "SHA-1"
         ],
         "proposed_pqc_primitives": [
-          "ML-DSA-65 + RSA-2048 Hybrid / ML-KEM-768",
-          "SHA3-256 / SHA-384"
+          "ML-DSA-65 + RSA-2048 Hybrid Signature [digital_signature]",
+          "SHA3-256 / SHA-384 [message_digest]"
         ],
-        "migration_mode": "Hybrid Dual-Mode (Classical + NIST FIPS 203/204)",
+        "migration_mode": "Hybrid Dual-Mode (Classical + NIST FIPS 203 ML-KEM / FIPS 204 ML-DSA)",
         "dependencies": [],
         "verification_gate_required": true,
-        "rollback_snapshot_policy": "Automatic pre-wave key & cipher state snapshot"
+        "human_approval_required": true,
+        "rollback_snapshot_policy": "Pre-wave configuration & feature-flag snapshot with automatic stop trigger"
       },
       {
         "service_id": "payment_signing",
         "service_name": "Real-Time Payment Instruction Signer",
+        "owner": "Real-Time Payments Team",
         "assigned_wave": 1,
         "legacy_primitives": [
           "ECDSA-P256",
           "RSA-2048"
         ],
         "proposed_pqc_primitives": [
-          "ML-DSA-65 Dual-Signature",
-          "ML-DSA-65 + RSA-2048 Hybrid / ML-KEM-768"
+          "ML-DSA-65 + ECDSA-P256 Dual-Signature [digital_signature]",
+          "ML-DSA-65 + RSA-2048 Hybrid Signature [digital_signature]"
         ],
-        "migration_mode": "Hybrid Dual-Mode (Classical + NIST FIPS 203/204)",
+        "migration_mode": "Hybrid Dual-Mode (Classical + NIST FIPS 203 ML-KEM / FIPS 204 ML-DSA)",
         "dependencies": [
           "auth_gateway",
           "ledger_audit"
         ],
         "verification_gate_required": true,
-        "rollback_snapshot_policy": "Automatic pre-wave key & cipher state snapshot"
+        "human_approval_required": true,
+        "rollback_snapshot_policy": "Pre-wave configuration & feature-flag snapshot with automatic stop trigger"
       },
       {
         "service_id": "card_vault",
         "service_name": "Card Tokenization & Key Vault",
+        "owner": "Card Security & PCI Vault Team",
         "assigned_wave": 2,
         "legacy_primitives": [
           "RSA-2048",
           "3DES"
         ],
         "proposed_pqc_primitives": [
-          "ML-DSA-65 + RSA-2048 Hybrid / ML-KEM-768",
-          "AES-256-GCM"
+          "ML-KEM-768 (FIPS 203) Hybrid Key Encapsulation [key_establishment]",
+          "AES-256-GCM [symmetric_encryption]"
         ],
-        "migration_mode": "Hybrid Dual-Mode (Classical + NIST FIPS 203/204)",
+        "migration_mode": "Hybrid Dual-Mode (Classical + NIST FIPS 203 ML-KEM / FIPS 204 ML-DSA)",
         "dependencies": [
           "auth_gateway"
         ],
         "verification_gate_required": true,
-        "rollback_snapshot_policy": "Automatic pre-wave key & cipher state snapshot"
+        "human_approval_required": true,
+        "rollback_snapshot_policy": "Pre-wave configuration & feature-flag snapshot with automatic stop trigger"
       },
       {
         "service_id": "settlement_batch",
         "service_name": "Clearinghouse Batch Settlement Engine",
+        "owner": "Settlement & Treasury Operations",
         "assigned_wave": 2,
         "legacy_primitives": [
           "DH-2048",
@@ -492,17 +768,18 @@
           "3DES"
         ],
         "proposed_pqc_primitives": [
-          "ML-KEM-768 + SLH-DSA-128s",
-          "ML-DSA-65 + RSA-2048 Hybrid / ML-KEM-768",
-          "AES-256-GCM"
+          "ML-KEM-768 Hybrid Key Establishment [key_establishment]",
+          "ML-DSA-65 + RSA-2048 Hybrid Signature [digital_signature]",
+          "AES-256-GCM [symmetric_encryption]"
         ],
-        "migration_mode": "Hybrid Dual-Mode (Classical + NIST FIPS 203/204)",
+        "migration_mode": "Hybrid Dual-Mode (Classical + NIST FIPS 203 ML-KEM / FIPS 204 ML-DSA)",
         "dependencies": [
           "payment_signing",
           "interbank_tls"
         ],
         "verification_gate_required": true,
-        "rollback_snapshot_policy": "Automatic pre-wave key & cipher state snapshot"
+        "human_approval_required": true,
+        "rollback_snapshot_policy": "Pre-wave configuration & feature-flag snapshot with automatic stop trigger"
       }
     ],
     "verification_gates": [
@@ -513,7 +790,20 @@
         "hybrid_handshake_passed": true,
         "latency_within_slo": true,
         "overall_passed": true,
-        "details": "FIPS 203/204 KAT vectors verified; hybrid handshake and <15ms latency budget passed."
+        "details": "Modelled FIPS 203/204 KAT vectors verified; dual-mode peer matrix and <15ms budget passed (prototype gate).",
+        "input_revision": "HEAD-synthetic-fixture-v1",
+        "finding_ids": [
+          "CS-F005",
+          "CS-F006"
+        ],
+        "dependency_prerequisites": [],
+        "peer_combinations_tested": [
+          "legacy_peer -> hybrid_service (classical fallback compatible)",
+          "hybrid_peer -> hybrid_service (PQC + classical dual-mode)"
+        ],
+        "trace_reference": "MOCKED_SYNTHETIC_TRACE:protocol_demo.py",
+        "overhead_methodology": "Modelled NIST FIPS 203/204 wire-size delta + local hashlib/HMAC timing check (not a production network benchmark)",
+        "approver": "pending_human_security_architect_review"
       },
       {
         "service_id": "ledger_audit",
@@ -522,7 +812,20 @@
         "hybrid_handshake_passed": true,
         "latency_within_slo": true,
         "overall_passed": true,
-        "details": "FIPS 203/204 KAT vectors verified; hybrid handshake and <15ms latency budget passed."
+        "details": "Modelled FIPS 203/204 KAT vectors verified; dual-mode peer matrix and <15ms budget passed (prototype gate).",
+        "input_revision": "HEAD-synthetic-fixture-v1",
+        "finding_ids": [
+          "CS-F003",
+          "CS-F004"
+        ],
+        "dependency_prerequisites": [],
+        "peer_combinations_tested": [
+          "legacy_peer -> hybrid_service (classical fallback compatible)",
+          "hybrid_peer -> hybrid_service (PQC + classical dual-mode)"
+        ],
+        "trace_reference": "MOCKED_SYNTHETIC_TRACE:protocol_demo.py",
+        "overhead_methodology": "Modelled NIST FIPS 203/204 wire-size delta + local hashlib/HMAC timing check (not a production network benchmark)",
+        "approver": "pending_human_security_architect_review"
       },
       {
         "service_id": "auth_gateway",
@@ -531,7 +834,20 @@
         "hybrid_handshake_passed": true,
         "latency_within_slo": true,
         "overall_passed": true,
-        "details": "FIPS 203/204 KAT vectors verified; hybrid handshake and <15ms latency budget passed."
+        "details": "Modelled FIPS 203/204 KAT vectors verified; dual-mode peer matrix and <15ms budget passed (prototype gate).",
+        "input_revision": "HEAD-synthetic-fixture-v1",
+        "finding_ids": [
+          "CS-F001",
+          "CS-F002"
+        ],
+        "dependency_prerequisites": [],
+        "peer_combinations_tested": [
+          "legacy_peer -> hybrid_service (classical fallback compatible)",
+          "hybrid_peer -> hybrid_service (PQC + classical dual-mode)"
+        ],
+        "trace_reference": "MOCKED_SYNTHETIC_TRACE:protocol_demo.py",
+        "overhead_methodology": "Modelled NIST FIPS 203/204 wire-size delta + local hashlib/HMAC timing check (not a production network benchmark)",
+        "approver": "pending_human_security_architect_review"
       },
       {
         "service_id": "payment_signing",
@@ -540,7 +856,23 @@
         "hybrid_handshake_passed": true,
         "latency_within_slo": true,
         "overall_passed": true,
-        "details": "FIPS 203/204 KAT vectors verified; hybrid handshake and <15ms latency budget passed."
+        "details": "Modelled FIPS 203/204 KAT vectors verified; dual-mode peer matrix and <15ms budget passed (prototype gate).",
+        "input_revision": "HEAD-synthetic-fixture-v1",
+        "finding_ids": [
+          "CS-F009",
+          "CS-F010"
+        ],
+        "dependency_prerequisites": [
+          "auth_gateway",
+          "ledger_audit"
+        ],
+        "peer_combinations_tested": [
+          "legacy_peer -> hybrid_service (classical fallback compatible)",
+          "hybrid_peer -> hybrid_service (PQC + classical dual-mode)"
+        ],
+        "trace_reference": "MOCKED_SYNTHETIC_TRACE:protocol_demo.py",
+        "overhead_methodology": "Modelled NIST FIPS 203/204 wire-size delta + local hashlib/HMAC timing check (not a production network benchmark)",
+        "approver": "pending_human_security_architect_review"
       },
       {
         "service_id": "card_vault",
@@ -549,7 +881,22 @@
         "hybrid_handshake_passed": true,
         "latency_within_slo": true,
         "overall_passed": true,
-        "details": "FIPS 203/204 KAT vectors verified; hybrid handshake and <15ms latency budget passed."
+        "details": "Modelled FIPS 203/204 KAT vectors verified; dual-mode peer matrix and <15ms budget passed (prototype gate).",
+        "input_revision": "HEAD-synthetic-fixture-v1",
+        "finding_ids": [
+          "CS-F007",
+          "CS-F008"
+        ],
+        "dependency_prerequisites": [
+          "auth_gateway"
+        ],
+        "peer_combinations_tested": [
+          "legacy_peer -> hybrid_service (classical fallback compatible)",
+          "hybrid_peer -> hybrid_service (PQC + classical dual-mode)"
+        ],
+        "trace_reference": "MOCKED_SYNTHETIC_TRACE:protocol_demo.py",
+        "overhead_methodology": "Modelled NIST FIPS 203/204 wire-size delta + local hashlib/HMAC timing check (not a production network benchmark)",
+        "approver": "pending_human_security_architect_review"
       },
       {
         "service_id": "settlement_batch",
@@ -558,7 +905,24 @@
         "hybrid_handshake_passed": true,
         "latency_within_slo": true,
         "overall_passed": true,
-        "details": "FIPS 203/204 KAT vectors verified; hybrid handshake and <15ms latency budget passed."
+        "details": "Modelled FIPS 203/204 KAT vectors verified; dual-mode peer matrix and <15ms budget passed (prototype gate).",
+        "input_revision": "HEAD-synthetic-fixture-v1",
+        "finding_ids": [
+          "CS-F011",
+          "CS-F012",
+          "CS-F013"
+        ],
+        "dependency_prerequisites": [
+          "payment_signing",
+          "interbank_tls"
+        ],
+        "peer_combinations_tested": [
+          "legacy_peer -> hybrid_service (classical fallback compatible)",
+          "hybrid_peer -> hybrid_service (PQC + classical dual-mode)"
+        ],
+        "trace_reference": "MOCKED_SYNTHETIC_TRACE:protocol_demo.py",
+        "overhead_methodology": "Modelled NIST FIPS 203/204 wire-size delta + local hashlib/HMAC timing check (not a production network benchmark)",
+        "approver": "pending_human_security_architect_review"
       }
     ],
     "rollback_events": [
@@ -566,75 +930,125 @@
         "service_id": "interbank_tls",
         "wave_index": 0,
         "triggered": false,
-        "reason": "Verification gate passed; hybrid PQC configuration committed.",
-        "restored_algorithm": "N/A (Committed Hybrid PQC)",
-        "snapshot_id": "SNAP-W0-01"
+        "reason": "Verification gate passed; hybrid PQC configuration ready for human promotion.",
+        "restored_algorithm": "N/A (Standby Snapshot Ready)",
+        "snapshot_id": "SNAP-W0-01",
+        "known_good_config_version": "v1.4.2-pre-pqc-baseline",
+        "feature_flag": "CRYPTOSHIFT_ENABLE_HYBRID_PQC=false",
+        "owner": "Network & Interbank Connectivity Team",
+        "measurable_stop_trigger": "p99 handshake latency > 15ms OR TLS/signature verification error rate > 0.1%",
+        "downstream_compatibility": "Dual-mode peers accept classical envelope during rollback window",
+        "re_verification_steps": "Re-run KAT vectors, check MTU fragmentation on middleboxes, and obtain human sign-off",
+        "policy_note": "Classical RSA-2048/ECDSA-P256 fallback permitted temporarily under dual-mode transition policy."
       },
       {
         "service_id": "ledger_audit",
         "wave_index": 0,
         "triggered": false,
-        "reason": "Verification gate passed; hybrid PQC configuration committed.",
-        "restored_algorithm": "N/A (Committed Hybrid PQC)",
-        "snapshot_id": "SNAP-W0-02"
+        "reason": "Verification gate passed; hybrid PQC configuration ready for human promotion.",
+        "restored_algorithm": "N/A (Standby Snapshot Ready)",
+        "snapshot_id": "SNAP-W0-02",
+        "known_good_config_version": "v1.4.2-pre-pqc-baseline",
+        "feature_flag": "CRYPTOSHIFT_ENABLE_HYBRID_PQC=false",
+        "owner": "Core Ledger Team",
+        "measurable_stop_trigger": "p99 handshake latency > 15ms OR TLS/signature verification error rate > 0.1%",
+        "downstream_compatibility": "Dual-mode peers accept classical envelope during rollback window",
+        "re_verification_steps": "Re-run KAT vectors, check MTU fragmentation on middleboxes, and obtain human sign-off",
+        "policy_note": "POLICY WARNING: Reverting to SHA-1 or 3DES violates NIST SP 800-131A; fallback must use classical SHA-256/AES-256-GCM baseline instead of weak legacy cipher."
       },
       {
         "service_id": "auth_gateway",
         "wave_index": 1,
         "triggered": false,
-        "reason": "Verification gate passed; hybrid PQC configuration committed.",
-        "restored_algorithm": "N/A (Committed Hybrid PQC)",
-        "snapshot_id": "SNAP-W1-03"
+        "reason": "Verification gate passed; hybrid PQC configuration ready for human promotion.",
+        "restored_algorithm": "N/A (Standby Snapshot Ready)",
+        "snapshot_id": "SNAP-W1-03",
+        "known_good_config_version": "v1.4.2-pre-pqc-baseline",
+        "feature_flag": "CRYPTOSHIFT_ENABLE_HYBRID_PQC=false",
+        "owner": "Identity & Access Team",
+        "measurable_stop_trigger": "p99 handshake latency > 15ms OR TLS/signature verification error rate > 0.1%",
+        "downstream_compatibility": "Dual-mode peers accept classical envelope during rollback window",
+        "re_verification_steps": "Re-run KAT vectors, check MTU fragmentation on middleboxes, and obtain human sign-off",
+        "policy_note": "POLICY WARNING: Reverting to SHA-1 or 3DES violates NIST SP 800-131A; fallback must use classical SHA-256/AES-256-GCM baseline instead of weak legacy cipher."
       },
       {
         "service_id": "payment_signing",
         "wave_index": 1,
         "triggered": false,
-        "reason": "Verification gate passed; hybrid PQC configuration committed.",
-        "restored_algorithm": "N/A (Committed Hybrid PQC)",
-        "snapshot_id": "SNAP-W1-04"
+        "reason": "Verification gate passed; hybrid PQC configuration ready for human promotion.",
+        "restored_algorithm": "N/A (Standby Snapshot Ready)",
+        "snapshot_id": "SNAP-W1-04",
+        "known_good_config_version": "v1.4.2-pre-pqc-baseline",
+        "feature_flag": "CRYPTOSHIFT_ENABLE_HYBRID_PQC=false",
+        "owner": "Real-Time Payments Team",
+        "measurable_stop_trigger": "p99 handshake latency > 15ms OR TLS/signature verification error rate > 0.1%",
+        "downstream_compatibility": "Dual-mode peers accept classical envelope during rollback window",
+        "re_verification_steps": "Re-run KAT vectors, check MTU fragmentation on middleboxes, and obtain human sign-off",
+        "policy_note": "Classical RSA-2048/ECDSA-P256 fallback permitted temporarily under dual-mode transition policy."
       },
       {
         "service_id": "card_vault",
         "wave_index": 2,
         "triggered": false,
-        "reason": "Verification gate passed; hybrid PQC configuration committed.",
-        "restored_algorithm": "N/A (Committed Hybrid PQC)",
-        "snapshot_id": "SNAP-W2-05"
+        "reason": "Verification gate passed; hybrid PQC configuration ready for human promotion.",
+        "restored_algorithm": "N/A (Standby Snapshot Ready)",
+        "snapshot_id": "SNAP-W2-05",
+        "known_good_config_version": "v1.4.2-pre-pqc-baseline",
+        "feature_flag": "CRYPTOSHIFT_ENABLE_HYBRID_PQC=false",
+        "owner": "Card Security & PCI Vault Team",
+        "measurable_stop_trigger": "p99 handshake latency > 15ms OR TLS/signature verification error rate > 0.1%",
+        "downstream_compatibility": "Dual-mode peers accept classical envelope during rollback window",
+        "re_verification_steps": "Re-run KAT vectors, check MTU fragmentation on middleboxes, and obtain human sign-off",
+        "policy_note": "POLICY WARNING: Reverting to SHA-1 or 3DES violates NIST SP 800-131A; fallback must use classical SHA-256/AES-256-GCM baseline instead of weak legacy cipher."
       },
       {
         "service_id": "settlement_batch",
         "wave_index": 2,
         "triggered": false,
-        "reason": "Verification gate passed; hybrid PQC configuration committed.",
-        "restored_algorithm": "N/A (Committed Hybrid PQC)",
-        "snapshot_id": "SNAP-W2-06"
+        "reason": "Verification gate passed; hybrid PQC configuration ready for human promotion.",
+        "restored_algorithm": "N/A (Standby Snapshot Ready)",
+        "snapshot_id": "SNAP-W2-06",
+        "known_good_config_version": "v1.4.2-pre-pqc-baseline",
+        "feature_flag": "CRYPTOSHIFT_ENABLE_HYBRID_PQC=false",
+        "owner": "Settlement & Treasury Operations",
+        "measurable_stop_trigger": "p99 handshake latency > 15ms OR TLS/signature verification error rate > 0.1%",
+        "downstream_compatibility": "Dual-mode peers accept classical envelope during rollback window",
+        "re_verification_steps": "Re-run KAT vectors, check MTU fragmentation on middleboxes, and obtain human sign-off",
+        "policy_note": "POLICY WARNING: Reverting to SHA-1 or 3DES violates NIST SP 800-131A; fallback must use classical SHA-256/AES-256-GCM baseline instead of weak legacy cipher."
       }
     ],
     "hybrid_protocol_demo": {
-      "payload_type": "ISO-20022 pacs.008 Interbank Credit Transfer (Synthetic)",
+      "trace_classification": "MOCKED_PROTOCOL_TRACE (Real hashlib digests + NIST FIPS 203/204 specification byte sizes)",
+      "payload_type": "ISO-20022 pacs.008 Interbank Credit Transfer (Synthetic Fixture)",
       "legacy_envelope": {
-        "key_exchange": "ECDHE-P256",
-        "signature": "RSA-2048",
+        "key_establishment": "ECDHE-P256 (32-byte public share)",
+        "digital_signature": "RSA-2048 (256-byte signature, 256-byte public key)",
         "digest_alg": "SHA-1",
         "digest_hex": "c3a3d928a29809163c1ca16f33edf22a6f007740",
+        "estimated_handshake_bytes": 544,
         "quantum_safe": false
       },
       "hybrid_pqc_envelope": {
-        "key_exchange": "X25519 + ML-KEM-768 (FIPS 203 Hybrid)",
-        "signature": "ECDSA-P256 + ML-DSA-65 (FIPS 204 Dual-Sign)",
+        "key_establishment": "X25519 + ML-KEM-768 (FIPS 203 Hybrid: 32B + 1184B public key, 32B + 1088B ciphertext)",
+        "digital_signature": "ECDSA-P256 + ML-DSA-65 (FIPS 204 Dual-Sign: ~64B + 3309B signature, 1952B ML-DSA pubkey)",
         "digest_alg": "SHA3-256",
         "digest_hex": "503766a7a718077d0b0b0a62872125553e03e2dbd233fbc3a61e26efce908392",
         "hybrid_authenticator_tag": "9683f1e0ab6e336f06de44a1cf5e5248",
-        "quantum_safe": true
+        "estimated_handshake_bytes": 7661,
+        "quantum_safe_target": "Hybrid transitional protection (subject to implementation & side-channel validation)"
+      },
+      "overhead_methodology": {
+        "wire_size_delta_bytes": 7117,
+        "mtu_fragmentation_note": "Hybrid key share + dual signature increases handshake payload by ~7.1 KB, exceeding a single 1500-byte Ethernet MTU and requiring TCP segmentation / TLS record fragmentation checks.",
+        "measurement_method": "Analytical byte-budget calculation from NIST FIPS 203 (Table 2) & FIPS 204 (Table 1) parameters."
       }
     }
   },
   "limitations": [
-    "QpiAI Opt local solving (`solve(model, mode='local', client=client)`) requires a valid `QPIAI_OPT_API_KEY` in `.env` because the SDK verifies the Opt API key online before invoking the local solver binary.",
-    "QpiAI Quantum variational solving (`solve(qubo, mode='local', algorithm=QAOA(...))`) requires a valid `QPIAI_QCLOUD_API_KEY` in `.env` because `qpiai_opt.quantum` verifies the QCloud key online before running the local simulator.",
-    "Direct `qpiai_quantum.Circuit.run(device_name='QpiAI-QSV-Local')`, `QUBOProblem.from_model()`, `build_circuit()`, `classify()`, `inspect()`, and `feasibility()` execute locally without credentials.",
+    "By default, `cryptoshift` runs in safe offline verification mode (`allow_online_auth=False`) so no online key-validation network requests are sent unless `--online-auth` is explicitly passed.",
+    "Direct `qpiai_quantum.Circuit.run(device_name='QpiAI-QSV-Local')`, `QUBOProblem.from_model()`, `build_circuit()`, `classify()`, `inspect()`, and `feasibility()` execute 100% locally without network calls or credentials.",
     "All quantum circuit results reported here come from the classical statevector simulator (`QpiAI-QSV-Local`), NOT a physical QPU, and do not demonstrate quantum speedup or production quantum advantage.",
-    "Platform mode (`mode='platform'`), `submit()`, and remote QPUs (`QpiAI-Indus-1`) are intentionally disabled to prevent unintended credit consumption."
+    "The protocol envelope trace is an explicitly labelled mocked/modelled trace combining real `hashlib` SHA-1/SHA3-256 digests with analytical NIST FIPS 203/204 wire-size parameters.",
+    "Platform mode (`mode='platform'`), `submit()`, and remote QPUs (`QpiAI-Indus-1`) are disabled to prevent unintended credit consumption."
   ]
 }

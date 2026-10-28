@@ -1,4 +1,4 @@
-"""Non-sensitive JSON and Markdown evidence reporting for CryptoShift and QpiAI runs."""
+"""Non-sensitive JSON and Markdown evidence reporting for CryptoShift QpiAI and dataset evaluation runs."""
 
 from __future__ import annotations
 
@@ -21,9 +21,10 @@ def write_qpiai_evidence_reports(
     lines = [
         "# CryptoShift — QpiAI Integration & Verification Evidence Report",
         "",
-        f"- **Project:** Quant-A-Maze 3.0 — PQC-01: Verification-Gated Cryptographic Migration Across Banking Applications",
+        "- **Project:** Quant-A-Maze 3.0 — PQC-01: Verification-Gated Cryptographic Migration Across Banking Applications",
         f"- **Python Runtime:** `{evidence['environment']['python_version']}`",
-        f"- **Virtual Environment:** `{evidence['environment']['virtualenv']}`",
+        f"- **Virtual Environment:** `{evidence['environment']['virtualenv_name']}`",
+        f"- **Online Key Validation Executed in This Run:** `{evidence['environment'].get('online_auth_executed', False)}`",
         "",
         "## 1. Package & SDK Availability",
         "",
@@ -101,3 +102,59 @@ def write_qpiai_evidence_reports(
 
     md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return {"json": str(json_path), "markdown": str(md_path)}
+
+
+def write_evaluation_reports(
+    eval_data: Dict[str, Any],
+    output_dir: Path,
+) -> Dict[str, str]:
+    """Write reproducible dataset evaluation metrics to `reports/evaluation/`."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    json_path = output_dir / "evaluation_report.json"
+    md_path = output_dir / "evaluation_report.md"
+
+    json_path.write_text(json.dumps(eval_data, indent=2), encoding="utf-8")
+
+    counts = eval_data.get("counts", {})
+    metrics = eval_data.get("metrics", {})
+    lines = [
+        "# CryptoShift — Detection Evaluation Report",
+        "",
+        f"- **Dataset Scope:** {eval_data.get('dataset_classification')}",
+        f"- **Unit of Analysis:** {eval_data.get('unit_of_analysis')}",
+        f"- **Repository Split Method:** {eval_data.get('split_method')}",
+        "",
+        "## 1. Confusion Matrix & Summary Metrics (Synthetic Fixture Suite)",
+        "",
+        "| Metric | Value | Formula / Definition |",
+        "|---|---:|---|",
+        f"| **True Positives (TP)** | `{counts.get('TP', 0)}` | Migration-relevant crypto present AND both algorithm & operation_purpose matched |",
+        f"| **False Positives (FP)** | `{counts.get('FP', 0)}` | Non-migration/decoy fixture flagged by static pattern |",
+        f"| **False Negatives (FN)** | `{counts.get('FN', 0)}` | Migration-relevant crypto missed (e.g., indirect dynamic reflection call) |",
+        f"| **True Negatives (TN)** | `{counts.get('TN', 0)}` | Clean/modern PQC or non-crypto file correctly ignored |",
+        f"| **Precision** | **`{metrics.get('precision', 0.0):.4f}`** | `TP / (TP + FP)` |",
+        f"| **Recall** | **`{metrics.get('recall', 0.0):.4f}`** | `TP / (TP + FN)` |",
+        "",
+        "## 2. Per-Instance Breakdown",
+        "",
+        "| Instance ID | Repository Split | File Path | Expected (Alg / Purpose) | Detected Count | Verdict | Notes |",
+        "|---|---|---|---|---:|---|---|",
+    ]
+    for item in eval_data.get("instance_outcomes", []):
+        exp = (
+            f"`{item['expected_algorithm']}` / `{item['expected_purpose']}`"
+            if item["expected_positive"]
+            else "`None (Negative/Decoy)`"
+        )
+        lines.append(
+            f"| `{item['instance_id']}` | `{item['repository_split']}` | `{item['relative_path']}` | "
+            f"{exp} | {item['detected_count']} | **{item['verdict']}** | {item['notes']} |"
+        )
+
+    lines.extend(["", "## 3. Scope Limitations", ""])
+    for lim in eval_data.get("limitations", []):
+        lines.append(f"- {lim}")
+
+    md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return {"json": str(json_path), "markdown": str(md_path)}
+

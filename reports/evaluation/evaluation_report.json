@@ -1,0 +1,261 @@
+{
+  "dataset_classification": "SYNTHETIC_FIXTURE_EVALUATION (Visibly separated in data/fixtures/synthetic/; NOT real-world banking data)",
+  "unit_of_analysis": "One labelled file-level cryptographic operation instance (requiring both algorithm clue and operation_purpose match for TP).",
+  "split_method": "Repository-level split across 3 synthetic mini-projects (calibration: project_alpha_auth; held_out_test: project_beta_tls, project_gamma_noncrypto).",
+  "total_instances": 11,
+  "counts": {
+    "TP": 7,
+    "FP": 1,
+    "FN": 1,
+    "TN": 2
+  },
+  "metrics": {
+    "precision": 0.875,
+    "recall": 0.875
+  },
+  "by_split": {
+    "calibration": {
+      "TP": 3,
+      "FP": 0,
+      "FN": 0,
+      "TN": 0
+    },
+    "held_out_test": {
+      "TP": 4,
+      "FP": 1,
+      "FN": 1,
+      "TN": 2
+    }
+  },
+  "instance_outcomes": [
+    {
+      "instance_id": "SYN-001",
+      "repository_id": "project_alpha_auth",
+      "repository_split": "calibration",
+      "relative_path": "data/fixtures/synthetic/project_alpha_auth/jwt_signer.py",
+      "expected_positive": true,
+      "expected_algorithm": "RSA-2048",
+      "expected_purpose": "digital_signature",
+      "detected_count": 2,
+      "detected_items": [
+        {
+          "algorithm": "RSA-2048",
+          "purpose": "digital_signature",
+          "line": 3,
+          "confidence": "high"
+        },
+        {
+          "algorithm": "RSA-2048",
+          "purpose": "digital_signature",
+          "line": 4,
+          "confidence": "high"
+        }
+      ],
+      "verdict": "TP",
+      "notes": "OAuth2 RS256 token signing using RSA-2048 -> maps to ML-DSA-65 (FIPS 204)."
+    },
+    {
+      "instance_id": "SYN-002",
+      "repository_id": "project_alpha_auth",
+      "repository_split": "calibration",
+      "relative_path": "data/fixtures/synthetic/project_alpha_auth/token_digest.py",
+      "expected_positive": true,
+      "expected_algorithm": "SHA-1",
+      "expected_purpose": "message_digest",
+      "detected_count": 1,
+      "detected_items": [
+        {
+          "algorithm": "SHA-1",
+          "purpose": "message_digest",
+          "line": 7,
+          "confidence": "high"
+        }
+      ],
+      "verdict": "TP",
+      "notes": "Legacy certificate thumbprint using hashlib.sha1 -> maps to SHA3-256."
+    },
+    {
+      "instance_id": "SYN-003",
+      "repository_id": "project_alpha_auth",
+      "repository_split": "calibration",
+      "relative_path": "data/fixtures/synthetic/project_alpha_auth/vault_wrapper.py",
+      "expected_positive": true,
+      "expected_algorithm": "RSA-2048",
+      "expected_purpose": "key_establishment",
+      "detected_count": 2,
+      "detected_items": [
+        {
+          "algorithm": "RSA-2048",
+          "purpose": "key_establishment",
+          "line": 1,
+          "confidence": "high"
+        },
+        {
+          "algorithm": "RSA-2048",
+          "purpose": "key_establishment",
+          "line": 3,
+          "confidence": "high"
+        }
+      ],
+      "verdict": "TP",
+      "notes": "RSA-OAEP key wrapping of DEKs -> maps to ML-KEM-768 (FIPS 203), NOT ML-DSA."
+    },
+    {
+      "instance_id": "SYN-004",
+      "repository_id": "project_beta_tls",
+      "repository_split": "held_out_test",
+      "relative_path": "data/fixtures/synthetic/project_beta_tls/mtls_config.yaml",
+      "expected_positive": true,
+      "expected_algorithm": "ECDHE-P256",
+      "expected_purpose": "key_establishment",
+      "detected_count": 1,
+      "detected_items": [
+        {
+          "algorithm": "ECDHE-P256",
+          "purpose": "key_establishment",
+          "line": 4,
+          "confidence": "high"
+        }
+      ],
+      "verdict": "TP",
+      "notes": "Interbank mTLS key exchange configuration -> maps to X25519MLKEM768 (FIPS 203)."
+    },
+    {
+      "instance_id": "SYN-005",
+      "repository_id": "project_beta_tls",
+      "repository_split": "held_out_test",
+      "relative_path": "data/fixtures/synthetic/project_beta_tls/payment_ecdsa.py",
+      "expected_positive": true,
+      "expected_algorithm": "ECDSA-P256",
+      "expected_purpose": "digital_signature",
+      "detected_count": 2,
+      "detected_items": [
+        {
+          "algorithm": "ECDSA-P256",
+          "purpose": "digital_signature",
+          "line": 3,
+          "confidence": "high"
+        },
+        {
+          "algorithm": "ECDSA-P256",
+          "purpose": "digital_signature",
+          "line": 4,
+          "confidence": "high"
+        }
+      ],
+      "verdict": "TP",
+      "notes": "ECDSA secp256r1 payment instruction signature -> maps to ML-DSA-65 (FIPS 204)."
+    },
+    {
+      "instance_id": "SYN-006",
+      "repository_id": "project_beta_tls",
+      "repository_split": "held_out_test",
+      "relative_path": "data/fixtures/synthetic/project_beta_tls/legacy_batch_cipher.py",
+      "expected_positive": true,
+      "expected_algorithm": "3DES",
+      "expected_purpose": "symmetric_encryption",
+      "detected_count": 2,
+      "detected_items": [
+        {
+          "algorithm": "3DES",
+          "purpose": "symmetric_encryption",
+          "line": 1,
+          "confidence": "high"
+        },
+        {
+          "algorithm": "3DES",
+          "purpose": "symmetric_encryption",
+          "line": 3,
+          "confidence": "high"
+        }
+      ],
+      "verdict": "TP",
+      "notes": "TripleDES batch encryption -> maps to AES-256-GCM."
+    },
+    {
+      "instance_id": "SYN-007",
+      "repository_id": "project_beta_tls",
+      "repository_split": "held_out_test",
+      "relative_path": "data/fixtures/synthetic/project_beta_tls/sftp_dh_exchange.py",
+      "expected_positive": true,
+      "expected_algorithm": "DH-2048",
+      "expected_purpose": "key_establishment",
+      "detected_count": 1,
+      "detected_items": [
+        {
+          "algorithm": "DH-2048",
+          "purpose": "key_establishment",
+          "line": 3,
+          "confidence": "high"
+        }
+      ],
+      "verdict": "TP",
+      "notes": "Finite-field diffie-hellman-group14 key exchange -> maps to ML-KEM-768."
+    },
+    {
+      "instance_id": "SYN-008",
+      "repository_id": "project_beta_tls",
+      "repository_split": "held_out_test",
+      "relative_path": "data/fixtures/synthetic/project_beta_tls/dynamic_reflection_cipher.py",
+      "expected_positive": true,
+      "expected_algorithm": "SHA-1",
+      "expected_purpose": "message_digest",
+      "detected_count": 0,
+      "detected_items": [],
+      "verdict": "FN",
+      "notes": "Edge case (FN): dynamically resolves getattr(hashlib, 'sh' + 'a1') at runtime; static scanner misses it."
+    },
+    {
+      "instance_id": "SYN-009",
+      "repository_id": "project_gamma_noncrypto",
+      "repository_split": "held_out_test",
+      "relative_path": "data/fixtures/synthetic/project_gamma_noncrypto/ui_layout_helper.py",
+      "expected_positive": false,
+      "expected_algorithm": null,
+      "expected_purpose": null,
+      "detected_count": 0,
+      "detected_items": [],
+      "verdict": "TN",
+      "notes": "True Negative decoy: contains non-crypto identifiers like rsa_building_floor = 2048."
+    },
+    {
+      "instance_id": "SYN-010",
+      "repository_id": "project_gamma_noncrypto",
+      "repository_split": "held_out_test",
+      "relative_path": "data/fixtures/synthetic/project_gamma_noncrypto/modern_pqc_service.py",
+      "expected_positive": false,
+      "expected_algorithm": null,
+      "expected_purpose": null,
+      "detected_count": 0,
+      "detected_items": [],
+      "verdict": "TN",
+      "notes": "True Negative: service already uses SHA3-256 and hybrid X25519MLKEM768."
+    },
+    {
+      "instance_id": "SYN-011",
+      "repository_id": "project_gamma_noncrypto",
+      "repository_split": "held_out_test",
+      "relative_path": "data/fixtures/synthetic/project_gamma_noncrypto/ambiguous_legacy_note.yaml",
+      "expected_positive": false,
+      "expected_algorithm": null,
+      "expected_purpose": null,
+      "detected_count": 1,
+      "detected_items": [
+        {
+          "algorithm": "RSA-2048",
+          "purpose": "unknown",
+          "line": 3,
+          "confidence": "medium"
+        }
+      ],
+      "verdict": "FP",
+      "notes": "Edge case (FP): inactive config flag LEGACY_RSA_2048_CONFIG=false triggers medium-confidence review alert."
+    }
+  ],
+  "public_repository_references_count": 3,
+  "limitations": [
+    "These precision and recall counts are measured on a small, controlled synthetic fixture suite (data/fixtures/synthetic/) to verify detector logic and error modes (such as dynamic reflection FN and ambiguous config FP).",
+    "Synthetic fixture scores do NOT represent detection performance on real-world production banking estates.",
+    "Public open-source repository references in data/labels/public_repo_references.json are pinned by URL and commit SHA for reproducible external evaluation without redistributing third-party source trees."
+  ]
+}

@@ -11,15 +11,22 @@ env/
 qcloud.env
 *.key
 *.pem
+*.p12
+*.pfx
 
-# Python bytecode and build artifacts
+# Local dated backups and scratch artifacts
+.backup_*/
+scratch/
+
+# Python bytecode, test caches, and build artifacts
 __pycache__/
 *.py[cod]
 *$py.class
 *.egg-info/
+src/*.egg-info/
 dist/
 build/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-
+.coverage

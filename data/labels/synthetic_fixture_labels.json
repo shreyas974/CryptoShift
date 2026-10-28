@@ -1,0 +1,131 @@
+{
+  "dataset_name": "CryptoShift Controlled Synthetic Fixture Benchmark v1",
+  "is_synthetic": true,
+  "collection_date": "2026-10-28",
+  "unit_of_analysis": "One file-level cryptographic usage/non-usage instance with required (algorithm, operation_purpose) match.",
+  "split_method": "Repository-level split across 3 synthetic mini-projects (project_alpha_auth=calibration; project_beta_tls & project_gamma_noncrypto=held_out_test).",
+  "instances": [
+    {
+      "instance_id": "SYN-001",
+      "repository_id": "project_alpha_auth",
+      "repository_split": "calibration",
+      "relative_path": "data/fixtures/synthetic/project_alpha_auth/jwt_signer.py",
+      "has_migration_relevant_crypto": true,
+      "expected_algorithm": "RSA-2048",
+      "expected_purpose": "digital_signature",
+      "review_status": "reviewed_synthetic",
+      "notes": "OAuth2 RS256 token signing using RSA-2048 -> maps to ML-DSA-65 (FIPS 204)."
+    },
+    {
+      "instance_id": "SYN-002",
+      "repository_id": "project_alpha_auth",
+      "repository_split": "calibration",
+      "relative_path": "data/fixtures/synthetic/project_alpha_auth/token_digest.py",
+      "has_migration_relevant_crypto": true,
+      "expected_algorithm": "SHA-1",
+      "expected_purpose": "message_digest",
+      "review_status": "reviewed_synthetic",
+      "notes": "Legacy certificate thumbprint using hashlib.sha1 -> maps to SHA3-256."
+    },
+    {
+      "instance_id": "SYN-003",
+      "repository_id": "project_alpha_auth",
+      "repository_split": "calibration",
+      "relative_path": "data/fixtures/synthetic/project_alpha_auth/vault_wrapper.py",
+      "has_migration_relevant_crypto": true,
+      "expected_algorithm": "RSA-2048",
+      "expected_purpose": "key_establishment",
+      "review_status": "reviewed_synthetic",
+      "notes": "RSA-OAEP key wrapping of DEKs -> maps to ML-KEM-768 (FIPS 203), NOT ML-DSA."
+    },
+    {
+      "instance_id": "SYN-004",
+      "repository_id": "project_beta_tls",
+      "repository_split": "held_out_test",
+      "relative_path": "data/fixtures/synthetic/project_beta_tls/mtls_config.yaml",
+      "has_migration_relevant_crypto": true,
+      "expected_algorithm": "ECDHE-P256",
+      "expected_purpose": "key_establishment",
+      "review_status": "reviewed_synthetic",
+      "notes": "Interbank mTLS key exchange configuration -> maps to X25519MLKEM768 (FIPS 203)."
+    },
+    {
+      "instance_id": "SYN-005",
+      "repository_id": "project_beta_tls",
+      "repository_split": "held_out_test",
+      "relative_path": "data/fixtures/synthetic/project_beta_tls/payment_ecdsa.py",
+      "has_migration_relevant_crypto": true,
+      "expected_algorithm": "ECDSA-P256",
+      "expected_purpose": "digital_signature",
+      "review_status": "reviewed_synthetic",
+      "notes": "ECDSA secp256r1 payment instruction signature -> maps to ML-DSA-65 (FIPS 204)."
+    },
+    {
+      "instance_id": "SYN-006",
+      "repository_id": "project_beta_tls",
+      "repository_split": "held_out_test",
+      "relative_path": "data/fixtures/synthetic/project_beta_tls/legacy_batch_cipher.py",
+      "has_migration_relevant_crypto": true,
+      "expected_algorithm": "3DES",
+      "expected_purpose": "symmetric_encryption",
+      "review_status": "reviewed_synthetic",
+      "notes": "TripleDES batch encryption -> maps to AES-256-GCM."
+    },
+    {
+      "instance_id": "SYN-007",
+      "repository_id": "project_beta_tls",
+      "repository_split": "held_out_test",
+      "relative_path": "data/fixtures/synthetic/project_beta_tls/sftp_dh_exchange.py",
+      "has_migration_relevant_crypto": true,
+      "expected_algorithm": "DH-2048",
+      "expected_purpose": "key_establishment",
+      "review_status": "reviewed_synthetic",
+      "notes": "Finite-field diffie-hellman-group14 key exchange -> maps to ML-KEM-768."
+    },
+    {
+      "instance_id": "SYN-008",
+      "repository_id": "project_beta_tls",
+      "repository_split": "held_out_test",
+      "relative_path": "data/fixtures/synthetic/project_beta_tls/dynamic_reflection_cipher.py",
+      "has_migration_relevant_crypto": true,
+      "expected_algorithm": "SHA-1",
+      "expected_purpose": "message_digest",
+      "review_status": "reviewed_synthetic",
+      "notes": "Edge case (FN): dynamically resolves getattr(hashlib, 'sh' + 'a1') at runtime; static scanner misses it."
+    },
+    {
+      "instance_id": "SYN-009",
+      "repository_id": "project_gamma_noncrypto",
+      "repository_split": "held_out_test",
+      "relative_path": "data/fixtures/synthetic/project_gamma_noncrypto/ui_layout_helper.py",
+      "has_migration_relevant_crypto": false,
+      "expected_algorithm": null,
+      "expected_purpose": null,
+      "review_status": "reviewed_synthetic",
+      "notes": "True Negative decoy: contains non-crypto identifiers like rsa_building_floor = 2048."
+    },
+    {
+      "instance_id": "SYN-010",
+      "repository_id": "project_gamma_noncrypto",
+      "repository_split": "held_out_test",
+      "relative_path": "data/fixtures/synthetic/project_gamma_noncrypto/modern_pqc_service.py",
+      "has_migration_relevant_crypto": false,
+      "expected_algorithm": null,
+      "expected_purpose": null,
+      "review_status": "reviewed_synthetic",
+      "notes": "True Negative: service already uses SHA3-256 and hybrid X25519MLKEM768."
+    },
+    {
+      "instance_id": "SYN-011",
+      "repository_id": "project_gamma_noncrypto",
+      "repository_split": "held_out_test",
+      "relative_path": "data/fixtures/synthetic/project_gamma_noncrypto/ambiguous_legacy_note.yaml",
+      "has_migration_relevant_crypto": false,
+      "expected_algorithm": null,
+      "expected_purpose": null,
+      "review_status": "reviewed_synthetic",
+      "notes": "Edge case (FP): inactive config flag LEGACY_RSA_2048_CONFIG=false triggers medium-confidence review alert."
+    }
+  ]
+}
+

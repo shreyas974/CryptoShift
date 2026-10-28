@@ -2,50 +2,136 @@
 
 **Quant-A-Maze 3.0 | PQC-01: Verification-Gated Cryptographic Migration Across Banking Applications**
 
-CryptoShift is a Python-first prototype for evidence-backed discovery and planning of post-quantum cryptography (PQC) migration. It is intended to help a team find cryptographic clues in a bounded code/configuration scope, classify the operation with visible uncertainty, sequence dependent migration tasks, and record verification and rollback evidence.
+CryptoShift is a beginner-friendly, Python-first prototype for evidence-backed discovery, dependency-aware wave scheduling, and verification-gated planning of post-quantum cryptography (PQC) migration across banking applications.
 
-This is a hackathon prototype, not a bank-wide scanner, cryptographic validation, or production migration system. Read [the project documentation](docs/README.md) before interpreting demo output. Treat every result as scoped to its pinned input and test setup.
+> **Scope & Honesty Notice:** CryptoShift is a hackathon migration-planning and verification prototype, not a production bank-wide scanner or cryptographic certification tool. All banking services in [`demo_bank_app/`](demo_bank_app/) and [`data/fixtures/synthetic/`](data/fixtures/synthetic/) are synthetic fixtures, protocol envelope traces are explicitly labelled as mocked/modelled traces, and all quantum circuit runs execute on the local classical statevector simulator (`QpiAI-QSV-Local`).
 
-## What the project is designed to demonstrate
+---
 
-- Inventory findings with file/service evidence and confidence.
-- Context-aware operation roles: key establishment, signature, verification, encryption, and related functions.
-- Dependency-aware migration waves with a deterministic fallback planner.
-- Optional QpiAI Opt local optimization and a QpiAI local-simulator experiment when configured and documented.
-- Verification gates, compatibility traces, overhead measurement methods, and rollback records.
-- Detection evaluation on labelled data, with precision/recall counts and scope limitations.
+## Key Capabilities
 
-**Algorithm-role reminder:** ML-KEM (NIST FIPS 203) is for key establishment. ML-DSA (FIPS 204) and SLH-DSA (FIPS 205) are for signatures. A name match alone does not justify an algorithm mapping.
+1. **Context-Aware CBOM Discovery ([`src/cryptoshift/scanner.py`](src/cryptoshift/scanner.py), [`src/cryptoshift/rules.py`](src/cryptoshift/rules.py)):**
+   - Identifies cryptographic clues in source, configuration, and service descriptors with file/line evidence, confidence, owner, protocol, and human-review status.
+   - Enforces strict NIST PQC algorithm role separation:
+     - **ML-KEM (NIST FIPS 203)** for **key establishment / key encapsulation** (e.g., `ECDHE-P256`, `DH-2048`, and `RSA-2048` OAEP DEK wrapping in `card_vault`).
+     - **ML-DSA (NIST FIPS 204)** / **SLH-DSA (NIST FIPS 205)** for **digital signatures** (e.g., `RSA-2048` RS256/XMLDSig and `ECDSA-P256` in `auth_gateway`, `ledger_audit`, and `payment_signing`).
+     - Holds automatic mapping for human review when `operation_purpose` is `unknown`.
+2. **Dependency-Aware Migration Wave Scheduling ([`src/cryptoshift/optimization/`](src/cryptoshift/optimization/)):**
+   - **Deterministic Fallback Scheduler ([`fallback_scheduler.py`](src/cryptoshift/optimization/fallback_scheduler.py)):** Exact constrained combinatorial scheduler enforcing upstream service dependencies, maintenance window budgets (`<= 85` min/wave), wave capacity (`<= 2` services/wave), and Wave-0 verification readiness.
+   - **QpiAI Opt Integration ([`qpiai_opt_adapter.py`](src/cryptoshift/optimization/qpiai_opt_adapter.py)):** Formulates the 18-variable binary MILP (`Model("cryptoshift_wave_schedule")`), verifies model classification (`classify(model) == "MILP"`), inspection (`inspect(model)`), and baseline feasibility (`feasibility(model, ...)`) offline, and supports authenticated local solving (`solve(model, mode="local", client=client)`).
+   - **QpiAI Quantum / QCloud Local Simulator Experiment ([`qcloud_experiment.py`](src/cryptoshift/optimization/qcloud_experiment.py)):** Compiles a 4-qubit Wave-0 priority selection QUBO (`QUBOProblem.from_model`), builds the `QAOA(reps=1)` circuit (`depth=8`, `size=18`), and simulates it locally on `QpiAI-QSV-Local` (`1024` shots), selecting `['interbank_tls', 'ledger_audit']` (energy `-13.07`), matching Wave 0 of the exact MILP and deterministic baseline (`248.105`).
+3. **Verification Gates, Mocked Protocol Traces & Rollback Records ([`verification.py`](src/cryptoshift/verification.py), [`protocol_demo.py`](src/cryptoshift/protocol_demo.py), [`rollback.py`](src/cryptoshift/rollback.py)):**
+   - Evaluates pre-promotion KAT, peer compatibility matrix, and latency gates per wave.
+   - Records an explicitly labelled mocked protocol envelope trace (`544B` legacy vs. `7661B` hybrid `X25519MLKEM768` + `ML-DSA-65` envelope) and rollback snapshots with policy warnings against reverting to deprecated `SHA-1` or `3DES`.
+4. **Labelled Dataset Evaluation ([`data/`](data/), [`reports/evaluation/`](reports/evaluation/)):**
+   - Evaluates context-aware detection across 11 reviewed synthetic fixture instances split by repository (`calibration` vs. `held_out_test`), reporting `TP=7, FP=1, FN=1, TN=2`, `Precision=0.8750`, and `Recall=0.8750`, alongside pinned public open-source repository references in [`data/labels/public_repo_references.json`](data/labels/public_repo_references.json).
 
-## Project structure
+---
+
+## Repository Structure
 
 ```text
-cryptoshift/       Python application modules and CLI
-src/cryptoshift/   source-layout optimization package (review for duplicate implementations)
-demo_bank_app/     explicitly synthetic banking fixture
-docs/              setup, architecture, migration, evaluation, and demo guidance
-reports/           non-sensitive run evidence; verify claims against actual runs
+CryptoShift/
+  README.md
+  CONTRIBUTING.md
+  pyproject.toml
+  requirements.txt
+  cryptoshift_cli.py
+  .gitignore
+  .env.example
+  qcloud.env.example
+  src/cryptoshift/
+    __init__.py
+    cli.py
+    scanner.py
+    rules.py
+    models.py
+    dependencies.py
+    scoring.py
+    proposals.py
+    verification.py
+    protocol_demo.py
+    rollback.py
+    metrics.py
+    reporting.py
+    optimization/
+      __init__.py
+      auth_check.py
+      fallback_scheduler.py
+      qpiai_opt_adapter.py
+      qcloud_experiment.py
+  demo_bank_app/
+    README_SYNTHETIC.md
+    services.py
+  data/
+    README.md
+    labels/
+      schema.json
+      synthetic_fixture_labels.json
+      public_repo_references.json
+    fixtures/synthetic/
+      project_alpha_auth/
+      project_beta_tls/
+      project_gamma_noncrypto/
+  docs/
+    README.md
+    architecture.md
+    pqc-basics-and-solution.md
+    dataset-and-evaluation.md
+    migration-and-verification.md
+    qpiai-login.md
+    qpiai-setup.md
+    demo-runbook.md
+  tests/
+    test_cryptoshift.py
+  scripts/
+    verify_repo.py
+  reports/
+    qpiai/
+      qpiai_evidence_report.json
+      qpiai_evidence_report.md
+    evaluation/
+      evaluation_report.json
+      evaluation_report.md
+  assets/
+    CryptoShift_Mentor_Deck.pptx
+    CryptoShift_PQC_Concept_and_Solution_Guide.docx
 ```
 
-The current package layout is preserved pending a code-aware migration; do not move modules or retain duplicate implementations without updating package configuration and entry points.
+---
 
-## Setup
+## Quick Start (Windows PowerShell)
 
-Use Python 3.12 in a project virtual environment. Install the core package using the project's documented instructions. QpiAI packages are optional; the deterministic fallback should remain available without them. See [QpiAI local setup](docs/qpiai-login.md).
+```powershell
+# 1. Install package in editable mode inside the project virtual environment (.venv)
+.\.venv\Scripts\python.exe -m pip install --no-build-isolation --no-deps -e .
 
-Never commit `.env`, `qcloud.env`, virtual environments, private keys, access tokens, customer data, or raw datasets without redistribution permission. The templates contain placeholders only. API credentials previously exposed in chat must be revoked and replaced.
+# 2. Run safe offline credential & local simulator smoke check
+.\.venv\Scripts\python.exe cryptoshift_cli.py check-auth
 
-## Evidence and demo
+# 3. Run full discovery, wave scheduling, verification gates, and dataset evaluation
+.\.venv\Scripts\python.exe cryptoshift_cli.py demo
 
-See [the demo runbook](docs/demo-runbook.md), [dataset and evaluation guidance](docs/dataset-and-evaluation.md), and [migration/verification guide](docs/migration-and-verification.md). The conversation log reports historical package versions and run results; verify those values from the current environment and sanitized report before presenting them as current results.
+# 4. Run unit tests and repository secret/hygiene check
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+.\.venv\Scripts\python.exe scripts/verify_repo.py
+```
 
-## Standards and references
+---
 
-- [NIST FIPS 203: ML-KEM](https://csrc.nist.gov/pubs/fips/203/final)
-- [NIST FIPS 204: ML-DSA](https://csrc.nist.gov/pubs/fips/204/final)
-- [NIST FIPS 205: SLH-DSA](https://csrc.nist.gov/pubs/fips/205/final)
-- [NIST migration to PQC](https://www.nccoe.nist.gov/applied-cryptography/migration-to-pqc)
+## Documentation & Project Deliverables
 
-## License
+- [Documentation Index](docs/README.md)
+- [PQC Basics & Solution Overview](docs/pqc-basics-and-solution.md) ([Word Guide](assets/CryptoShift_PQC_Concept_and_Solution_Guide.docx) | [Mentor Deck](assets/CryptoShift_Mentor_Deck.pptx))
+- [Architecture & Trust Boundaries](docs/architecture.md)
+- [Dataset & Evaluation Guide](docs/dataset-and-evaluation.md) ([Verified Evaluation Report](reports/evaluation/evaluation_report.md))
+- [Migration Verification & Rollback Guide](docs/migration-and-verification.md)
+- [QpiAI Login & Local `.env` Setup](docs/qpiai-login.md)
+- [QpiAI Scheduling Formulation & QUBO Experiment](docs/qpiai-setup.md) ([Verified QpiAI Evidence Report](reports/qpiai/qpiai_evidence_report.md))
+- [Demo Runbook](docs/demo-runbook.md)
 
-The package metadata currently names MIT. Confirm that the project owner intends to release the repository under that license before adding a license file or publishing publicly.
+---
+
+## License Status
+
+No `LICENSE` file has been selected yet pending explicit owner confirmation of the intended license.

@@ -1,0 +1,4 @@
+# Synthetic fixture SYN-011: Inactive config key that triggers medium-confidence review alert (FP)
+feature_flags:
+  LEGACY_RSA_2048_CONFIG: false
+
