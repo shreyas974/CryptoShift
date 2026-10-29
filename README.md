@@ -27,6 +27,12 @@ CryptoShift is a beginner-friendly, Python-first prototype for evidence-backed d
    - Records an explicitly labelled mocked protocol envelope trace (`544B` legacy vs. `7661B` hybrid `X25519MLKEM768` + `ML-DSA-65` envelope) and rollback snapshots with policy warnings against reverting to deprecated `SHA-1` or `3DES`.
 4. **Labelled Dataset Evaluation ([`data/`](data/), [`reports/evaluation/`](reports/evaluation/)):**
    - Evaluates context-aware detection across 11 reviewed synthetic fixture instances split by repository (`calibration` vs. `held_out_test`), reporting `TP=7, FP=1, FN=1, TN=2`, `Precision=0.8750`, and `Recall=0.8750`, alongside pinned public open-source repository references in [`data/labels/public_repo_references.json`](data/labels/public_repo_references.json).
+5. **Company-Grade Web Platform & Living Anatomy Studio ([cryptoshift_app/](cryptoshift_app/)):**
+   - Sunlit glass enterprise interface with 8-stage migration pipeline tracker, responsive zero-dependency SVG Donut & Bar charts, and multi-wave visualizer.
+   - **4 Living Isometric Anatomies:** Educational Superconducting Quantum Computer cutaway, 10-drawer Evidence Cabinet, Banking Dependencies DAG bench, and physical Verification Carriage line.
+   - **Sarvam AI Cloud Reasoning:** Live integration with Sarvam AI (sarvam-105b-conversations) for automated NIST FIPS 203/204 and Harvest-Now-Decrypt-Later architectural audits.
+   - **Tripartite Security Governance:** *AI proposes, Verification validates, Humans approve.* Enforces named human sign-off before staged release with byte-for-byte SHA-256 rollback checkpoints.
+   - **Vercel-Ready Serverless Architecture:** Fully configured with ercel.json and serverless API handlers for instant deployment.
 
 ---
 
@@ -137,6 +143,9 @@ CryptoShift/
 - [QpiAI Login & Local `.env` Setup](docs/qpiai-login.md)
 - [QpiAI Scheduling Formulation & QUBO Experiment](docs/qpiai-setup.md) ([Verified QpiAI Evidence Report](reports/qpiai/qpiai_evidence_report.md))
 - [Demo Runbook](docs/demo-runbook.md)
+- [Full Website User Audit & Quality Report](docs/USER_AUDIT_AND_FIX_REPORT.md)
+- [Vercel Deployment Guide](docs/VERCEL_DEPLOYMENT_GUIDE.md)
+- [Full-Stack Web App Documentation](cryptoshift_app/README.md)
 
 ---
 
