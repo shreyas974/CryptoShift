@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "collected": "2026-10-29",
   "fetch": "scripts/fetch_public_label_sources.py (clones into data/public/raw/<id>, git-ignored)",
-  "split_policy": "Split by repository. calibration repos may be used during detector development; held_out repos were labelled before the detector was run on them and were never used for tuning.",
+  "split_policy": "Split by repository. calibration repos may be used during detector development; held_out repos were labelled before the detector was run on them and were never used for tuning. Round 2: the Stage 1 held_out repos became calibration-2; new held_out repos have round=2.",
   "sources": [
     {
       "id": "pyjwt",
@@ -58,7 +58,7 @@
       "commit": "018b310ddb8b50dcfd09a0c152117835a21dd656",
       "license": "MIT",
       "attribution": "Copyright (c) 2015 Michael Davis (python-jose), MIT License",
-      "split": "held_out",
+      "split": "calibration-2",
       "files": [
         {
           "path": "jose/backends/cryptography_backend.py",
@@ -72,7 +72,8 @@
           "path": "requirements.txt",
           "sha256": "68b317debefb6b69f31bb61dfa828a56415f456b85e4a941e859e460ad7b9bbb"
         }
-      ]
+      ],
+      "split_note": "held_out in Stage 1 (results seen); calibration-2 from round 2"
     },
     {
       "id": "certbot",
@@ -80,7 +81,7 @@
       "commit": "0a97bd98b853c33e1e31d258006bca0048ba8226",
       "license": "Apache-2.0",
       "attribution": "Certbot / ACME contributors (Electronic Frontier Foundation and others), Apache License 2.0",
-      "split": "held_out",
+      "split": "calibration-2",
       "files": [
         {
           "path": "acme/src/acme/crypto_util.py",
@@ -90,7 +91,8 @@
           "path": "certbot-ci/src/certbot_integration_tests/assets/sample-config/options-ssl-apache.conf",
           "sha256": "2396f9ed005afed7aeecb598ace616ce701cb417e6a66672f16e4263a3bb1578"
         }
-      ]
+      ],
+      "split_note": "held_out in Stage 1 (results seen); calibration-2 from round 2"
     },
     {
       "id": "h5bp-apache",
@@ -98,7 +100,7 @@
       "commit": "f9feb463fe136620ccde264b4cfbddfd8cd473b5",
       "license": "MIT",
       "attribution": "H5BP server-configs-apache contributors, MIT License",
-      "split": "held_out",
+      "split": "calibration-2",
       "files": [
         {
           "path": "h5bp/tls/policy_balanced.conf",
@@ -111,6 +113,129 @@
         {
           "path": "h5bp/tls/certificate_files.conf",
           "sha256": "b5bbbc5373b30cac6e0fff94d9b27281292e6ccf3f39db46f9ef32e6c01494d0"
+        }
+      ],
+      "split_note": "held_out in Stage 1 (results seen); calibration-2 from round 2"
+    },
+    {
+      "id": "nginx-proxy",
+      "url": "https://github.com/nginx-proxy/nginx-proxy",
+      "commit": "bff2cddfece8e4f2c6d00b62ba45b8214c4727c5",
+      "license": "MIT",
+      "license_file": "LICENSE",
+      "attribution": "Copyright (c) 2014-2020 Jason Wilder, (c) 2021-2022 Nicolas Duchon (MIT)",
+      "split": "held_out",
+      "round": 2,
+      "fetch": "raw",
+      "files": [
+        {
+          "path": "nginx.tmpl",
+          "sha256": "f5b1c7e44d67f7f468c54a2f74e00c175e16deb4261b47bed41e53724e112c2a"
+        },
+        {
+          "path": "test/certs/create_server_certificate.sh",
+          "sha256": "8a8652de4ade89179cd7f78908875e7b11cdb61c27c66d91ba415e827843754d"
+        }
+      ]
+    },
+    {
+      "id": "mitmproxy",
+      "url": "https://github.com/mitmproxy/mitmproxy",
+      "commit": "df14a28624b0e813b4a26b3b33921c1991f20eba",
+      "license": "MIT",
+      "license_file": "LICENSE",
+      "attribution": "Copyright (c) 2013, Aldo Cortesi (MIT)",
+      "split": "held_out",
+      "round": 2,
+      "fetch": "raw",
+      "files": [
+        {
+          "path": "mitmproxy/net/tls.py",
+          "sha256": "6058b0408a46b78d9d43457bab0095752a0be985682d12080d5dd783a2e1b5c0"
+        },
+        {
+          "path": "pyproject.toml",
+          "sha256": "6fcc53c2d4a2bd9b14b1920cf98af1390a14d2ec0b1ec28a89418d549711b1ab"
+        },
+        {
+          "path": "mitmproxy/addons/tlsconfig.py",
+          "sha256": "d386b618131e42834a0bf4a16eba2d820b165d982bfd843600869b649300a609"
+        }
+      ],
+      "excluded_files": [
+        {
+          "path": "mitmproxy/certs.py",
+          "reason": "embeds a PEM private-key block (publicly disclosed third-party CA key); excluded so no key material is handled or stored"
+        }
+      ]
+    },
+    {
+      "id": "josepy",
+      "url": "https://github.com/certbot/josepy",
+      "commit": "7069e07e20408bf1bf911427f5d386a2d6471d5d",
+      "license": "Apache-2.0",
+      "license_file": "LICENSE.txt",
+      "attribution": "Copyright 2015 Electronic Frontier Foundation and others (Apache-2.0)",
+      "split": "held_out",
+      "round": 2,
+      "fetch": "raw",
+      "files": [
+        {
+          "path": "src/josepy/jwa.py",
+          "sha256": "12e19d3f44e7f421bfa6ea5f6489a5fb638eb68850bb2a1234b5e4bc6944680e"
+        },
+        {
+          "path": "src/josepy/jwk.py",
+          "sha256": "7e613c9acb258983baafe5f5166d9cd34017e3099fb165ddb4e1268cf85767b5"
+        },
+        {
+          "path": "pyproject.toml",
+          "sha256": "8114a53b7c8ad257fa069d8ec183c0edc5b4fa3104514a38f823bdeffbae68a9"
+        }
+      ]
+    },
+    {
+      "id": "spring-security",
+      "url": "https://github.com/spring-projects/spring-security",
+      "commit": "f97bd2483a52edeed62c0ca8b43275e4e39b6aed",
+      "license": "Apache-2.0",
+      "license_file": "LICENSE.txt",
+      "attribution": "Copyright the original author or authors, spring-projects (Apache-2.0)",
+      "split": "held_out",
+      "round": 2,
+      "fetch": "raw",
+      "files": [
+        {
+          "path": "crypto/src/main/java/org/springframework/security/crypto/encrypt/RsaAlgorithm.java",
+          "sha256": "8ed11fc78a4b975c616637877cf32afa5a2083cd96165c7b9df7958f1adfea51"
+        },
+        {
+          "path": "crypto/src/main/java/org/springframework/security/crypto/encrypt/RsaRawEncryptor.java",
+          "sha256": "0dd2783a6ec7e8f6f7f23f3675380d7b4e92188fa5183ca8ab0e175392de3c1d"
+        },
+        {
+          "path": "crypto/src/main/java/org/springframework/security/crypto/encrypt/RsaSecretEncryptor.java",
+          "sha256": "ace0b9789b48f784d913db21028dac2646c44c6f41d58626fa8b188e387fd0f7"
+        },
+        {
+          "path": "crypto/src/main/java/org/springframework/security/crypto/encrypt/RsaKeyHelper.java",
+          "sha256": "baee4d09149729ea8d0ca436a87e72e65ca03524fe2e03da2c712e73d6b792db"
+        },
+        {
+          "path": "crypto/src/main/java/org/springframework/security/crypto/encrypt/KeyStoreKeyFactory.java",
+          "sha256": "91154d6798ff912ff682302e18914d85d94903350cd93c4f4d7f5b7bd34648dc"
+        },
+        {
+          "path": "crypto/src/main/java/org/springframework/security/crypto/encrypt/AesBytesEncryptor.java",
+          "sha256": "5698f61655ef1af3ea8cd754bc524a134a3d3e9418e6c1da835a4056f1208ae5"
+        },
+        {
+          "path": "crypto/src/main/java/org/springframework/security/crypto/password/Digester.java",
+          "sha256": "b7b898bd388cbe23f55f9a61806c1f867a3af514866170f308cf1446b50f4591"
+        },
+        {
+          "path": "oauth2/oauth2-jose/src/main/java/org/springframework/security/oauth2/jose/jws/SignatureAlgorithm.java",
+          "sha256": "29d451c0026f434e1a8ab1ef49a54f8a62fa52c28313bcfc2f5ad60786154166"
         }
       ]
     }

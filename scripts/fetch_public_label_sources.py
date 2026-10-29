@@ -36,7 +36,26 @@ def sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def fetch_raw(src: dict) -> Path:
+    """Download only the labelled files (+ licence) at the pinned commit from raw.githubusercontent.com."""
+    import urllib.request
+
+    dest = RAW_DIR / src["id"]
+    owner_repo = src["url"].removeprefix("https://github.com/").removesuffix(".git")
+    for rel in [f["path"] for f in src["files"]] + [src.get("license_file", "LICENSE")]:
+        out = dest / rel
+        if out.is_file():
+            continue
+        out.parent.mkdir(parents=True, exist_ok=True)
+        url = f"https://raw.githubusercontent.com/{owner_repo}/{src['commit']}/{rel}"
+        with urllib.request.urlopen(url, timeout=60) as r:  # noqa: S310 (fixed https host, pinned commit)
+            out.write_bytes(r.read())
+    return dest
+
+
 def fetch(src: dict) -> Path:
+    if src.get("fetch") == "raw":
+        return fetch_raw(src)
     dest = RAW_DIR / src["id"]
     if not (dest / ".git").exists():
         _git("clone", "--filter=blob:none", "--no-checkout", "--sparse", src["url"], str(dest))
