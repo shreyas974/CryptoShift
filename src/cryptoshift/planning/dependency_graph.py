@@ -125,6 +125,28 @@ def _yaml_edges(root: Any, svc: str, rel: str, known: Set[str], unknown: List[Di
     return out
 
 
+def member2_observed_edges(target: Path, known: Set[str]) -> Dict[str, List[Dict[str, Any]]]:
+    """OBSERVED edges from Member 2's relationship evidence (inventory/relationships.py).
+
+    Member 2 edges are (source = consumer, target = provider); here they become (upstream = provider,
+    downstream = consumer). Unresolved references stay visible as unknown endpoints, never as edges."""
+    from cryptoshift.inventory.relationships import extract_relationships
+
+    target = Path(target)
+    base = target.parent if target.is_file() else target
+    rel = extract_relationships(target, extra_known=sorted(known))
+    edges = [
+        dict(_edge(e["target"], e["source"], "OBSERVED", rel_to_root(str(base / e["file"])), e["line"],
+                   f"{e['kind']} ({e['confidence']} confidence host match)" if e["kind"] in ("nginx_proxy_pass", "config_url", "config_host")
+                   else e["kind"], e["evidence"]),
+             kind=e["kind"], confidence=e["confidence"], evidence_id=e["edge_id"], producer="inventory.relationships (Member 2)")
+        for e in rel["edges"] if e["source"] in known and e["target"] in known
+    ]
+    unknown = [{"service": u["source"], "endpoint": u["reference"], "file": rel_to_root(str(base / u["file"])),
+                "line": u["line"], "kind": u["kind"], "reason": u["reason"]} for u in rel["unknown_references"]]
+    return {"edges": edges, "unknown_endpoints": unknown}
+
+
 def declared_edges(descriptor: Dict[str, Dict[str, Any]]) -> List[Dict[str, Any]]:
     return [
         _edge(dep, sid, "DECLARED", "demo_bank_app/services.py", None, "synthetic service descriptor")

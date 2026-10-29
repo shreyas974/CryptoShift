@@ -64,6 +64,10 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--authorize-local-solve", action="store_true")
     a = ap.parse_args()
+    if a.authorize_local_solve:  # owner-approved 2026-10-29; key loaded into this process only, never printed
+        from dotenv import load_dotenv
+
+        load_dotenv(ROOT / ".env", override=False)
     res = run(a.authorize_local_solve)
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "scheduling_comparison.json").write_text(json.dumps(res, indent=2, default=str), encoding="utf-8")
