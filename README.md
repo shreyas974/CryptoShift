@@ -6,6 +6,8 @@ CryptoShift is a beginner-friendly, Python-first prototype for evidence-backed d
 
 > **Scope & Honesty Notice:** CryptoShift is a hackathon migration-planning and verification prototype, not a production bank-wide scanner or cryptographic certification tool. All banking services in [`demo_bank_app/`](demo_bank_app/) and [`data/fixtures/synthetic/`](data/fixtures/synthetic/) are synthetic fixtures, protocol envelope traces are explicitly labelled as mocked/modelled traces, and all quantum circuit runs execute on the local classical statevector simulator (`QpiAI-QSV-Local`).
 
+> **Claim status (Stage 0):** the numbers below are labelled in [`docs/stage0/claims-register.md`](docs/stage0/claims-register.md), which takes precedence over this page. In short: "13 findings / 6 services" come from a *synthetic* service descriptor; 0.875/0.875 is a *synthetic smoke test* (11 fixtures), not a benchmark; 544 B vs 7661 B is *mocked/analytical*; the 6 verification gates are *mocked* booleans; 248.105 is verified only for the deterministic baseline scheduler on synthetic tasks; the QAOA energy −13.07 is *reported, not re-verified* in this checkout. Stage 0/1 docs: [`docs/stage0/`](docs/stage0/), datasets: [`docs/data/DATASETS.md`](docs/data/DATASETS.md), new commands: `cryptoshift_cli.py data-summary` and `cryptoshift_cli.py inventory`.
+
 ---
 
 ## Key Capabilities

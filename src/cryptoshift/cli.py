@@ -7,7 +7,7 @@ import shutil
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from cryptoshift.datasets import build_combined_real_data_summary
+from cryptoshift.data_summary import DEFAULT_SUMMARY_OUT_DIR, build_data_summary, write_data_summary
 from cryptoshift.dependencies import validate_dependency_order
 from cryptoshift.metrics import compute_migration_metrics, evaluate_labelled_dataset
 from cryptoshift.models import WaveScheduleConfig
@@ -26,7 +26,6 @@ from cryptoshift.reporting import (
     write_evaluation_reports,
     write_mvp_vertical_slice_reports,
     write_qpiai_evidence_reports,
-    write_real_dataset_summary_reports,
 )
 from cryptoshift.rollback import evaluate_rollbacks
 from cryptoshift.scanner import scan_banking_services, scan_repository_path
@@ -203,38 +202,47 @@ def cmd_evaluate() -> int:
     return 0
 
 
-def cmd_data_summary(chunk_size: int = 25_000, max_stream_rows: int = 100_000) -> int:
-    """Summarize both real datasets (320 banking PQC observations + CESNET-TLS22-S streaming) and write reports."""
-    summary = build_combined_real_data_summary(chunk_size=chunk_size, max_stream_rows=max_stream_rows)
-    out_paths = write_real_dataset_summary_reports(summary, PROJECT_ROOT / "reports" / "datasets")
+def cmd_data_summary(
+    chunk_size: int = 25_000,
+    max_stream_rows: int = 100_000,
+    out_dir: Optional[str] = None,
+) -> int:
+    """Summarize the real datasets read-only (h5py chunked for HDF5) and write to a git-ignored folder."""
+    summary = build_data_summary(chunk_size=chunk_size, max_stream_rows=max_stream_rows)
+    out_paths = write_data_summary(summary, Path(out_dir) if out_dir else DEFAULT_SUMMARY_OUT_DIR)
 
-    pqc = summary.get("banking_pqc_observations", {})
-    ces = summary.get("cesnet_tls22_s", {})
-    audit = pqc.get("audit", {})
-    stream = ces.get("incremental_streaming_benchmark", {})
+    pqc = summary["banking_pqc_observations"]
+    ces = summary["cesnet_tls22_s"]
 
-    print("=== CryptoShift: Real Dataset Summary & Streaming Audit ===")
-    print("1. PQ Readiness Index — Banking Longitudinal TLS 1.3 Observations:")
+    print("=== CryptoShift: Dataset Summary (read-only) ===")
+    print("1. Banking PQC observations (REAL public TLS endpoints on given dates):")
     print(f"   - Status               : {pqc.get('status')}")
-    print(f"   - Total Observations   : {audit.get('row_count')} across {len(pqc.get('scan_dates', []))} scan dates ({', '.join(pqc.get('scan_dates', []))})")
-    print(f"   - Duplicate Keys       : {audit.get('duplicate_observation_keys')} (key = {audit.get('duplicate_key_definition')}; {audit.get('unique_hosts')} unique hosts)")
-    print(f"   - Status Counts        : {pqc.get('overall_status_counts')} (ERROR kept unclassified: {pqc.get('unclassified_error_count')})")
-    print("")
-    print("2. CESNET-TLS22 Provider-Defined 'S' Subset (Read-Only HDF5 Streaming):")
+    if pqc.get("status") == "read":
+        print(f"   - Rows                 : {pqc['row_count']} across {len(pqc['scan_dates'])} scan dates ({', '.join(pqc['scan_dates'])})")
+        print(f"   - Duplicate keys       : {pqc['duplicate_observation_keys']} (key = {pqc['duplicate_key_definition']}; {pqc['unique_hosts']} unique hosts)")
+        print(f"   - Status counts        : {pqc['status_counts']} (ERROR kept unclassified: {pqc['error_rows_unclassified']})")
+    print("2. CESNET-TLS22 S (REAL flow metadata; NOT bank data; NOT PQC ground truth):")
     print(f"   - Status               : {ces.get('status')}")
-    print(f"   - File Size & SHA-256  : {ces.get('file_size_bytes', 0):,} bytes | {ces.get('recorded_sha256')}")
-    print(f"   - Total Daily Tables   : {ces.get('table_count')} tables | {ces.get('total_table_rows', 0):,} total flows")
-    print(
-        f"   - Streamed Window      : {stream.get('streamed_rows', 0):,} rows in {stream.get('chunks_processed', 0)} chunks "
-        f"({stream.get('elapsed_seconds', 0.0)}s, {stream.get('throughput_rows_per_sec', 0.0):,} rows/sec, "
-        f"duplicate IDs={stream.get('streamed_duplicate_flow_ids', 0)})"
-    )
-    print(f"   - Top Categories       : {stream.get('top_categories_in_stream', {})}")
-    print("")
-    print("Real dataset summary reports written to:")
-    print(f"  - JSON     : {Path(out_paths['json']).relative_to(PROJECT_ROOT)}")
-    print(f"  - Markdown : {Path(out_paths['markdown']).relative_to(PROJECT_ROOT)}")
+    if ces.get("status") == "read":
+        cs = ces["chunked_scan"]
+        print(f"   - File size            : {ces['file_size_bytes']:,} bytes (matches manifest: {ces['file_size_matches_manifest']})")
+        print(f"   - Manifest SHA-256     : {ces['manifest_sha256']} (not re-hashed in this run)")
+        print(f"   - Tables / rows        : {ces['table_count']} tables | {ces['total_rows']:,} rows | {' to '.join(ces['date_range'])}")
+        print(
+            f"   - h5py chunked scan    : {cs['rows_read']:,} rows in {cs['chunks']} chunks "
+            f"({cs['elapsed_seconds']}s, duplicate IDs in window={cs['duplicate_ids_in_window']})"
+        )
+    print("Summary written (git-ignored):")
+    print(f"  - JSON     : {_display(out_paths['json'])}")
+    print(f"  - Markdown : {_display(out_paths['markdown'])}")
     return 0
+
+
+def _display(path: Path) -> str:
+    try:
+        return str(Path(path).resolve().relative_to(PROJECT_ROOT))
+    except ValueError:
+        return Path(path).name
 
 
 def cmd_scan(target_path: Optional[str] = None) -> int:
@@ -249,6 +257,30 @@ def cmd_scan(target_path: Optional[str] = None) -> int:
             f"  - [{f.finding_id}] {f.service_id} | {f.file_path}:{f.line_number} | "
             f"{f.legacy_algorithm} ({f.operation_purpose}) -> {f.target_pqc_algorithm} [{f.nist_standard}]"
         )
+    return 0
+
+
+def cmd_inventory(target_path: Optional[str] = None, out_dir: Optional[str] = None) -> int:
+    """Stage 1 inventory: AST/TLS-config/manifest/certificate detectors -> CBOM-like JSON + Markdown (git-ignored)."""
+    from cryptoshift.inventory import build_cbom_like, scan_inventory, write_inventory
+
+    resolved = Path(target_path) if target_path else DEFAULT_CONFIGS_DIR
+    findings, stats = scan_inventory(resolved)
+    label = _display(resolved) if resolved.resolve().is_relative_to(PROJECT_ROOT) else resolved.name
+    cbom = build_cbom_like(findings, stats, target_label=label.replace("\\", "/"))
+    paths = write_inventory(cbom, Path(out_dir) if out_dir else PROJECT_ROOT / "scratch" / "derived" / "inventory")
+    s = cbom["summary"]
+    print(f"=== CryptoShift: Stage 1 Inventory ({cbom['target']}) ===")
+    print(f"Files seen        : {s['files_seen']} | by detector: {s['files_by_detector']} | sensitive skipped: {s['skipped_sensitive_files']} | parse errors: {s['parse_errors']}")
+    print(f"Findings          : {s['findings_total']} (vulnerable/weak {s['findings_quantum_or_classically_weak']}, PQC/hybrid info {s['findings_pqc_or_hybrid_info']})")
+    print(f"By purpose        : {s['by_purpose']}")
+    print(f"By ambiguity      : {s['by_ambiguity']}")
+    for f in findings:
+        where = f"{f.file_path}:{f.line_number}" if f.line_number else f"{f.file_path} ({f.location})"
+        print(f"  - [{f.finding_id}] {where} | {f.legacy_algorithm} | {f.operation_purpose} | {f.confidence} | {f.ambiguity}")
+    print("Inventory written (git-ignored):")
+    print(f"  - JSON     : {_display(paths['json'])}")
+    print(f"  - Markdown : {_display(paths['markdown'])}")
     return 0
 
 
@@ -362,7 +394,7 @@ def main(argv: List[str] | None = None) -> int:
 
     p_data = sub.add_parser(
         "data-summary",
-        help="Summarize real datasets (320 banking PQC observations + CESNET-TLS22-S streaming) and write reports/datasets/",
+        help="Summarize real datasets read-only (counts, dates, status, caveats) into scratch/derived/data-summary/",
     )
     p_data.add_argument("--chunk-size", type=int, default=25_000, help="HDF5 streaming chunk size (default: 25000)")
     p_data.add_argument(
@@ -371,9 +403,22 @@ def main(argv: List[str] | None = None) -> int:
         default=100_000,
         help="Max rows to stream for interactive summary benchmark (default: 100000)",
     )
+    p_data.add_argument(
+        "--out-dir",
+        type=str,
+        default=None,
+        help="Output folder (default: scratch/derived/data-summary, git-ignored)",
+    )
 
     p_scan = sub.add_parser("scan", help="Scan a file or directory for traceable cryptographic evidence")
     p_scan.add_argument("--path", type=str, default=None, help="File or directory path to scan (default: demo_bank_app/configs)")
+
+    p_inv = sub.add_parser(
+        "inventory",
+        help="Stage 1 inventory (Python AST, TLS configs, manifests, certificates) -> CBOM-like JSON + Markdown",
+    )
+    p_inv.add_argument("--path", type=str, default=None, help="File or directory to scan (default: demo_bank_app/configs)")
+    p_inv.add_argument("--out-dir", type=str, default=None, help="Output folder (default: scratch/derived/inventory, git-ignored)")
 
     p_slice = sub.add_parser(
         "mvp-slice",
@@ -407,9 +452,13 @@ def main(argv: List[str] | None = None) -> int:
     if args.command == "evaluate":
         return cmd_evaluate()
     if args.command == "data-summary":
-        return cmd_data_summary(chunk_size=args.chunk_size, max_stream_rows=args.max_stream_rows)
+        return cmd_data_summary(
+            chunk_size=args.chunk_size, max_stream_rows=args.max_stream_rows, out_dir=args.out_dir
+        )
     if args.command == "scan":
         return cmd_scan(target_path=args.path)
+    if args.command == "inventory":
+        return cmd_inventory(target_path=args.path, out_dir=args.out_dir)
     if args.command == "mvp-slice":
         return cmd_mvp_slice(
             target_path=args.path,
