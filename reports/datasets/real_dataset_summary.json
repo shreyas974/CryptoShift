@@ -1,0 +1,361 @@
+{
+  "dataset_configuration": {
+    "configured_via": "default_codex_dataset_pack_path",
+    "dataset_pack_dir_available": true,
+    "cesnet_h5_available": true,
+    "pqc_observations_csv_available": true,
+    "manifest_json_available": true,
+    "verification_json_available": true,
+    "pqc_summary_json_available": true,
+    "attribution_txt_available": true,
+    "repo_single_run_csv_available": true,
+    "display_paths": {
+      "dataset_pack_dir": "~/.codex/.chatgpt-projects/g-p-6ad83eb9e6888191bf45faeac1ec7a7d/output/cryptoshift_dataset",
+      "cesnet_h5_path": "~/.codex/.chatgpt-projects/g-p-6ad83eb9e6888191bf45faeac1ec7a7d/output/cryptoshift_dataset/CESNET-TLS22/S/CESNET-TLS22-S.h5",
+      "pqc_observations_csv_path": "~/.codex/.chatgpt-projects/g-p-6ad83eb9e6888191bf45faeac1ec7a7d/output/cryptoshift_dataset/pqc_evidence/banking_pqc_observations.csv",
+      "manifest_json_path": "~/.codex/.chatgpt-projects/g-p-6ad83eb9e6888191bf45faeac1ec7a7d/output/cryptoshift_dataset/manifest.json",
+      "verification_json_path": "~/.codex/.chatgpt-projects/g-p-6ad83eb9e6888191bf45faeac1ec7a7d/output/cryptoshift_dataset/verification.json",
+      "pqc_summary_json_path": "~/.codex/.chatgpt-projects/g-p-6ad83eb9e6888191bf45faeac1ec7a7d/output/cryptoshift_dataset/pqc_evidence/summary.json",
+      "attribution_txt_path": "~/.codex/.chatgpt-projects/g-p-6ad83eb9e6888191bf45faeac1ec7a7d/output/cryptoshift_dataset/ATTRIBUTION.txt",
+      "repo_single_run_csv_path": "data/real/bank_tls_pqc_observations.csv"
+    }
+  },
+  "banking_pqc_observations": {
+    "status": "verified",
+    "dataset_name": "PQ Readiness Index \u2014 Banking Sector Longitudinal TLS 1.3 Observations",
+    "source_repository": "https://github.com/xuxu298/PQReadinessIndex",
+    "attribution": "Nguyen Dong, Global PQ Readiness Index (2026), https://github.com/xuxu298/PQReadinessIndex",
+    "license": "CC-BY-4.0",
+    "path": "~/.codex/.chatgpt-projects/g-p-6ad83eb9e6888191bf45faeac1ec7a7d/output/cryptoshift_dataset/pqc_evidence/banking_pqc_observations.csv",
+    "audit": {
+      "row_count": 320,
+      "unique_observation_keys": 320,
+      "duplicate_observation_keys": 0,
+      "duplicate_key_definition": "(scan_file, host, ts)",
+      "unique_hosts": 64,
+      "hosts_measured_across_multiple_dates": 64
+    },
+    "scan_dates": [
+      "2026-04-23",
+      "2026-05-10",
+      "2026-09-03",
+      "2026-09-14",
+      "2026-10-02"
+    ],
+    "overall_status_counts": {
+      "ERROR": 65,
+      "PQ-SAFE": 175,
+      "CLASSICAL": 80
+    },
+    "unclassified_error_count": 65,
+    "status_counts_by_scan_date": {
+      "2026-04-23": {
+        "ERROR": 14,
+        "PQ-SAFE": 14,
+        "CLASSICAL": 36
+      },
+      "2026-05-10": {
+        "ERROR": 14,
+        "CLASSICAL": 35,
+        "PQ-SAFE": 15
+      },
+      "2026-09-03": {
+        "ERROR": 13,
+        "PQ-SAFE": 48,
+        "CLASSICAL": 3
+      },
+      "2026-09-14": {
+        "ERROR": 12,
+        "PQ-SAFE": 49,
+        "CLASSICAL": 3
+      },
+      "2026-10-02": {
+        "ERROR": 12,
+        "PQ-SAFE": 49,
+        "CLASSICAL": 3
+      }
+    },
+    "status_counts_by_scan_file": {
+      "results_20260423_112838.csv": {
+        "ERROR": 14,
+        "PQ-SAFE": 14,
+        "CLASSICAL": 36
+      },
+      "results_20260510_144226.csv": {
+        "ERROR": 14,
+        "CLASSICAL": 35,
+        "PQ-SAFE": 15
+      },
+      "results_20260903_063326.csv": {
+        "ERROR": 13,
+        "PQ-SAFE": 48,
+        "CLASSICAL": 3
+      },
+      "results_20260914_112705.csv": {
+        "ERROR": 12,
+        "PQ-SAFE": 49,
+        "CLASSICAL": 3
+      },
+      "results_20261002_031250.csv": {
+        "ERROR": 12,
+        "PQ-SAFE": 49,
+        "CLASSICAL": 3
+      }
+    },
+    "status_counts_by_region": {
+      "au": {
+        "PQ-SAFE": 18,
+        "CLASSICAL": 2,
+        "ERROR": 5
+      },
+      "br": {
+        "PQ-SAFE": 11,
+        "CLASSICAL": 4
+      },
+      "ca": {
+        "CLASSICAL": 10,
+        "PQ-SAFE": 15
+      },
+      "eu_be": {
+        "CLASSICAL": 2,
+        "PQ-SAFE": 3
+      },
+      "eu_ch": {
+        "CLASSICAL": 2,
+        "PQ-SAFE": 3
+      },
+      "eu_de": {
+        "CLASSICAL": 10
+      },
+      "eu_es": {
+        "PQ-SAFE": 9,
+        "CLASSICAL": 1
+      },
+      "eu_fr": {
+        "CLASSICAL": 2,
+        "ERROR": 10,
+        "PQ-SAFE": 3
+      },
+      "eu_ie": {
+        "PQ-SAFE": 5
+      },
+      "eu_it": {
+        "CLASSICAL": 4,
+        "PQ-SAFE": 6
+      },
+      "eu_nl": {
+        "CLASSICAL": 4,
+        "PQ-SAFE": 6
+      },
+      "hk": {
+        "ERROR": 10,
+        "PQ-SAFE": 10
+      },
+      "in": {
+        "PQ-SAFE": 8,
+        "CLASSICAL": 7
+      },
+      "jp": {
+        "CLASSICAL": 4,
+        "ERROR": 2,
+        "PQ-SAFE": 9
+      },
+      "kr": {
+        "ERROR": 15
+      },
+      "my": {
+        "CLASSICAL": 2,
+        "PQ-SAFE": 3
+      },
+      "sg": {
+        "PQ-SAFE": 10,
+        "ERROR": 10
+      },
+      "uk": {
+        "PQ-SAFE": 29,
+        "CLASSICAL": 8,
+        "ERROR": 3
+      },
+      "us": {
+        "ERROR": 10,
+        "CLASSICAL": 18,
+        "PQ-SAFE": 27
+      }
+    },
+    "negotiated_group_counts": {
+      "(none / error)": 65,
+      "X25519MLKEM768": 173,
+      "X25519": 80,
+      "SecP256r1MLKEM768": 2
+    },
+    "latency_ms_by_status": {
+      "ERROR": {
+        "count": 65,
+        "min_ms": 39.0,
+        "median_ms": 285.0,
+        "mean_ms": 710.68,
+        "max_ms": 8013.0
+      },
+      "PQ-SAFE": {
+        "count": 175,
+        "min_ms": 18.0,
+        "median_ms": 229.0,
+        "mean_ms": 382.83,
+        "max_ms": 8765.0
+      },
+      "CLASSICAL": {
+        "count": 80,
+        "min_ms": 178.0,
+        "median_ms": 468.5,
+        "mean_ms": 644.16,
+        "max_ms": 2040.0
+      }
+    },
+    "longitudinal_transitions_first_to_last_scan": {
+      "from_date": "2026-04-23",
+      "to_date": "2026-10-02",
+      "transitions": {
+        "ERROR -> ERROR": 12,
+        "PQ-SAFE -> PQ-SAFE": 14,
+        "CLASSICAL -> PQ-SAFE": 33,
+        "ERROR -> PQ-SAFE": 2,
+        "CLASSICAL -> CLASSICAL": 3
+      }
+    },
+    "caveats": [
+      "Each row records a single public TLS 1.3 endpoint handshake observation on a specific scan date.",
+      "Status values ('PQ-SAFE', 'CLASSICAL', 'ERROR') are preserved unchanged from the source scan files.",
+      "'ERROR' rows are unclassified probe outcomes (e.g., server alert or DNS failure) and are NEVER relabelled as 'CLASSICAL' or PQC-negative.",
+      "Repeating host IDs (h101..h164) across the 5 scan dates are valid longitudinal measurements; duplicate checking uses (scan_file, host, ts) and confirmed 0 duplicates.",
+      "These public-edge TLS key-establishment observations do NOT reveal a bank's internal software estate, ML-DSA digital signature adoption, internal service dependencies, or overall migration status."
+    ]
+  },
+  "cesnet_tls22_s": {
+    "status": "verified",
+    "dataset_name": "CESNET-TLS22 Provider-Defined S Subset (Encrypted TLS Flow Metadata)",
+    "source_url": "https://zenodo.org/records/10610895",
+    "doi": "10.5281/zenodo.10610895",
+    "required_citation": "Jan Luxemburk and Tom\u00e1\u0161 \u010cejka, 'Fine-grained TLS services classification with reject option,' Computer Networks, vol. 220, 2023, article 109467, https://doi.org/10.1016/j.comnet.2022.109467",
+    "license": "CC-BY-4.0",
+    "collection_period": "2021-10-04 through 2021-10-17 (CESNET2 network)",
+    "path": "~/.codex/.chatgpt-projects/g-p-6ad83eb9e6888191bf45faeac1ec7a7d/output/cryptoshift_dataset/CESNET-TLS22/S/CESNET-TLS22-S.h5",
+    "file_size_bytes": 3231649088,
+    "file_size_matches_expected": true,
+    "recorded_sha256": "36e3240b144bf8902e874e8fd875b6e7ac3e40b0706eb5f8d3f40720ff5a2e06",
+    "table_count": 14,
+    "total_table_rows": 25000000,
+    "total_rows_matches_expected": true,
+    "table_row_counts": {
+      "/flows/D20211004": 2687075,
+      "/flows/D20211005": 2277286,
+      "/flows/D20211006": 2118850,
+      "/flows/D20211007": 1575872,
+      "/flows/D20211008": 1955879,
+      "/flows/D20211009": 1139517,
+      "/flows/D20211010": 1190164,
+      "/flows/D20211011": 2130330,
+      "/flows/D20211012": 2310260,
+      "/flows/D20211013": 1734285,
+      "/flows/D20211014": 2120508,
+      "/flows/D20211015": 1974853,
+      "/flows/D20211016": 855129,
+      "/flows/D20211017": 929992
+    },
+    "columns_count": 30,
+    "columns": [
+      "ID",
+      "BYTES",
+      "BYTES_REV",
+      "PACKETS",
+      "PACKETS_REV",
+      "DURATION",
+      "PPI",
+      "PPI_LEN",
+      "PPI_DURATION",
+      "PPI_ROUNDTRIPS",
+      "APP",
+      "CATEGORY",
+      "TCP_FLAGS",
+      "TCP_FLAGS_REV",
+      "FLAG_CWR",
+      "FLAG_CWR_REV",
+      "FLAG_ECE",
+      "FLAG_ECE_REV",
+      "FLAG_URG",
+      "FLAG_URG_REV",
+      "FLAG_ACK",
+      "FLAG_ACK_REV",
+      "FLAG_PSH",
+      "FLAG_PSH_REV",
+      "FLAG_RST",
+      "FLAG_RST_REV",
+      "FLAG_SYN",
+      "FLAG_SYN_REV",
+      "FLAG_FIN",
+      "FLAG_FIN_REV"
+    ],
+    "enum_dictionary_sizes": {
+      "APP_labels": 201,
+      "CATEGORY_labels": 22
+    },
+    "full_25m_audit_record": {
+      "verified_at_utc": "2026-10-29T01:35:05.526656+00:00",
+      "sha256": "36e3240b144bf8902e874e8fd875b6e7ac3e40b0706eb5f8d3f40720ff5a2e06",
+      "sha256_matches_expected": true,
+      "observed_table_rows": 25000000,
+      "unique_flow_ids": 25000000,
+      "duplicate_flow_ids": 0,
+      "status": "PASS"
+    },
+    "incremental_streaming_benchmark": {
+      "chunk_size": 25000,
+      "streamed_rows": 100000,
+      "chunks_processed": 4,
+      "streamed_unique_flow_ids": 100000,
+      "streamed_duplicate_flow_ids": 0,
+      "elapsed_seconds": 0.3188,
+      "throughput_rows_per_sec": 313690.9,
+      "mean_forward_bytes": 21347.28,
+      "mean_forward_packets": 60.6,
+      "mean_duration_seconds": 7.4462,
+      "top_categories_in_stream": {
+        "Other services and APIs": 15666,
+        "Streaming media": 9396,
+        "Social": 9104,
+        "Analytics & Telemetry": 8449,
+        "Antivirus": 7855,
+        "File sharing": 6900,
+        "Software updates": 6687,
+        "Advertising": 5758,
+        "Videoconferencing": 5724,
+        "Music": 4873
+      },
+      "top_apps_in_stream": {
+        "microsoft-update": 4896,
+        "microsoft-diagnostic": 4324,
+        "tiktok": 3976,
+        "uzis-api": 3467,
+        "facebook-graph": 3039,
+        "skype": 2979,
+        "apple-itunes": 2811,
+        "outlook": 2698,
+        "microsoft-settings": 2400,
+        "teams": 2237,
+        "office-365": 2194,
+        "appnexus": 2066
+      }
+    },
+    "allowed_use_in_cryptoshift": [
+      "Demonstrating real multi-gigabyte TLS flow data ingestion and out-of-core HDF5 chunk streaming.",
+      "Exploring traffic metadata distributions (bytes, packets, duration, PPI roundtrips) and service/category tags.",
+      "Testing streaming, filtering, aggregation, and dashboard responsiveness without loading 25M rows into RAM."
+    ],
+    "prohibited_interpretations": [
+      "NOT bank-internal source code, configuration, or network infrastructure data.",
+      "NOT PQC adoption or migration ground truth (captured in Oct 2021 before PQC endpoint transition).",
+      "APP and CATEGORY labels identify application services, NOT cryptographic algorithms or PQC posture.",
+      "NEVER use CESNET-TLS22 service labels to compute PQC detector precision or recall."
+    ]
+  },
+  "evaluation_separation_policy": "Real public TLS endpoint observations (320 banking rows across 5 dates) and real encrypted TLS flow metadata (CESNET-TLS22-S, 25M rows) are kept strictly separate from code/config scanner precision/recall. Code/config detector precision and recall are reported only on separately labelled code/configuration fixtures (and any future verified real code corpus with defensible ground truth), never from CESNET service labels."
+}

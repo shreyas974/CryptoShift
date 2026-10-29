@@ -1,0 +1,826 @@
+{
+  "run_id": "RUN-20261029T020623Z",
+  "created_at_utc": "2026-10-29T02:06:23.228446+00:00",
+  "target_path": "demo_bank_app/configs",
+  "approval_status": "APPROVED_AND_STAGED",
+  "approver": "Security Architect Reviewer",
+  "original_source_files_unmodified": true,
+  "scanned_file_findings_count": 10,
+  "post_patch_staged_findings_count": 0,
+  "scanned_file_findings": [
+    {
+      "finding_id": "YML-auth_gateway_tls-01",
+      "service_id": "auth_gateway",
+      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/auth_gateway_tls.yaml",
+      "line_number": 11,
+      "legacy_algorithm": "RSA-2048",
+      "quantum_threat": "Shor-CRQC (Integer factorization broken by cryptanalytically relevant quantum computer)",
+      "target_pqc_algorithm": "ML-DSA-65 + RSA-2048 Hybrid Signature",
+      "nist_standard": "FIPS 204 (ML-DSA)",
+      "severity": "CRITICAL",
+      "evidence_type": "config_file",
+      "operation_purpose": "digital_signature",
+      "confidence": "high",
+      "rationale": "YAML directive 'oauth_jwt.signing_algorithm: RS256' at line 11 (sha256:300815abf831110e).",
+      "owner": "Identity & Access Team",
+      "library_or_protocol": "yaml:oauth_jwt.signing_algorithm=RS256",
+      "human_review_status": "requires_human_review"
+    },
+    {
+      "finding_id": "YML-auth_gateway_tls-02",
+      "service_id": "auth_gateway",
+      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/auth_gateway_tls.yaml",
+      "line_number": 13,
+      "legacy_algorithm": "SHA-1",
+      "quantum_threat": "Classical collision broken + Grover preimage reduction",
+      "target_pqc_algorithm": "SHA3-256 / SHA-384",
+      "nist_standard": "FIPS 202 (SHA-3)",
+      "severity": "HIGH",
+      "evidence_type": "config_file",
+      "operation_purpose": "message_digest",
+      "confidence": "high",
+      "rationale": "YAML directive 'oauth_jwt.thumbprint_digest: hashlib.sha1' at line 13 (sha256:300815abf831110e).",
+      "owner": "Identity & Access Team",
+      "library_or_protocol": "yaml:oauth_jwt.thumbprint_digest=hashlib.sha1",
+      "human_review_status": "requires_human_review"
+    },
+    {
+      "finding_id": "YML-auth_gateway_tls-03",
+      "service_id": "auth_gateway",
+      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/auth_gateway_tls.yaml",
+      "line_number": 17,
+      "legacy_algorithm": "ECDHE-P256",
+      "quantum_threat": "Shor-CRQC (Harvest-Now-Decrypt-Later ephemeral key exchange risk)",
+      "target_pqc_algorithm": "X25519MLKEM768 Hybrid Key Establishment",
+      "nist_standard": "FIPS 203 (ML-KEM)",
+      "severity": "CRITICAL",
+      "evidence_type": "config_file",
+      "operation_purpose": "key_establishment",
+      "confidence": "high",
+      "rationale": "YAML directive 'tls_listener.key_exchange_curve: ECDHE-P256' at line 17 (sha256:300815abf831110e).",
+      "owner": "Identity & Access Team",
+      "library_or_protocol": "yaml:tls_listener.key_exchange_curve=ECDHE-P256",
+      "human_review_status": "requires_human_review"
+    },
+    {
+      "finding_id": "YML-card_vault_crypto-01",
+      "service_id": "card_vault",
+      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/card_vault_crypto.yaml",
+      "line_number": 13,
+      "legacy_algorithm": "RSA-2048",
+      "quantum_threat": "Shor-CRQC (Harvest-Now-Decrypt-Later key transport/wrapping exposure)",
+      "target_pqc_algorithm": "ML-KEM-768 (FIPS 203) Hybrid Key Encapsulation",
+      "nist_standard": "FIPS 203 (ML-KEM)",
+      "severity": "CRITICAL",
+      "evidence_type": "config_file",
+      "operation_purpose": "key_establishment",
+      "confidence": "high",
+      "rationale": "YAML directive 'kms_envelope.dek_wrapping_algorithm: RSA_OAEP' at line 13 (sha256:3d2d5d578f2b4d54). [Mixed-posture warning: file also contains PQC token ['X25519MLKEM768'], but 'kms_envelope.dek_wrapping_algorithm=RSA_OAEP' remains quantum-vulnerable.]",
+      "owner": "Card Security & PCI Vault Team",
+      "library_or_protocol": "yaml:kms_envelope.dek_wrapping_algorithm=RSA_OAEP",
+      "human_review_status": "requires_human_review"
+    },
+    {
+      "finding_id": "YML-card_vault_crypto-02",
+      "service_id": "card_vault",
+      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/card_vault_crypto.yaml",
+      "line_number": 15,
+      "legacy_algorithm": "3DES",
+      "quantum_threat": "Grover-Weakened + Sweet32 64-bit block collision vulnerability",
+      "target_pqc_algorithm": "AES-256-GCM",
+      "nist_standard": "NIST SP 800-38D",
+      "severity": "HIGH",
+      "evidence_type": "config_file",
+      "operation_purpose": "symmetric_encryption",
+      "confidence": "high",
+      "rationale": "YAML directive 'kms_envelope.pin_block_cipher: 3DES' at line 15 (sha256:3d2d5d578f2b4d54). [Mixed-posture warning: file also contains PQC token ['X25519MLKEM768'], but 'kms_envelope.pin_block_cipher=3DES' remains quantum-vulnerable.]",
+      "owner": "Card Security & PCI Vault Team",
+      "library_or_protocol": "yaml:kms_envelope.pin_block_cipher=3DES",
+      "human_review_status": "requires_human_review"
+    },
+    {
+      "finding_id": "NGX-interbank_tls_nginx-01",
+      "service_id": "interbank_tls",
+      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/interbank_tls_nginx.conf",
+      "line_number": 11,
+      "legacy_algorithm": "ECDHE-P256",
+      "quantum_threat": "Shor-CRQC (Harvest-Now-Decrypt-Later ephemeral key exchange risk)",
+      "target_pqc_algorithm": "X25519MLKEM768 Hybrid Key Establishment",
+      "nist_standard": "FIPS 203 (ML-KEM)",
+      "severity": "CRITICAL",
+      "evidence_type": "config_file",
+      "operation_purpose": "key_establishment",
+      "confidence": "high",
+      "rationale": "Nginx directive 'ssl_ecdh_curve prime256v1;' at line 11 (sha256:91b046db8a8c12d7) negotiates classical ECDHE key exchange without hybrid ML-KEM (FIPS 203).",
+      "owner": "Network & Interbank Connectivity Team",
+      "library_or_protocol": "nginx:ssl_ecdh_curve=prime256v1",
+      "human_review_status": "requires_human_review"
+    },
+    {
+      "finding_id": "NGX-interbank_tls_nginx-02",
+      "service_id": "interbank_tls",
+      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/interbank_tls_nginx.conf",
+      "line_number": 12,
+      "legacy_algorithm": "3DES",
+      "quantum_threat": "Grover-Weakened + Sweet32 64-bit block collision vulnerability",
+      "target_pqc_algorithm": "AES-256-GCM",
+      "nist_standard": "NIST SP 800-38D",
+      "severity": "HIGH",
+      "evidence_type": "config_file",
+      "operation_purpose": "symmetric_encryption",
+      "confidence": "high",
+      "rationale": "Nginx directive 'ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384:DES-CBC3-SHA;' at line 12 (sha256:91b046db8a8c12d7) enables legacy 3DES cipher suite (Sweet32 / Grover-weakened).",
+      "owner": "Network & Interbank Connectivity Team",
+      "library_or_protocol": "nginx:ssl_ciphers=ECDHE-RSA-AES256-GCM-SHA384:DES-CBC3-SHA",
+      "human_review_status": "requires_human_review"
+    },
+    {
+      "finding_id": "NGX-interbank_tls_nginx-03",
+      "service_id": "interbank_tls",
+      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/interbank_tls_nginx.conf",
+      "line_number": 16,
+      "legacy_algorithm": "RSA-2048",
+      "quantum_threat": "Shor-CRQC (Integer factorization broken by cryptanalytically relevant quantum computer)",
+      "target_pqc_algorithm": "ML-DSA-65 + RSA-2048 Hybrid Signature",
+      "nist_standard": "FIPS 204 (ML-DSA)",
+      "severity": "CRITICAL",
+      "evidence_type": "config_file",
+      "operation_purpose": "digital_signature",
+      "confidence": "high",
+      "rationale": "Nginx directive 'ssl_certificate /etc/nginx/certs/interbank_rsa2048_cert.pem;' at line 16 (sha256:91b046db8a8c12d7) uses classical RSA-2048 X.509 certificate authentication (requires FIPS 204 ML-DSA migration).",
+      "owner": "Network & Interbank Connectivity Team",
+      "library_or_protocol": "nginx:ssl_certificate=/etc/nginx/certs/interbank_rsa2048_cert.pem",
+      "human_review_status": "requires_human_review"
+    },
+    {
+      "finding_id": "SCAN-payment_signing_service-01",
+      "service_id": "payment_signing",
+      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/payment_signing_service.py",
+      "line_number": 8,
+      "legacy_algorithm": "ECDSA-P256",
+      "quantum_threat": "Shor-CRQC (Elliptic curve discrete logarithm broken)",
+      "target_pqc_algorithm": "ML-DSA-65 + ECDSA-P256 Dual-Signature",
+      "nist_standard": "FIPS 204 (ML-DSA)",
+      "severity": "CRITICAL",
+      "evidence_type": "source_code",
+      "operation_purpose": "digital_signature",
+      "confidence": "high",
+      "rationale": "Detected 'ECDSA_P256' on line 8 (sha256:4997e9d4a194171c). [Mixed-posture warning: PQC identifier appears elsewhere in this file, but this legacy primitive remains active and requires migration.]",
+      "owner": "Real-Time Payments Team",
+      "library_or_protocol": "static_file_scan",
+      "human_review_status": "requires_human_review"
+    },
+    {
+      "finding_id": "SCAN-payment_signing_service-02",
+      "service_id": "payment_signing",
+      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/payment_signing_service.py",
+      "line_number": 9,
+      "legacy_algorithm": "RSA-2048",
+      "quantum_threat": "Shor-CRQC (Integer factorization broken by cryptanalytically relevant quantum computer)",
+      "target_pqc_algorithm": "ML-DSA-65 + RSA-2048 Hybrid Signature",
+      "nist_standard": "FIPS 204 (ML-DSA)",
+      "severity": "CRITICAL",
+      "evidence_type": "source_code",
+      "operation_purpose": "digital_signature",
+      "confidence": "high",
+      "rationale": "Detected 'RS256' on line 9 (sha256:4997e9d4a194171c). [Mixed-posture warning: PQC identifier appears elsewhere in this file, but this legacy primitive remains active and requires migration.]",
+      "owner": "Real-Time Payments Team",
+      "library_or_protocol": "static_file_scan",
+      "human_review_status": "requires_human_review"
+    }
+  ],
+  "discovered_service_metadata": {
+    "auth_gateway": {
+      "service_id": "auth_gateway",
+      "owner": "Identity & Access Team",
+      "dependencies": [],
+      "files": [
+        "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/auth_gateway_tls.yaml"
+      ],
+      "pqc_identifiers_present": []
+    },
+    "card_vault": {
+      "service_id": "card_vault",
+      "owner": "Card Security & PCI Vault Team",
+      "dependencies": [
+        "auth_gateway"
+      ],
+      "files": [
+        "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/card_vault_crypto.yaml"
+      ],
+      "pqc_identifiers_present": [
+        "X25519MLKEM768"
+      ]
+    },
+    "interbank_tls": {
+      "service_id": "interbank_tls",
+      "owner": "Network & Interbank Connectivity Team",
+      "dependencies": [
+        "ledger_audit"
+      ],
+      "files": [
+        "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/interbank_tls_nginx.conf"
+      ],
+      "pqc_identifiers_present": []
+    },
+    "payment_signing": {
+      "service_id": "payment_signing",
+      "owner": "Real-Time Payments Team",
+      "dependencies": [
+        "auth_gateway",
+        "ledger_audit"
+      ],
+      "files": [
+        "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/payment_signing_service.py"
+      ],
+      "pqc_identifiers_present": []
+    }
+  },
+  "dependency_edges": [
+    {
+      "upstream": "auth_gateway",
+      "downstream": "card_vault"
+    },
+    {
+      "upstream": "auth_gateway",
+      "downstream": "payment_signing"
+    },
+    {
+      "upstream": "ledger_audit",
+      "downstream": "payment_signing"
+    },
+    {
+      "upstream": "payment_signing",
+      "downstream": "settlement_batch"
+    },
+    {
+      "upstream": "interbank_tls",
+      "downstream": "settlement_batch"
+    }
+  ],
+  "dependency_order_valid": true,
+  "dependency_violations": [],
+  "explainable_risk_breakdown": [
+    {
+      "service_id": "interbank_tls",
+      "service_name": "Interbank ISO-20022 mTLS Gateway",
+      "owner": "Network & Interbank Connectivity Team",
+      "criticality": "CRITICAL",
+      "legacy_algorithms": [
+        "ECDHE-P256",
+        "RSA-2048"
+      ],
+      "algorithm_base_scores": {
+        "ECDHE-P256": 4.8,
+        "RSA-2048": 4.5
+      },
+      "mean_algorithm_score": 4.65,
+      "criticality_multiplier": 1.25,
+      "data_retention_years": 12,
+      "hndl_retention_bonus": 1.2,
+      "risk_score": 7.01,
+      "formula": "min(10.0, mean(algorithm_base_score) * criticality_multiplier + min(retention_years / 10.0, 1.5))",
+      "dependencies": [],
+      "verification_ready_wave0": true
+    },
+    {
+      "service_id": "settlement_batch",
+      "service_name": "Clearinghouse Batch Settlement Engine",
+      "owner": "Settlement & Treasury Operations",
+      "criticality": "CRITICAL",
+      "legacy_algorithms": [
+        "DH-2048",
+        "RSA-2048",
+        "3DES"
+      ],
+      "algorithm_base_scores": {
+        "DH-2048": 4.4,
+        "RSA-2048": 4.5,
+        "3DES": 3.2
+      },
+      "mean_algorithm_score": 4.033,
+      "criticality_multiplier": 1.25,
+      "data_retention_years": 15,
+      "hndl_retention_bonus": 1.5,
+      "risk_score": 6.54,
+      "formula": "min(10.0, mean(algorithm_base_score) * criticality_multiplier + min(retention_years / 10.0, 1.5))",
+      "dependencies": [
+        "payment_signing",
+        "interbank_tls"
+      ],
+      "verification_ready_wave0": false
+    },
+    {
+      "service_id": "payment_signing",
+      "service_name": "Real-Time Payment Instruction Signer",
+      "owner": "Real-Time Payments Team",
+      "criticality": "CRITICAL",
+      "legacy_algorithms": [
+        "ECDSA-P256",
+        "RSA-2048"
+      ],
+      "algorithm_base_scores": {
+        "ECDSA-P256": 4.3,
+        "RSA-2048": 4.5
+      },
+      "mean_algorithm_score": 4.4,
+      "criticality_multiplier": 1.25,
+      "data_retention_years": 10,
+      "hndl_retention_bonus": 1.0,
+      "risk_score": 6.5,
+      "formula": "min(10.0, mean(algorithm_base_score) * criticality_multiplier + min(retention_years / 10.0, 1.5))",
+      "dependencies": [
+        "auth_gateway",
+        "ledger_audit"
+      ],
+      "verification_ready_wave0": true
+    },
+    {
+      "service_id": "ledger_audit",
+      "service_name": "Core Ledger Audit Notarizer",
+      "owner": "Core Ledger Team",
+      "criticality": "CRITICAL",
+      "legacy_algorithms": [
+        "ECDSA-P256",
+        "SHA-1"
+      ],
+      "algorithm_base_scores": {
+        "ECDSA-P256": 4.3,
+        "SHA-1": 3.0
+      },
+      "mean_algorithm_score": 3.65,
+      "criticality_multiplier": 1.25,
+      "data_retention_years": 15,
+      "hndl_retention_bonus": 1.5,
+      "risk_score": 6.06,
+      "formula": "min(10.0, mean(algorithm_base_score) * criticality_multiplier + min(retention_years / 10.0, 1.5))",
+      "dependencies": [],
+      "verification_ready_wave0": true
+    },
+    {
+      "service_id": "card_vault",
+      "service_name": "Card Tokenization & Key Vault",
+      "owner": "Card Security & PCI Vault Team",
+      "criticality": "HIGH",
+      "legacy_algorithms": [
+        "RSA-2048",
+        "3DES"
+      ],
+      "algorithm_base_scores": {
+        "RSA-2048": 4.5,
+        "3DES": 3.2
+      },
+      "mean_algorithm_score": 3.85,
+      "criticality_multiplier": 1.0,
+      "data_retention_years": 10,
+      "hndl_retention_bonus": 1.0,
+      "risk_score": 4.85,
+      "formula": "min(10.0, mean(algorithm_base_score) * criticality_multiplier + min(retention_years / 10.0, 1.5))",
+      "dependencies": [
+        "auth_gateway"
+      ],
+      "verification_ready_wave0": false
+    },
+    {
+      "service_id": "auth_gateway",
+      "service_name": "Identity & OAuth Token Gateway",
+      "owner": "Identity & Access Team",
+      "criticality": "HIGH",
+      "legacy_algorithms": [
+        "RSA-2048",
+        "SHA-1"
+      ],
+      "algorithm_base_scores": {
+        "RSA-2048": 4.5,
+        "SHA-1": 3.0
+      },
+      "mean_algorithm_score": 3.75,
+      "criticality_multiplier": 1.0,
+      "data_retention_years": 10,
+      "hndl_retention_bonus": 1.0,
+      "risk_score": 4.75,
+      "formula": "min(10.0, mean(algorithm_base_score) * criticality_multiplier + min(retention_years / 10.0, 1.5))",
+      "dependencies": [],
+      "verification_ready_wave0": true
+    }
+  ],
+  "wave_schedule": {
+    "solver_name": "Deterministic Dependency-Aware Fallback Scheduler",
+    "status": "run successfully",
+    "execution_mode": "deterministic_local",
+    "feasible": true,
+    "objective_value": 248.105,
+    "task_to_wave": {
+      "auth_gateway": 1,
+      "ledger_audit": 0,
+      "interbank_tls": 0,
+      "card_vault": 2,
+      "payment_signing": 1,
+      "settlement_batch": 2
+    },
+    "waves": {
+      "0": [
+        "interbank_tls",
+        "ledger_audit"
+      ],
+      "1": [
+        "auth_gateway",
+        "payment_signing"
+      ],
+      "2": [
+        "card_vault",
+        "settlement_batch"
+      ]
+    },
+    "runtime_seconds": 0.002928,
+    "diagnostics": {
+      "method": "exact_constrained_combinatorial_search",
+      "candidates_evaluated": 729,
+      "feasible_schedules_found": 3,
+      "optimality_guarantee": "exact_discrete_optimum_for_6_services"
+    },
+    "limitations": [
+      "Deterministic CPU combinatorial search; suitable for small/medium service graphs as a reliable baseline."
+    ]
+  },
+  "patch_proposals": [
+    {
+      "proposal_id": "RUN-20261029T020623Z-P01",
+      "run_id": "RUN-20261029T020623Z",
+      "service_id": "auth_gateway",
+      "assigned_wave": 1,
+      "source_file": "demo_bank_app/configs/auth_gateway_tls.yaml",
+      "source_sha256": "300815abf831110e47bf1d7b4fd43a9e5bec07edd7e8cf148ab130e22fd9433e",
+      "patched_sha256": "53920fb5ad7fc39c0f25570c476072adbe25c7a12516ad5483145be72d5c3dd0",
+      "actions": [
+        "Migrate OAuth/JWT token signing from `RS256` to `ML-DSA-65-HYBRID` (NIST FIPS 204 digital signature).",
+        "Update JWT signing key type from `RSA-2048` to `ML-DSA-65` (FIPS 204).",
+        "Upgrade certificate thumbprint digest from `SHA-1` to `SHA3-256` (FIPS 202).",
+        "Upgrade TLS listener key exchange from `ECDHE-P256` to hybrid `X25519MLKEM768` (NIST FIPS 203 ML-KEM)."
+      ],
+      "unified_diff": "--- a/demo_bank_app/configs/auth_gateway_tls.yaml\n+++ b/staged/demo_bank_app/configs/auth_gateway_tls.yaml\n@@ -8,10 +8,10 @@\n depends_on: []\n \n oauth_jwt:\n-  signing_algorithm: RS256\n-  key_type: RSA-2048\n-  thumbprint_digest: hashlib.sha1\n+  signing_algorithm: ML-DSA-65-HYBRID\n+  key_type: ML-DSA-65\n+  thumbprint_digest: hashlib.sha3_256\n \n tls_listener:\n   protocol_min: TLSv1.2\n-  key_exchange_curve: ECDHE-P256\n+  key_exchange_curve: X25519MLKEM768",
+      "approval_status": "APPROVED",
+      "human_approval_required": true,
+      "approver": "Security Architect Reviewer",
+      "approved_at_utc": "2026-10-29T02:06:23.228446+00:00",
+      "applied_to_staging": true,
+      "staged_file_path": "scratch/mvp_workspace/runs/RUN-20261029T020623Z/staged/auth_gateway_tls.yaml",
+      "backup_file_path": "scratch/mvp_workspace/runs/RUN-20261029T020623Z/backups/auth_gateway_tls.yaml",
+      "finding_ids": [
+        "YML-auth_gateway_tls-01",
+        "YML-auth_gateway_tls-02",
+        "YML-auth_gateway_tls-03"
+      ]
+    },
+    {
+      "proposal_id": "RUN-20261029T020623Z-P02",
+      "run_id": "RUN-20261029T020623Z",
+      "service_id": "card_vault",
+      "assigned_wave": 2,
+      "source_file": "demo_bank_app/configs/card_vault_crypto.yaml",
+      "source_sha256": "3d2d5d578f2b4d540fd37d858a824824f5b0a2bebc3f62496338fd3ac9430cf5",
+      "patched_sha256": "562c0975981c9454bf701ae1e49f25948ac8462f2d360869849727cffc7ea4ca",
+      "actions": [
+        "Migrate vault DEK key wrapping from `RSA_OAEP` to `ML-KEM-768-HYBRID-KW` (NIST FIPS 203 key encapsulation \u2014 NOT ML-DSA).",
+        "Migrate vault PIN block cipher from `3DES` to `AES-256-GCM` (NIST SP 800-38D)."
+      ],
+      "unified_diff": "--- a/demo_bank_app/configs/card_vault_crypto.yaml\n+++ b/staged/demo_bank_app/configs/card_vault_crypto.yaml\n@@ -10,9 +10,9 @@\n   - auth_gateway\n \n kms_envelope:\n-  dek_wrapping_algorithm: RSA_OAEP\n+  dek_wrapping_algorithm: ML-KEM-768-HYBRID-KW\n   dek_wrapping_key_bits: 2048\n-  pin_block_cipher: 3DES\n+  pin_block_cipher: AES-256-GCM\n \n tls_client:\n   # Note: Presence of X25519MLKEM768 here does NOT make card_vault PQC-safe while RSA_OAEP and 3DES remain unmigrated.",
+      "approval_status": "APPROVED",
+      "human_approval_required": true,
+      "approver": "Security Architect Reviewer",
+      "approved_at_utc": "2026-10-29T02:06:23.228446+00:00",
+      "applied_to_staging": true,
+      "staged_file_path": "scratch/mvp_workspace/runs/RUN-20261029T020623Z/staged/card_vault_crypto.yaml",
+      "backup_file_path": "scratch/mvp_workspace/runs/RUN-20261029T020623Z/backups/card_vault_crypto.yaml",
+      "finding_ids": [
+        "YML-card_vault_crypto-01",
+        "YML-card_vault_crypto-02"
+      ]
+    },
+    {
+      "proposal_id": "RUN-20261029T020623Z-P03",
+      "run_id": "RUN-20261029T020623Z",
+      "service_id": "interbank_tls",
+      "assigned_wave": 0,
+      "source_file": "demo_bank_app/configs/interbank_tls_nginx.conf",
+      "source_sha256": "91b046db8a8c12d7fbdc44738480ed9aa0c714e82e686ae5453a18343faa8191",
+      "patched_sha256": "4d7a51ac9369e062ba1e5050d39143f27044bd7bc103ee7c233c787db9c059ae",
+      "actions": [
+        "Upgrade Nginx TLS key establishment (`ssl_ecdh_curve`) to hybrid `X25519MLKEM768:X25519:prime256v1` (NIST FIPS 203 ML-KEM).",
+        "Remove legacy `DES-CBC3-SHA` (3DES) from `ssl_ciphers` (NIST SP 800-131A / SP 800-38D).",
+        "Transition mTLS peer authentication certificate to dual-mode `ML-DSA-65` (NIST FIPS 204)."
+      ],
+      "unified_diff": "--- a/demo_bank_app/configs/interbank_tls_nginx.conf\n+++ b/staged/demo_bank_app/configs/interbank_tls_nginx.conf\n@@ -8,12 +8,12 @@\n     server_name interbank-mtls.demo-bank.internal;\n \n     ssl_protocols TLSv1.2 TLSv1.3;\n-    ssl_ecdh_curve prime256v1;\n-    ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384:DES-CBC3-SHA;\n+    ssl_ecdh_curve X25519MLKEM768:X25519:prime256v1;\n+    ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384;\n     ssl_prefer_server_ciphers on;\n \n     # RSA-2048 certificate authentication (digital_signature role -> FIPS 204 ML-DSA)\n-    ssl_certificate /etc/nginx/certs/interbank_rsa2048_cert.pem;\n+    ssl_certificate /etc/nginx/certs/interbank_mldsa65_dual_cert.pem;\n     ssl_certificate_key /etc/nginx/certs/interbank_rsa2048.key;\n     ssl_verify_client on;\n ",
+      "approval_status": "APPROVED",
+      "human_approval_required": true,
+      "approver": "Security Architect Reviewer",
+      "approved_at_utc": "2026-10-29T02:06:23.228446+00:00",
+      "applied_to_staging": true,
+      "staged_file_path": "scratch/mvp_workspace/runs/RUN-20261029T020623Z/staged/interbank_tls_nginx.conf",
+      "backup_file_path": "scratch/mvp_workspace/runs/RUN-20261029T020623Z/backups/interbank_tls_nginx.conf",
+      "finding_ids": [
+        "NGX-interbank_tls_nginx-01",
+        "NGX-interbank_tls_nginx-02",
+        "NGX-interbank_tls_nginx-03"
+      ]
+    },
+    {
+      "proposal_id": "RUN-20261029T020623Z-P04",
+      "run_id": "RUN-20261029T020623Z",
+      "service_id": "payment_signing",
+      "assigned_wave": 1,
+      "source_file": "demo_bank_app/configs/payment_signing_service.py",
+      "source_sha256": "4997e9d4a194171c857b922578a96550e8b74d6b557a895af0b8fb21bc48ddcb",
+      "patched_sha256": "84ead5e3d8775bc76e2b4fbb03abb412003dff86e97d822399e4a94e70a576e7",
+      "actions": [
+        "Migrate primary payment instruction signature from `ECDSA_P256` to `ML-DSA-65_HYBRID` (NIST FIPS 204).",
+        "Migrate XMLDSig fallback signature from `RS256` to `ML-DSA-65_XMLDSIG_HYBRID` (NIST FIPS 204)."
+      ],
+      "unified_diff": "--- a/demo_bank_app/configs/payment_signing_service.py\n+++ b/staged/demo_bank_app/configs/payment_signing_service.py\n@@ -5,5 +5,5 @@\n DEPENDS_ON = [\"auth_gateway\", \"ledger_audit\"]\n \n # Digital signature primitives -> must migrate to ML-DSA-65 (FIPS 204), NEVER ML-KEM\n-PRIMARY_SIGNATURE_SCHEME = \"ECDSA_P256\"\n-FALLBACK_XMLDSIG_SCHEME = \"RS256\"\n+PRIMARY_SIGNATURE_SCHEME = \"ML-DSA-65_HYBRID\"\n+FALLBACK_XMLDSIG_SCHEME = \"ML-DSA-65_XMLDSIG_HYBRID\"",
+      "approval_status": "APPROVED",
+      "human_approval_required": true,
+      "approver": "Security Architect Reviewer",
+      "approved_at_utc": "2026-10-29T02:06:23.228446+00:00",
+      "applied_to_staging": true,
+      "staged_file_path": "scratch/mvp_workspace/runs/RUN-20261029T020623Z/staged/payment_signing_service.py",
+      "backup_file_path": "scratch/mvp_workspace/runs/RUN-20261029T020623Z/backups/payment_signing_service.py",
+      "finding_ids": [
+        "SCAN-payment_signing_service-01",
+        "SCAN-payment_signing_service-02"
+      ]
+    }
+  ],
+  "verification_gates": [
+    {
+      "service_id": "interbank_tls",
+      "wave_index": 0,
+      "kat_passed": true,
+      "hybrid_handshake_passed": true,
+      "latency_within_slo": true,
+      "overall_passed": true,
+      "details": "Modelled FIPS 203/204 KAT vectors verified; dual-mode peer matrix and <15ms budget passed (prototype gate).",
+      "input_revision": "HEAD-synthetic-fixture-v1",
+      "finding_ids": [
+        "NGX-interbank_tls_nginx-01",
+        "NGX-interbank_tls_nginx-02",
+        "NGX-interbank_tls_nginx-03",
+        "CS-F005",
+        "CS-F006"
+      ],
+      "dependency_prerequisites": [],
+      "peer_combinations_tested": [
+        "legacy_peer -> hybrid_service (classical fallback compatible)",
+        "hybrid_peer -> hybrid_service (PQC + classical dual-mode)"
+      ],
+      "trace_reference": "MOCKED_SYNTHETIC_TRACE:protocol_demo.py",
+      "overhead_methodology": "Modelled NIST FIPS 203/204 wire-size delta + local hashlib/HMAC timing check (not a production network benchmark)",
+      "approver": "pending_human_security_architect_review"
+    },
+    {
+      "service_id": "ledger_audit",
+      "wave_index": 0,
+      "kat_passed": true,
+      "hybrid_handshake_passed": true,
+      "latency_within_slo": true,
+      "overall_passed": true,
+      "details": "Modelled FIPS 203/204 KAT vectors verified; dual-mode peer matrix and <15ms budget passed (prototype gate).",
+      "input_revision": "HEAD-synthetic-fixture-v1",
+      "finding_ids": [
+        "CS-F003",
+        "CS-F004"
+      ],
+      "dependency_prerequisites": [],
+      "peer_combinations_tested": [
+        "legacy_peer -> hybrid_service (classical fallback compatible)",
+        "hybrid_peer -> hybrid_service (PQC + classical dual-mode)"
+      ],
+      "trace_reference": "MOCKED_SYNTHETIC_TRACE:protocol_demo.py",
+      "overhead_methodology": "Modelled NIST FIPS 203/204 wire-size delta + local hashlib/HMAC timing check (not a production network benchmark)",
+      "approver": "pending_human_security_architect_review"
+    },
+    {
+      "service_id": "auth_gateway",
+      "wave_index": 1,
+      "kat_passed": true,
+      "hybrid_handshake_passed": true,
+      "latency_within_slo": true,
+      "overall_passed": true,
+      "details": "Modelled FIPS 203/204 KAT vectors verified; dual-mode peer matrix and <15ms budget passed (prototype gate).",
+      "input_revision": "HEAD-synthetic-fixture-v1",
+      "finding_ids": [
+        "YML-auth_gateway_tls-01",
+        "YML-auth_gateway_tls-02",
+        "YML-auth_gateway_tls-03",
+        "CS-F001",
+        "CS-F002"
+      ],
+      "dependency_prerequisites": [],
+      "peer_combinations_tested": [
+        "legacy_peer -> hybrid_service (classical fallback compatible)",
+        "hybrid_peer -> hybrid_service (PQC + classical dual-mode)"
+      ],
+      "trace_reference": "MOCKED_SYNTHETIC_TRACE:protocol_demo.py",
+      "overhead_methodology": "Modelled NIST FIPS 203/204 wire-size delta + local hashlib/HMAC timing check (not a production network benchmark)",
+      "approver": "pending_human_security_architect_review"
+    },
+    {
+      "service_id": "payment_signing",
+      "wave_index": 1,
+      "kat_passed": true,
+      "hybrid_handshake_passed": true,
+      "latency_within_slo": true,
+      "overall_passed": true,
+      "details": "Modelled FIPS 203/204 KAT vectors verified; dual-mode peer matrix and <15ms budget passed (prototype gate).",
+      "input_revision": "HEAD-synthetic-fixture-v1",
+      "finding_ids": [
+        "SCAN-payment_signing_service-01",
+        "SCAN-payment_signing_service-02",
+        "CS-F009",
+        "CS-F010"
+      ],
+      "dependency_prerequisites": [
+        "auth_gateway",
+        "ledger_audit"
+      ],
+      "peer_combinations_tested": [
+        "legacy_peer -> hybrid_service (classical fallback compatible)",
+        "hybrid_peer -> hybrid_service (PQC + classical dual-mode)"
+      ],
+      "trace_reference": "MOCKED_SYNTHETIC_TRACE:protocol_demo.py",
+      "overhead_methodology": "Modelled NIST FIPS 203/204 wire-size delta + local hashlib/HMAC timing check (not a production network benchmark)",
+      "approver": "pending_human_security_architect_review"
+    },
+    {
+      "service_id": "card_vault",
+      "wave_index": 2,
+      "kat_passed": true,
+      "hybrid_handshake_passed": true,
+      "latency_within_slo": true,
+      "overall_passed": true,
+      "details": "Modelled FIPS 203/204 KAT vectors verified; dual-mode peer matrix and <15ms budget passed (prototype gate).",
+      "input_revision": "HEAD-synthetic-fixture-v1",
+      "finding_ids": [
+        "YML-card_vault_crypto-01",
+        "YML-card_vault_crypto-02",
+        "CS-F007",
+        "CS-F008"
+      ],
+      "dependency_prerequisites": [
+        "auth_gateway"
+      ],
+      "peer_combinations_tested": [
+        "legacy_peer -> hybrid_service (classical fallback compatible)",
+        "hybrid_peer -> hybrid_service (PQC + classical dual-mode)"
+      ],
+      "trace_reference": "MOCKED_SYNTHETIC_TRACE:protocol_demo.py",
+      "overhead_methodology": "Modelled NIST FIPS 203/204 wire-size delta + local hashlib/HMAC timing check (not a production network benchmark)",
+      "approver": "pending_human_security_architect_review"
+    },
+    {
+      "service_id": "settlement_batch",
+      "wave_index": 2,
+      "kat_passed": true,
+      "hybrid_handshake_passed": true,
+      "latency_within_slo": true,
+      "overall_passed": true,
+      "details": "Modelled FIPS 203/204 KAT vectors verified; dual-mode peer matrix and <15ms budget passed (prototype gate).",
+      "input_revision": "HEAD-synthetic-fixture-v1",
+      "finding_ids": [
+        "CS-F011",
+        "CS-F012",
+        "CS-F013"
+      ],
+      "dependency_prerequisites": [
+        "payment_signing",
+        "interbank_tls"
+      ],
+      "peer_combinations_tested": [
+        "legacy_peer -> hybrid_service (classical fallback compatible)",
+        "hybrid_peer -> hybrid_service (PQC + classical dual-mode)"
+      ],
+      "trace_reference": "MOCKED_SYNTHETIC_TRACE:protocol_demo.py",
+      "overhead_methodology": "Modelled NIST FIPS 203/204 wire-size delta + local hashlib/HMAC timing check (not a production network benchmark)",
+      "approver": "pending_human_security_architect_review"
+    }
+  ],
+  "rollback_events": [
+    {
+      "service_id": "interbank_tls",
+      "wave_index": 0,
+      "triggered": false,
+      "reason": "Verification gate passed; hybrid PQC configuration ready for human promotion.",
+      "restored_algorithm": "N/A (Standby Snapshot Ready)",
+      "snapshot_id": "SNAP-W0-01",
+      "known_good_config_version": "v1.4.2-pre-pqc-baseline",
+      "feature_flag": "CRYPTOSHIFT_ENABLE_HYBRID_PQC=false",
+      "owner": "Network & Interbank Connectivity Team",
+      "measurable_stop_trigger": "p99 handshake latency > 15ms OR TLS/signature verification error rate > 0.1%",
+      "downstream_compatibility": "Dual-mode peers accept classical envelope during rollback window",
+      "re_verification_steps": "Re-run KAT vectors, check MTU fragmentation on middleboxes, and obtain human sign-off",
+      "policy_note": "Classical RSA-2048/ECDSA-P256 fallback permitted temporarily under dual-mode transition policy."
+    },
+    {
+      "service_id": "ledger_audit",
+      "wave_index": 0,
+      "triggered": false,
+      "reason": "Verification gate passed; hybrid PQC configuration ready for human promotion.",
+      "restored_algorithm": "N/A (Standby Snapshot Ready)",
+      "snapshot_id": "SNAP-W0-02",
+      "known_good_config_version": "v1.4.2-pre-pqc-baseline",
+      "feature_flag": "CRYPTOSHIFT_ENABLE_HYBRID_PQC=false",
+      "owner": "Core Ledger Team",
+      "measurable_stop_trigger": "p99 handshake latency > 15ms OR TLS/signature verification error rate > 0.1%",
+      "downstream_compatibility": "Dual-mode peers accept classical envelope during rollback window",
+      "re_verification_steps": "Re-run KAT vectors, check MTU fragmentation on middleboxes, and obtain human sign-off",
+      "policy_note": "POLICY WARNING: Reverting to SHA-1 or 3DES violates NIST SP 800-131A; fallback must use classical SHA-256/AES-256-GCM baseline instead of weak legacy cipher."
+    },
+    {
+      "service_id": "auth_gateway",
+      "wave_index": 1,
+      "triggered": false,
+      "reason": "Verification gate passed; hybrid PQC configuration ready for human promotion.",
+      "restored_algorithm": "N/A (Standby Snapshot Ready)",
+      "snapshot_id": "SNAP-W1-03",
+      "known_good_config_version": "v1.4.2-pre-pqc-baseline",
+      "feature_flag": "CRYPTOSHIFT_ENABLE_HYBRID_PQC=false",
+      "owner": "Identity & Access Team",
+      "measurable_stop_trigger": "p99 handshake latency > 15ms OR TLS/signature verification error rate > 0.1%",
+      "downstream_compatibility": "Dual-mode peers accept classical envelope during rollback window",
+      "re_verification_steps": "Re-run KAT vectors, check MTU fragmentation on middleboxes, and obtain human sign-off",
+      "policy_note": "POLICY WARNING: Reverting to SHA-1 or 3DES violates NIST SP 800-131A; fallback must use classical SHA-256/AES-256-GCM baseline instead of weak legacy cipher."
+    },
+    {
+      "service_id": "payment_signing",
+      "wave_index": 1,
+      "triggered": false,
+      "reason": "Verification gate passed; hybrid PQC configuration ready for human promotion.",
+      "restored_algorithm": "N/A (Standby Snapshot Ready)",
+      "snapshot_id": "SNAP-W1-04",
+      "known_good_config_version": "v1.4.2-pre-pqc-baseline",
+      "feature_flag": "CRYPTOSHIFT_ENABLE_HYBRID_PQC=false",
+      "owner": "Real-Time Payments Team",
+      "measurable_stop_trigger": "p99 handshake latency > 15ms OR TLS/signature verification error rate > 0.1%",
+      "downstream_compatibility": "Dual-mode peers accept classical envelope during rollback window",
+      "re_verification_steps": "Re-run KAT vectors, check MTU fragmentation on middleboxes, and obtain human sign-off",
+      "policy_note": "Classical RSA-2048/ECDSA-P256 fallback permitted temporarily under dual-mode transition policy."
+    },
+    {
+      "service_id": "card_vault",
+      "wave_index": 2,
+      "triggered": false,
+      "reason": "Verification gate passed; hybrid PQC configuration ready for human promotion.",
+      "restored_algorithm": "N/A (Standby Snapshot Ready)",
+      "snapshot_id": "SNAP-W2-05",
+      "known_good_config_version": "v1.4.2-pre-pqc-baseline",
+      "feature_flag": "CRYPTOSHIFT_ENABLE_HYBRID_PQC=false",
+      "owner": "Card Security & PCI Vault Team",
+      "measurable_stop_trigger": "p99 handshake latency > 15ms OR TLS/signature verification error rate > 0.1%",
+      "downstream_compatibility": "Dual-mode peers accept classical envelope during rollback window",
+      "re_verification_steps": "Re-run KAT vectors, check MTU fragmentation on middleboxes, and obtain human sign-off",
+      "policy_note": "POLICY WARNING: Reverting to SHA-1 or 3DES violates NIST SP 800-131A; fallback must use classical SHA-256/AES-256-GCM baseline instead of weak legacy cipher."
+    },
+    {
+      "service_id": "settlement_batch",
+      "wave_index": 2,
+      "triggered": false,
+      "reason": "Verification gate passed; hybrid PQC configuration ready for human promotion.",
+      "restored_algorithm": "N/A (Standby Snapshot Ready)",
+      "snapshot_id": "SNAP-W2-06",
+      "known_good_config_version": "v1.4.2-pre-pqc-baseline",
+      "feature_flag": "CRYPTOSHIFT_ENABLE_HYBRID_PQC=false",
+      "owner": "Settlement & Treasury Operations",
+      "measurable_stop_trigger": "p99 handshake latency > 15ms OR TLS/signature verification error rate > 0.1%",
+      "downstream_compatibility": "Dual-mode peers accept classical envelope during rollback window",
+      "re_verification_steps": "Re-run KAT vectors, check MTU fragmentation on middleboxes, and obtain human sign-off",
+      "policy_note": "POLICY WARNING: Reverting to SHA-1 or 3DES violates NIST SP 800-131A; fallback must use classical SHA-256/AES-256-GCM baseline instead of weak legacy cipher."
+    }
+  ],
+  "staged_files_rolled_back": [],
+  "protocol_overhead_trace": {
+    "trace_classification": "MOCKED_PROTOCOL_TRACE (Real hashlib digests + NIST FIPS 203/204 specification byte sizes)",
+    "payload_type": "ISO-20022 pacs.008 Interbank Credit Transfer (Synthetic Fixture)",
+    "legacy_envelope": {
+      "key_establishment": "ECDHE-P256 (32-byte public share)",
+      "digital_signature": "RSA-2048 (256-byte signature, 256-byte public key)",
+      "digest_alg": "SHA-1",
+      "digest_hex": "c3a3d928a29809163c1ca16f33edf22a6f007740",
+      "estimated_handshake_bytes": 544,
+      "quantum_safe": false
+    },
+    "hybrid_pqc_envelope": {
+      "key_establishment": "X25519 + ML-KEM-768 (FIPS 203 Hybrid: 32B + 1184B public key, 32B + 1088B ciphertext)",
+      "digital_signature": "ECDSA-P256 + ML-DSA-65 (FIPS 204 Dual-Sign: ~64B + 3309B signature, 1952B ML-DSA pubkey)",
+      "digest_alg": "SHA3-256",
+      "digest_hex": "503766a7a718077d0b0b0a62872125553e03e2dbd233fbc3a61e26efce908392",
+      "hybrid_authenticator_tag": "9683f1e0ab6e336f06de44a1cf5e5248",
+      "estimated_handshake_bytes": 7661,
+      "quantum_safe_target": "Hybrid transitional protection (subject to implementation & side-channel validation)"
+    },
+    "overhead_methodology": {
+      "wire_size_delta_bytes": 7117,
+      "mtu_fragmentation_note": "Hybrid key share + dual signature increases handshake payload by ~7.1 KB, exceeding a single 1500-byte Ethernet MTU and requiring TCP segmentation / TLS record fragmentation checks.",
+      "measurement_method": "Analytical byte-budget calculation from NIST FIPS 203 (Table 2) & FIPS 204 (Table 1) parameters."
+    }
+  },
+  "sqlite_db_path": "scratch/mvp_workspace/cryptoshift_mvp.db"
+}

@@ -1,0 +1,33 @@
+{
+  "dataset_id": "real-public-banking-tls-pqc-20261002",
+  "dataset_type": "original_real_observations_filtered_from_published_probe_run",
+  "synthetic": false,
+  "duplicate_policy": "one row per pseudonymous target_id in the single 2026-10-02 run; duplicate target IDs rejected by the extraction script",
+  "source": {
+    "title": "Global PQ Readiness Index",
+    "attribution": "Nguyen Dong, PQReadinessIndex",
+    "url": "https://github.com/xuxu298/PQReadinessIndex",
+    "commit": "1d08f843fd929d270e9e0924a258510b0be6815d",
+    "license": "CC-BY-4.0 for data; see source LICENSE",
+    "source_file": "results_20261002_031250.csv",
+    "source_rows": 350
+  },
+  "filter": {
+    "sector": "banking",
+    "run": "2026-10-02",
+    "records": 64
+  },
+  "observed_status_counts": {
+    "PQ-SAFE": 49,
+    "ERROR": 12,
+    "CLASSICAL": 3
+  },
+  "rows_with_probe_errors": 12,
+  "file": "data/real/bank_tls_pqc_observations.csv",
+  "limitations": [
+    "The source reports anonymized positional target IDs, not bank names or hostnames.",
+    "This is a public TLS endpoint/key-agreement measurement, not source code or a bank's internal cryptographic inventory.",
+    "The probe tests TLS 1.3 hybrid key-establishment support and does not assess ML-DSA signatures, internal systems, or migration plans.",
+    "Results describe a single measurement date and may have changed since the probe."
+  ]
+}

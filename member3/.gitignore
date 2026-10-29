@@ -1,0 +1,13 @@
+# Member 3 local outputs, caches, and local dataset path overrides
+outputs/
+!outputs/.gitkeep
+configs/*.local.json
+configs/*.local.env
+.ipynb_checkpoints/
+__pycache__/
+*.py[cod]
+*.h5
+*.hdf5
+*.db
+*.sqlite
+*.sqlite3

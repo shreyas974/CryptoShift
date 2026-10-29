@@ -1,0 +1,6 @@
+{
+  "_comment": "Copy this file to member3/configs/dataset_paths.local.json (git-ignored) and set your local dataset paths.",
+  "dataset_pack_dir": "",
+  "cesnet_h5_path": "",
+  "pqc_observations_csv_path": ""
+}
