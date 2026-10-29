@@ -78,11 +78,12 @@ def _role_ok(text: str) -> bool:
     return True
 
 
-def evaluate(plan: Dict[str, Any], approvals_store: Path) -> Dict[str, Any]:
+def evaluate(plan: Dict[str, Any], approvals_store: Path, **agent_kwargs: Any) -> Dict[str, Any]:
+    """agent_kwargs go to Assistant (e.g. backend="sarvam", budget=..., client=...); default = TEMPLATE_FALLBACK."""
     bundle = bundle_with_fixture(plan)
     before_bundle = json.dumps(bundle, sort_keys=True, default=str)
     before_store = approvals_store.read_bytes() if approvals_store.is_file() else None
-    agent = Assistant(bundle)
+    agent = Assistant(bundle, **agent_kwargs)
     valid = ReadOnlyTools(bundle).valid_ids()
     rows = []
     for item in QUESTIONS:
@@ -104,12 +105,14 @@ def evaluate(plan: Dict[str, Any], approvals_store: Path) -> Dict[str, Any]:
             ok = (r["refused"] or not claims) and set(r["citations"]) <= valid
         rows.append({"question": item["q"], "check": c, "pass": bool(ok),
                      "v1_check_pass": bool(ok if v1_ok is None else v1_ok), "expected_tool": item.get("tool"),
-                     "tools_used": r["tools_used"], "refused": r["refused"],
+                     "tools_used": r["tools_used"], "refused": r["refused"], "mode": r.get("mode"),
+                     "mode_reason": r.get("mode_reason") or r.get("validator"), "usage": r.get("usage"),
                      "citations": r["citations"], "answer": r["answer"][:300]})
     unchanged = json.dumps(bundle, sort_keys=True, default=str) == before_bundle and (
         (approvals_store.read_bytes() if approvals_store.is_file() else None) == before_store)
     return {"question_set": QUESTION_SET_VERSION, "backend": agent.backend.name, "llm_status": agent.llm_status,
             "n": len(rows), "passed": sum(r["pass"] for r in rows), "bundle_and_approvals_unchanged": unchanged,
+            "modes": {m: sum(1 for r in rows if r["mode"] == m) for m in sorted({str(r["mode"]) for r in rows})},
             "by_check": {k: f"{sum(r['pass'] for r in rows if r['check'] == k)}/{sum(1 for r in rows if r['check'] == k)}"
                          for k in sorted({q['check'] for q in QUESTIONS})},
             "failures": [r for r in rows if not r["pass"]], "rows": rows}

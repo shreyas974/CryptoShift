@@ -16,6 +16,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from cryptoshift.agent.assistant import Assistant
+from cryptoshift.agent.sarvam import BudgetGuard, key_configured
 from cryptoshift.optimization.auth_check import PROJECT_ROOT, redact_secrets
 
 BUNDLE = Path(os.environ.get("CRYPTOSHIFT_AGENT_BUNDLE", PROJECT_ROOT / "scratch" / "derived" / "member3" / "bundle" / "plan.json"))
@@ -29,8 +30,15 @@ if not logger.handlers:
     logger.addHandler(h)
     logger.setLevel(logging.INFO)
 
-app = FastAPI(title="CryptoShift Assistant (local, read-only)")
-_assistant = Assistant(json.loads(BUNDLE.read_text(encoding="utf-8"))) if BUNDLE.is_file() else None
+app = FastAPI(title="CryptoShift Assistant (cloud LLM (Sarvam) with local read-only tools)")
+# Cloud mode only when the owner sets CRYPTOSHIFT_AGENT_MODE=sarvam and CRYPTOSHIFT_SARVAM_CREDIT_INR (stated balance).
+_MODE = os.environ.get("CRYPTOSHIFT_AGENT_MODE", "template")
+_BALANCE = os.environ.get("CRYPTOSHIFT_SARVAM_CREDIT_INR")
+_CUSTOM = os.environ.get("CRYPTOSHIFT_CLOUD_FOR_CUSTOM_SCANS", "off").lower() == "on"
+_budget = BudgetGuard(PROJECT_ROOT / "scratch" / "derived" / "agent_usage.json",
+                      credit_balance_inr=float(_BALANCE) if _BALANCE else None)
+_assistant = (Assistant(json.loads(BUNDLE.read_text(encoding="utf-8")), backend=_MODE, budget=_budget,
+                        cloud_for_custom_scans=_CUSTOM) if BUNDLE.is_file() else None)
 
 
 class Ask(BaseModel):
@@ -39,8 +47,12 @@ class Ask(BaseModel):
 
 @app.get("/health")
 def health() -> dict:
-    return {"status": "ok" if _assistant else "no-bundle", "backend": "template-deterministic-v1",
-            "llm": "BLOCKED", "bundle_loaded": _assistant is not None}
+    cloud_ok, why = _assistant.cloud_status() if _assistant else (False, "no bundle")
+    return {"status": "ok" if _assistant else "no-bundle", "label": "cloud LLM (Sarvam) with local read-only tools",
+            "mode": "SARVAM_CLOUD" if cloud_ok else "TEMPLATE_FALLBACK", "mode_reason": why,
+            "sarvam_key_configured": key_configured(), "cloud_for_custom_scans": _CUSTOM,
+            "usage": {k: _budget.state[k] for k in ("requests", "prompt_tokens", "completion_tokens", "estimated_cost_inr")},
+            "bundle_loaded": _assistant is not None}
 
 
 @app.get("/tools")
@@ -55,5 +67,5 @@ def ask(body: Ask) -> dict:
     res = _assistant.answer(body.question)
     logger.info(json.dumps({"q_sha256": hashlib.sha256(body.question.encode()).hexdigest()[:16], "q_len": len(body.question),
                             "q_preview": redact_secrets(body.question)[:60], "tools": res["tools_used"],
-                            "citations": res["citations"][:10], "refused": res["refused"]}))
+                            "citations": res["citations"][:10], "refused": res["refused"], "mode": res.get("mode")}))
     return res
