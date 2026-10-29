@@ -1,0 +1,27 @@
+{
+  "label": "Rollback plan; rehearsed on a temporary COPY (TEST SCENARIO)",
+  "profile": "interbank_tls_nginx.conf",
+  "restore": "restore the profile copy from snapshot sha256:457d33bd76ef598f3d9715d8bde0dddee2c6ee56f233ebdefc35953e78003421",
+  "snapshot_sha256": "457d33bd76ef598f3d9715d8bde0dddee2c6ee56f233ebdefc35953e78003421",
+  "trigger": "compatibility gate: classical-only peer must still connect after the change",
+  "recovery_check": "re-run the classical handshake against the restored profile; success required",
+  "rehearsal_result": {
+    "forced_failure_detected": true,
+    "restored_hash_matches_snapshot": true,
+    "recovered": true,
+    "originals_unchanged": true
+  },
+  "recovery_command": "openssl s_client -connect 127.0.0.1:56031 -servername localhost -groups P-256",
+  "warnings": [
+    "Restored profile still enables 3DES (DES-CBC3-SHA); NIST SP 800-131A disallows it - compensating control or cipher clean-up needed",
+    "Never restore SHA-1 or 3DES configurations as a rollback target; fall back to SHA-256 / AES-256-GCM classical baselines."
+  ],
+  "applies_to_steps": [
+    "migrate:auth_gateway",
+    "migrate:card_vault",
+    "migrate:interbank_tls",
+    "migrate:ledger_audit",
+    "migrate:payment_signing",
+    "migrate:settlement_batch"
+  ]
+}

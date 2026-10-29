@@ -1,0 +1,24 @@
+{
+ "frozen_utc": "2026-10-29T10:43:28+00:00",
+ "purpose": "detector + scoring sources frozen before round-2 held-out labels were written",
+ "sha256": {
+  "src/cryptoshift/inventory/__init__.py": "ff470106d391405880f05f70a88556f21a061265ec34922861a4550c609aa2d4",
+  "src/cryptoshift/inventory/algorithm_ids.py": "f4dd5ba6d6bbd546671fd4acdcab2bf54c3ab32ce0ecdc0b5c451f5f0b10a64f",
+  "src/cryptoshift/inventory/certificates.py": "68a1bbcb809f6f4a3503cfdbe2ea70ade7e3e64eca2acacfc3de7ada186bc434",
+  "src/cryptoshift/inventory/common.py": "5b26c66a1ef2a97609ad4929797502b2781a30bd4fdc805356dc6e4434893598",
+  "src/cryptoshift/inventory/cyclonedx.py": "789cb9dd90ce8e7746b891390d93774953ac5f189c109c6ea1bc68e0ccdebbf1",
+  "src/cryptoshift/inventory/haproxy.py": "d0ba70b1f68799f768b89980d25ea92bbfa2eaa736dfad0c36507fdb1839e615",
+  "src/cryptoshift/inventory/java_source.py": "08f3ed7d9d100bcffa3e2e53b0ec347d540d8f5a74c93c062bcebd7c0903fcd8",
+  "src/cryptoshift/inventory/manifests.py": "b9b56678c410792a6facb7e57381344427fc1fce24c00a6dddace06fd969ee5e",
+  "src/cryptoshift/inventory/python_ast.py": "a414de087b1ac1cabe03d54a8afc6eb4e4fe95907854351f1991731a23983ab8",
+  "src/cryptoshift/inventory/relationships.py": "22e0c7040a11cc111061bfa9a8d974a091645c5dc86f560c933d9c4565daff75",
+  "src/cryptoshift/inventory/report.py": "79077d0d87cf42755a3b7e05cdd1d79aaeda8b023f110bc6a9760686e2f281b8",
+  "src/cryptoshift/inventory/scan.py": "4db377c9ade1ddc8d4a77e2b8197034aef76c739a7f91c6f60486aed32decfdf",
+  "src/cryptoshift/inventory/services.py": "5974b77075f171486f8cd5d070047db92148916a1d745b89b6841dacc908e637",
+  "src/cryptoshift/inventory/shell_scripts.py": "c9ca329df8ae43aa1998886bb9f8c385ae7edf2ca280de8a90025120bd5fd4bb",
+  "src/cryptoshift/inventory/structured_config.py": "ca40cbf27d5ff8b56c3b19af4d77e5d1a26af6feb100589a208ab639833b4f89",
+  "src/cryptoshift/inventory/tls_config.py": "adaee0610641ab9653ae483fe69ac955f6f900011053047ddfcf7caf787574a2",
+  "src/cryptoshift/rules.py": "33c4b82ce1ba37337ffe590ab0485ae4a73511806ebe6c62195e222b634fc816",
+  "scripts/evaluate_public_labels.py": "1346a7c8da0871802de2739899feb95b797f3b87a0eafe87739c972fd96f38b6"
+ }
+}

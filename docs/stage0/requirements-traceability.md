@@ -30,3 +30,19 @@ Status labels: **VERIFIED** (implemented and run, evidence below) · **PARTIAL**
 | PQC role separation (ML-KEM vs ML-DSA/SLH-DSA; HOLD on unknown) | **VERIFIED** | `test_contextual_pqc_roles_distinguish_kem_vs_dsa`, `inventory/common.candidate_mapping`, cert test asserts ML-DSA for RSA certificate. | Member 2 |
 | Secret hygiene | **VERIFIED** | `scripts/verify_repo.py` PASS; inventory skips `.env*`/`qcloud.env`/key stores unopened (unit test). | All |
 | Risk score | **MOCKED / provisional** | `scoring.compute_service_risk`: mean of hand-set per-algorithm base risks × criticality multiplier (1.25/1.0/0.8) + min(retention_years/10, 1.5), capped at 10. Inputs are synthetic; weights are not validated. | Member 3 |
+
+## Member 3 update (2026-10-29, additive)
+
+Evidence: `docs/evidence/member3-log.md`, `reports/member3/summary.md`, `reports/member3/plan.json`.
+
+| # | Requirement | Previous | Now | Evidence | Remaining gap |
+|---|---|---|---|---|---|
+| D2 | Migration sequence | PARTIAL | **VERIFIED on synthetic inputs** | `planning.planner` + deterministic scheduler: tasks from findings, provenance edges, objective 292.8, 0 violations | Constraint values are assumptions; 2 services have only declared data |
+| D3 | Before-and-after protocol traces | MOCKED | **VERIFIED (TEST SCENARIO, loopback)** | `gates.openssl_lab.traces`: X25519 vs X25519MLKEM768; ML-DSA-65 certificate handshake | Not real bank peers or networks |
+| D4 | Compatibility tests | MOCKED | **VERIFIED (loopback)** | 11/11 matrix cases incl. 7 negative | Service-specific stacks (KMS, JWT libs) untested |
+| D5 | Rollback plan | PARTIAL | **VERIFIED rehearsal on a copy** | `gates.rollback_rehearsal`: failure → restore → hash → classical recovery | No real service deployment |
+| E2 | Protocol correctness | PLANNED | **PARTIAL** | handshakes negotiate the expected group; ML-KEM/ML-DSA round-trip self-tests | No NIST KAT vectors; no transcript-level conformance testing |
+| E3 | Overhead | MOCKED | **PARTIAL** | handshake bytes measured (+~1.1 kB each way); timings recorded | Timing dominated by process start-up; no network measurement |
+| E4 | Feasible migration dependencies | PARTIAL | **VERIFIED on synthetic inputs** | 0 dependency violations; cycles detected and reported (tested) | Graph from synthetic configs |
+| — | QpiAI Opt solve | REPORTED | **BLOCKED** | offline MILP checks only | Owner authorization + key needed |
+| — | QAOA −13.07 | REPORTED | **REPRODUCED (SIMULATOR)** with documented caveats | `optimization.member3_qpiai` | Fixed-angle QAOA barely above uniform |

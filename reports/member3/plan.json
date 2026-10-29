@@ -1,0 +1,1381 @@
+{
+  "schema_version": "member3-plan/1.0",
+  "generated_at_utc": "2026-10-29T11:17:58+00:00",
+  "status_labels": {
+    "inventory": "VERIFIED on SYNTHETIC demo configs",
+    "risk_score": "PROVISIONAL, UNVALIDATED",
+    "schedule": "VERIFIED (deterministic exact search; constraints are ASSUMPTIONS)",
+    "gates": "VERIFIED loopback evidence; Generic loopback lab evidence (OpenSSL 3.5 s_server/s_client, test keys). It does NOT exercise the service's own stack (e.g. KMS key wrapping, JWT libraries, partner peers); READY means 'eligible for human review', not 'verified in production'.",
+    "approval": "human-only"
+  },
+  "target": "demo_bank_app/configs",
+  "findings": [
+    {
+      "finding_id": "INV-0001",
+      "service_id": "auth_gateway",
+      "file_path": "demo_bank_app/configs/auth_gateway_tls.yaml",
+      "line_number": 11,
+      "legacy_algorithm": "RSA",
+      "quantum_threat": "Shor-CRQC (signature forgery once a CRQC exists)",
+      "target_pqc_algorithm": "Candidate: ML-DSA (FIPS 204) or SLH-DSA (FIPS 205), subject to library/peer support",
+      "nist_standard": "FIPS 204 (ML-DSA) / FIPS 205 (SLH-DSA)",
+      "severity": "CRITICAL",
+      "evidence_type": "config_file",
+      "operation_purpose": "digital_signature",
+      "confidence": "high",
+      "rationale": "oauth_jwt.signing_algorithm: JWS algorithm RS256 (RSA signature)",
+      "owner": "unknown",
+      "library_or_protocol": "yaml",
+      "human_review_status": "requires_human_review",
+      "detector": "structured_config",
+      "algorithm_family": "RSA",
+      "detected_value": "oauth_jwt.signing_algorithm = RS256",
+      "location": "key oauth_jwt.signing_algorithm (line 11)",
+      "snippet_redacted": "signing_algorithm: RS256",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "declared in file (service_id key, line 2)",
+      "service_id_confidence": "high"
+    },
+    {
+      "finding_id": "INV-0002",
+      "service_id": "auth_gateway",
+      "file_path": "demo_bank_app/configs/auth_gateway_tls.yaml",
+      "line_number": 12,
+      "legacy_algorithm": "RSA",
+      "quantum_threat": "Potential quantum-vulnerable primitive (operation purpose unresolved)",
+      "target_pqc_algorithm": "HOLD: Requires human review of operation purpose (ML-KEM for key establishment vs. ML-DSA for signatures)",
+      "nist_standard": "Pending Purpose Classification (FIPS 203 vs. FIPS 204)",
+      "severity": "MEDIUM",
+      "evidence_type": "config_file",
+      "operation_purpose": "unknown",
+      "confidence": "medium",
+      "rationale": "oauth_jwt.key_type: RSA key type (2048); signing vs key transport not stated",
+      "owner": "unknown",
+      "library_or_protocol": "yaml",
+      "human_review_status": "requires_human_review",
+      "detector": "structured_config",
+      "algorithm_family": "RSA",
+      "detected_value": "oauth_jwt.key_type = RSA-2048",
+      "location": "key oauth_jwt.key_type (line 12)",
+      "snippet_redacted": "key_type: RSA-2048",
+      "ambiguity": "ambiguous",
+      "in_test_file": false,
+      "service_id_basis": "declared in file (service_id key, line 2)",
+      "service_id_confidence": "high"
+    },
+    {
+      "finding_id": "INV-0003",
+      "service_id": "auth_gateway",
+      "file_path": "demo_bank_app/configs/auth_gateway_tls.yaml",
+      "line_number": 13,
+      "legacy_algorithm": "SHA-1",
+      "quantum_threat": "Classically broken collision resistance",
+      "target_pqc_algorithm": "Candidate: SHA-256/SHA-384 (FIPS 180-4) or SHA3-256 (FIPS 202)",
+      "nist_standard": "FIPS 180-4 / FIPS 202",
+      "severity": "HIGH",
+      "evidence_type": "config_file",
+      "operation_purpose": "message_digest",
+      "confidence": "high",
+      "rationale": "oauth_jwt.thumbprint_digest: hashlib.sha1: weak hash",
+      "owner": "unknown",
+      "library_or_protocol": "yaml",
+      "human_review_status": "requires_human_review",
+      "detector": "structured_config",
+      "algorithm_family": "SHA-1",
+      "detected_value": "oauth_jwt.thumbprint_digest = hashlib.sha1",
+      "location": "key oauth_jwt.thumbprint_digest (line 13)",
+      "snippet_redacted": "thumbprint_digest: hashlib.sha1",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "declared in file (service_id key, line 2)",
+      "service_id_confidence": "high"
+    },
+    {
+      "finding_id": "INV-0004",
+      "service_id": "auth_gateway",
+      "file_path": "demo_bank_app/configs/auth_gateway_tls.yaml",
+      "line_number": 17,
+      "legacy_algorithm": "ECDH",
+      "quantum_threat": "Shor-CRQC (harvest-now-decrypt-later exposure of key establishment)",
+      "target_pqc_algorithm": "Candidate: ML-KEM (FIPS 203), e.g. ML-KEM-768 or hybrid X25519MLKEM768 in TLS 1.3",
+      "nist_standard": "FIPS 203 (ML-KEM)",
+      "severity": "CRITICAL",
+      "evidence_type": "config_file",
+      "operation_purpose": "key_establishment",
+      "confidence": "high",
+      "rationale": "tls_listener.key_exchange_curve: ECDHE (P256) key agreement",
+      "owner": "unknown",
+      "library_or_protocol": "yaml",
+      "human_review_status": "requires_human_review",
+      "detector": "structured_config",
+      "algorithm_family": "ECDH",
+      "detected_value": "tls_listener.key_exchange_curve = ECDHE-P256",
+      "location": "key tls_listener.key_exchange_curve (line 17)",
+      "snippet_redacted": "key_exchange_curve: ECDHE-P256",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "declared in file (service_id key, line 2)",
+      "service_id_confidence": "high"
+    },
+    {
+      "finding_id": "INV-0005",
+      "service_id": "card_vault",
+      "file_path": "demo_bank_app/configs/card_vault_crypto.yaml",
+      "line_number": 13,
+      "legacy_algorithm": "RSA",
+      "quantum_threat": "Shor-CRQC (harvest-now-decrypt-later exposure of key establishment)",
+      "target_pqc_algorithm": "Candidate: ML-KEM (FIPS 203), e.g. ML-KEM-768 or hybrid X25519MLKEM768 in TLS 1.3",
+      "nist_standard": "FIPS 203 (ML-KEM)",
+      "severity": "CRITICAL",
+      "evidence_type": "config_file",
+      "operation_purpose": "key_establishment",
+      "confidence": "high",
+      "rationale": "kms_envelope.dek_wrapping_algorithm: RSA_OAEP: RSA encryption / key transport",
+      "owner": "unknown",
+      "library_or_protocol": "yaml",
+      "human_review_status": "requires_human_review",
+      "detector": "structured_config",
+      "algorithm_family": "RSA",
+      "detected_value": "kms_envelope.dek_wrapping_algorithm = RSA_OAEP",
+      "location": "key kms_envelope.dek_wrapping_algorithm (line 13)",
+      "snippet_redacted": "dek_wrapping_algorithm: RSA_OAEP",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "declared in file (service_id key, line 3)",
+      "service_id_confidence": "high"
+    },
+    {
+      "finding_id": "INV-0006",
+      "service_id": "card_vault",
+      "file_path": "demo_bank_app/configs/card_vault_crypto.yaml",
+      "line_number": 15,
+      "legacy_algorithm": "3DES",
+      "quantum_threat": "Classically weak cipher (small block/key); Grover further reduces margin",
+      "target_pqc_algorithm": "Candidate: AES-256-GCM",
+      "nist_standard": "NIST SP 800-38D",
+      "severity": "HIGH",
+      "evidence_type": "config_file",
+      "operation_purpose": "symmetric_encryption",
+      "confidence": "medium",
+      "rationale": "kms_envelope.pin_block_cipher: cipher string enables 3DES suites (token '3DES')",
+      "owner": "unknown",
+      "library_or_protocol": "yaml",
+      "human_review_status": "requires_human_review",
+      "detector": "structured_config",
+      "algorithm_family": "3DES",
+      "detected_value": "kms_envelope.pin_block_cipher = 3DES",
+      "location": "key kms_envelope.pin_block_cipher (line 15)",
+      "snippet_redacted": "pin_block_cipher: 3DES",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "declared in file (service_id key, line 3)",
+      "service_id_confidence": "high"
+    },
+    {
+      "finding_id": "INV-0007",
+      "service_id": "card_vault",
+      "file_path": "demo_bank_app/configs/card_vault_crypto.yaml",
+      "line_number": 19,
+      "legacy_algorithm": "Hybrid-ML-KEM",
+      "quantum_threat": "None identified (PQC or hybrid PQC primitive present)",
+      "target_pqc_algorithm": "No migration candidate (already PQC/hybrid); verify parameters and fallback",
+      "nist_standard": "FIPS 203 / FIPS 204 / FIPS 205",
+      "severity": "INFO",
+      "evidence_type": "config_file",
+      "operation_purpose": "key_establishment",
+      "confidence": "high",
+      "rationale": "tls_client.preferred_group: hybrid/PQC key-exchange group(s) X25519MLKEM768 configured",
+      "owner": "unknown",
+      "library_or_protocol": "yaml",
+      "human_review_status": "requires_human_review",
+      "detector": "structured_config",
+      "algorithm_family": "Hybrid-ML-KEM",
+      "detected_value": "tls_client.preferred_group = X25519MLKEM768",
+      "location": "key tls_client.preferred_group (line 19)",
+      "snippet_redacted": "preferred_group: X25519MLKEM768",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "declared in file (service_id key, line 3)",
+      "service_id_confidence": "high"
+    },
+    {
+      "finding_id": "INV-0008",
+      "service_id": "interbank_tls",
+      "file_path": "demo_bank_app/configs/interbank_tls_nginx.conf",
+      "line_number": 11,
+      "legacy_algorithm": "ECDH",
+      "quantum_threat": "Shor-CRQC (harvest-now-decrypt-later exposure of key establishment)",
+      "target_pqc_algorithm": "Candidate: ML-KEM (FIPS 203), e.g. ML-KEM-768 or hybrid X25519MLKEM768 in TLS 1.3",
+      "nist_standard": "FIPS 203 (ML-KEM)",
+      "severity": "CRITICAL",
+      "evidence_type": "config_file",
+      "operation_purpose": "key_establishment",
+      "confidence": "high",
+      "rationale": "ssl_ecdh_curve: classical key-exchange groups prime256v1",
+      "owner": "unknown",
+      "library_or_protocol": "nginx",
+      "human_review_status": "requires_human_review",
+      "detector": "tls_config",
+      "algorithm_family": "ECDH",
+      "detected_value": "ssl_ecdh_curve prime256v1",
+      "location": "directive ssl_ecdh_curve (line 11)",
+      "snippet_redacted": "ssl_ecdh_curve prime256v1;",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "declared in file (header comment, line 2)",
+      "service_id_confidence": "medium"
+    },
+    {
+      "finding_id": "INV-0009",
+      "service_id": "interbank_tls",
+      "file_path": "demo_bank_app/configs/interbank_tls_nginx.conf",
+      "line_number": 12,
+      "legacy_algorithm": "ECDH",
+      "quantum_threat": "Shor-CRQC (harvest-now-decrypt-later exposure of key establishment)",
+      "target_pqc_algorithm": "Candidate: ML-KEM (FIPS 203), e.g. ML-KEM-768 or hybrid X25519MLKEM768 in TLS 1.3",
+      "nist_standard": "FIPS 203 (ML-KEM)",
+      "severity": "CRITICAL",
+      "evidence_type": "config_file",
+      "operation_purpose": "key_establishment",
+      "confidence": "medium",
+      "rationale": "ssl_ciphers: cipher string enables classical ECDHE key exchange (token 'ECDHE-RSA-AES256-GCM-SHA384')",
+      "owner": "unknown",
+      "library_or_protocol": "nginx",
+      "human_review_status": "requires_human_review",
+      "detector": "tls_config",
+      "algorithm_family": "ECDH",
+      "detected_value": "ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384:DES-CBC3-SHA",
+      "location": "directive ssl_ciphers (line 12)",
+      "snippet_redacted": "ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384:DES-CBC3-SHA;",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "declared in file (header comment, line 2)",
+      "service_id_confidence": "medium"
+    },
+    {
+      "finding_id": "INV-0011",
+      "service_id": "interbank_tls",
+      "file_path": "demo_bank_app/configs/interbank_tls_nginx.conf",
+      "line_number": 12,
+      "legacy_algorithm": "RSA",
+      "quantum_threat": "Shor-CRQC (harvest-now-decrypt-later exposure of key establishment)",
+      "target_pqc_algorithm": "Candidate: ML-KEM (FIPS 203), e.g. ML-KEM-768 or hybrid X25519MLKEM768 in TLS 1.3",
+      "nist_standard": "FIPS 203 (ML-KEM)",
+      "severity": "CRITICAL",
+      "evidence_type": "config_file",
+      "operation_purpose": "key_establishment",
+      "confidence": "medium",
+      "rationale": "ssl_ciphers: cipher string enables static RSA key transport (no forward secrecy) (token 'DES-CBC3-SHA')",
+      "owner": "unknown",
+      "library_or_protocol": "nginx",
+      "human_review_status": "requires_human_review",
+      "detector": "tls_config",
+      "algorithm_family": "RSA",
+      "detected_value": "ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384:DES-CBC3-SHA",
+      "location": "directive ssl_ciphers (line 12)",
+      "snippet_redacted": "ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384:DES-CBC3-SHA;",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "declared in file (header comment, line 2)",
+      "service_id_confidence": "medium"
+    },
+    {
+      "finding_id": "INV-0012",
+      "service_id": "interbank_tls",
+      "file_path": "demo_bank_app/configs/interbank_tls_nginx.conf",
+      "line_number": 12,
+      "legacy_algorithm": "3DES",
+      "quantum_threat": "Classically weak cipher (small block/key); Grover further reduces margin",
+      "target_pqc_algorithm": "Candidate: AES-256-GCM",
+      "nist_standard": "NIST SP 800-38D",
+      "severity": "HIGH",
+      "evidence_type": "config_file",
+      "operation_purpose": "symmetric_encryption",
+      "confidence": "medium",
+      "rationale": "ssl_ciphers: cipher string enables 3DES suites (token 'DES-CBC3-SHA')",
+      "owner": "unknown",
+      "library_or_protocol": "nginx",
+      "human_review_status": "requires_human_review",
+      "detector": "tls_config",
+      "algorithm_family": "3DES",
+      "detected_value": "ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384:DES-CBC3-SHA",
+      "location": "directive ssl_ciphers (line 12)",
+      "snippet_redacted": "ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384:DES-CBC3-SHA;",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "declared in file (header comment, line 2)",
+      "service_id_confidence": "medium"
+    },
+    {
+      "finding_id": "INV-0013",
+      "service_id": "interbank_tls",
+      "file_path": "demo_bank_app/configs/interbank_tls_nginx.conf",
+      "line_number": 16,
+      "legacy_algorithm": "RSA",
+      "quantum_threat": "Shor-CRQC (signature forgery once a CRQC exists)",
+      "target_pqc_algorithm": "Candidate: ML-DSA (FIPS 204) or SLH-DSA (FIPS 205), subject to library/peer support",
+      "nist_standard": "FIPS 204 (ML-DSA) / FIPS 205 (SLH-DSA)",
+      "severity": "CRITICAL",
+      "evidence_type": "config_file",
+      "operation_purpose": "digital_signature",
+      "confidence": "low",
+      "rationale": "ssl_certificate: certificate key type inferred from file name only (file not inspected)",
+      "owner": "unknown",
+      "library_or_protocol": "nginx",
+      "human_review_status": "requires_human_review",
+      "detector": "tls_config",
+      "algorithm_family": "RSA",
+      "detected_value": "ssl_certificate [REDACTED_TOKEN].pem",
+      "location": "directive ssl_certificate (line 16)",
+      "snippet_redacted": "ssl_certificate [REDACTED_TOKEN].pem;",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "declared in file (header comment, line 2)",
+      "service_id_confidence": "medium"
+    },
+    {
+      "finding_id": "INV-0014",
+      "service_id": "payment_signing",
+      "file_path": "demo_bank_app/configs/payment_signing_service.py",
+      "line_number": 8,
+      "legacy_algorithm": "ECDSA",
+      "quantum_threat": "Shor-CRQC (signature forgery once a CRQC exists)",
+      "target_pqc_algorithm": "Candidate: ML-DSA (FIPS 204) or SLH-DSA (FIPS 205), subject to library/peer support",
+      "nist_standard": "FIPS 204 (ML-DSA) / FIPS 205 (SLH-DSA)",
+      "severity": "CRITICAL",
+      "evidence_type": "source_code",
+      "operation_purpose": "digital_signature",
+      "confidence": "low",
+      "rationale": "algorithm constant PRIMARY_SIGNATURE_SCHEME: ECDSA (P256) (constant rule; usage not traced)",
+      "owner": "unknown",
+      "library_or_protocol": "constant",
+      "human_review_status": "requires_human_review",
+      "detector": "python_ast",
+      "algorithm_family": "ECDSA",
+      "detected_value": "PRIMARY_SIGNATURE_SCHEME = 'ECDSA_P256'",
+      "location": "line 8",
+      "snippet_redacted": "PRIMARY_SIGNATURE_SCHEME = \"ECDSA_P256\"",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "declared in file (SERVICE_ID constant, line 3)",
+      "service_id_confidence": "high"
+    },
+    {
+      "finding_id": "INV-0015",
+      "service_id": "payment_signing",
+      "file_path": "demo_bank_app/configs/payment_signing_service.py",
+      "line_number": 9,
+      "legacy_algorithm": "RSA",
+      "quantum_threat": "Shor-CRQC (signature forgery once a CRQC exists)",
+      "target_pqc_algorithm": "Candidate: ML-DSA (FIPS 204) or SLH-DSA (FIPS 205), subject to library/peer support",
+      "nist_standard": "FIPS 204 (ML-DSA) / FIPS 205 (SLH-DSA)",
+      "severity": "CRITICAL",
+      "evidence_type": "source_code",
+      "operation_purpose": "digital_signature",
+      "confidence": "low",
+      "rationale": "algorithm constant FALLBACK_XMLDSIG_SCHEME: JWS algorithm RS256 (RSA signature) (constant rule; usage not traced)",
+      "owner": "unknown",
+      "library_or_protocol": "constant",
+      "human_review_status": "requires_human_review",
+      "detector": "python_ast",
+      "algorithm_family": "RSA",
+      "detected_value": "FALLBACK_XMLDSIG_SCHEME = 'RS256'",
+      "location": "line 9",
+      "snippet_redacted": "FALLBACK_XMLDSIG_SCHEME = \"RS256\"",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "declared in file (SERVICE_ID constant, line 3)",
+      "service_id_confidence": "high"
+    }
+  ],
+  "services": {
+    "auth_gateway": {
+      "service_id": "auth_gateway",
+      "evidence_source": "OBSERVED",
+      "finding_ids": [
+        "INV-0001",
+        "INV-0002",
+        "INV-0003",
+        "INV-0004"
+      ],
+      "hold_finding_ids": [
+        "INV-0002"
+      ],
+      "files": [
+        "demo_bank_app/configs/auth_gateway_tls.yaml"
+      ],
+      "legacy_algorithms": [
+        "ECDH",
+        "RSA",
+        "SHA-1"
+      ],
+      "candidate_targets": [
+        "Candidate: ML-DSA (FIPS 204) or SLH-DSA (FIPS 205), subject to library/peer support [digital_signature]",
+        "Candidate: ML-KEM (FIPS 203), e.g. ML-KEM-768 or hybrid X25519MLKEM768 in TLS 1.3 [key_establishment]",
+        "Candidate: SHA-256/SHA-384 (FIPS 180-4) or SHA3-256 (FIPS 202) [message_digest]",
+        "HOLD: Requires human review of operation purpose (ML-KEM for key establishment vs. ML-DSA for signatures) [unknown]"
+      ],
+      "duration_minutes": 35,
+      "rollout_cost": 18.0,
+      "criticality": "HIGH",
+      "verification_ready_wave0": true,
+      "field_sources": {
+        "criticality": "OBSERVED (demo_bank_app/configs/auth_gateway_tls.yaml)",
+        "verification_ready_wave0": "OBSERVED (demo_bank_app/configs/auth_gateway_tls.yaml)",
+        "duration_minutes": "DECLARED (demo_bank_app/services.py)",
+        "rollout_cost": "DECLARED (demo_bank_app/services.py)"
+      },
+      "features": {
+        "group_purpose_pairs": [
+          [
+            "RSA",
+            "digital_signature"
+          ],
+          [
+            "RSA",
+            "unknown"
+          ],
+          [
+            "WEAK_HASH",
+            "message_digest"
+          ],
+          [
+            "EC",
+            "key_establishment"
+          ]
+        ],
+        "network_exposure": "observed_listener",
+        "criticality": "HIGH",
+        "dependents_norm": 1.0,
+        "verification_ready_wave0": true
+      },
+      "risk": {
+        "score": 13.3,
+        "contributions": {
+          "crypto_exposure": 8.4,
+          "network_exposure": 1.5,
+          "criticality": 1.4,
+          "dependents": 1.5,
+          "verification_readiness": 0.5
+        },
+        "inputs": {
+          "crypto_exposure": 2.8,
+          "network_exposure": 1.0,
+          "criticality": 0.7,
+          "dependents": 1.0,
+          "verification_readiness": 1.0
+        },
+        "reason": "crypto_exposure=2.80x3=8.40; network_exposure=1.00x1.5=1.50; criticality=0.70x2=1.40; dependents=1.00x1.5=1.50; verification_readiness=1.00x0.5=0.50 | pairs=['EC/key_establishment', 'RSA/digital_signature', 'RSA/unknown', 'WEAK_HASH/message_digest'] | criticality=HIGH | exposure=observed_listener",
+        "label": "PROVISIONAL, UNVALIDATED"
+      }
+    },
+    "card_vault": {
+      "service_id": "card_vault",
+      "evidence_source": "OBSERVED",
+      "finding_ids": [
+        "INV-0005",
+        "INV-0006"
+      ],
+      "hold_finding_ids": [],
+      "files": [
+        "demo_bank_app/configs/card_vault_crypto.yaml"
+      ],
+      "legacy_algorithms": [
+        "3DES",
+        "RSA"
+      ],
+      "candidate_targets": [
+        "Candidate: AES-256-GCM [symmetric_encryption]",
+        "Candidate: ML-KEM (FIPS 203), e.g. ML-KEM-768 or hybrid X25519MLKEM768 in TLS 1.3 [key_establishment]"
+      ],
+      "duration_minutes": 35,
+      "rollout_cost": 20.0,
+      "criticality": "HIGH",
+      "verification_ready_wave0": false,
+      "field_sources": {
+        "criticality": "OBSERVED (demo_bank_app/configs/card_vault_crypto.yaml)",
+        "verification_ready_wave0": "OBSERVED (demo_bank_app/configs/card_vault_crypto.yaml)",
+        "duration_minutes": "DECLARED (demo_bank_app/services.py)",
+        "rollout_cost": "DECLARED (demo_bank_app/services.py)"
+      },
+      "features": {
+        "group_purpose_pairs": [
+          [
+            "RSA",
+            "key_establishment"
+          ],
+          [
+            "LEGACY_SYM",
+            "symmetric_encryption"
+          ]
+        ],
+        "network_exposure": "none_observed",
+        "criticality": "HIGH",
+        "dependents_norm": 0.0,
+        "verification_ready_wave0": false
+      },
+      "risk": {
+        "score": 5.9,
+        "contributions": {
+          "crypto_exposure": 4.5,
+          "network_exposure": 0.0,
+          "criticality": 1.4,
+          "dependents": 0.0,
+          "verification_readiness": 0.0
+        },
+        "inputs": {
+          "crypto_exposure": 1.5,
+          "network_exposure": 0.0,
+          "criticality": 0.7,
+          "dependents": 0.0,
+          "verification_readiness": 0.0
+        },
+        "reason": "crypto_exposure=1.50x3=4.50; network_exposure=0.00x1.5=0.00; criticality=0.70x2=1.40; dependents=0.00x1.5=0.00; verification_readiness=0.00x0.5=0.00 | pairs=['LEGACY_SYM/symmetric_encryption', 'RSA/key_establishment'] | criticality=HIGH | exposure=none_observed",
+        "label": "PROVISIONAL, UNVALIDATED"
+      }
+    },
+    "interbank_tls": {
+      "service_id": "interbank_tls",
+      "evidence_source": "OBSERVED",
+      "finding_ids": [
+        "INV-0008",
+        "INV-0009",
+        "INV-0011",
+        "INV-0012",
+        "INV-0013"
+      ],
+      "hold_finding_ids": [],
+      "files": [
+        "demo_bank_app/configs/interbank_tls_nginx.conf"
+      ],
+      "legacy_algorithms": [
+        "3DES",
+        "ECDH",
+        "RSA"
+      ],
+      "candidate_targets": [
+        "Candidate: AES-256-GCM [symmetric_encryption]",
+        "Candidate: ML-DSA (FIPS 204) or SLH-DSA (FIPS 205), subject to library/peer support [digital_signature]",
+        "Candidate: ML-KEM (FIPS 203), e.g. ML-KEM-768 or hybrid X25519MLKEM768 in TLS 1.3 [key_establishment]"
+      ],
+      "duration_minutes": 40,
+      "rollout_cost": 22.0,
+      "criticality": "CRITICAL",
+      "verification_ready_wave0": true,
+      "field_sources": {
+        "criticality": "DECLARED (demo_bank_app/services.py)",
+        "verification_ready_wave0": "DECLARED (demo_bank_app/services.py)",
+        "duration_minutes": "DECLARED (demo_bank_app/services.py)",
+        "rollout_cost": "DECLARED (demo_bank_app/services.py)"
+      },
+      "features": {
+        "group_purpose_pairs": [
+          [
+            "EC",
+            "key_establishment"
+          ],
+          [
+            "EC",
+            "key_establishment"
+          ],
+          [
+            "RSA",
+            "key_establishment"
+          ],
+          [
+            "LEGACY_SYM",
+            "symmetric_encryption"
+          ],
+          [
+            "RSA",
+            "digital_signature"
+          ]
+        ],
+        "network_exposure": "observed_listener",
+        "criticality": "CRITICAL",
+        "dependents_norm": 0.3333333333333333,
+        "verification_ready_wave0": true
+      },
+      "risk": {
+        "score": 13.5,
+        "contributions": {
+          "crypto_exposure": 9.0,
+          "network_exposure": 1.5,
+          "criticality": 2.0,
+          "dependents": 0.5,
+          "verification_readiness": 0.5
+        },
+        "inputs": {
+          "crypto_exposure": 3.0,
+          "network_exposure": 1.0,
+          "criticality": 1.0,
+          "dependents": 0.3333333333333333,
+          "verification_readiness": 1.0
+        },
+        "reason": "crypto_exposure=3.00x3=9.00; network_exposure=1.00x1.5=1.50; criticality=1.00x2=2.00; dependents=0.33x1.5=0.50; verification_readiness=1.00x0.5=0.50 | pairs=['EC/key_establishment', 'LEGACY_SYM/symmetric_encryption', 'RSA/digital_signature', 'RSA/key_establishment'] | criticality=CRITICAL | exposure=observed_listener",
+        "label": "PROVISIONAL, UNVALIDATED"
+      }
+    },
+    "ledger_audit": {
+      "service_id": "ledger_audit",
+      "evidence_source": "DECLARED_ONLY",
+      "finding_ids": [],
+      "hold_finding_ids": [],
+      "files": [],
+      "legacy_algorithms": [
+        "ECDSA-P256",
+        "SHA-1"
+      ],
+      "candidate_targets": [
+        "HOLD: no scanned evidence; algorithms only DECLARED in synthetic descriptor (purpose unverified)"
+      ],
+      "duration_minutes": 30,
+      "rollout_cost": 15.0,
+      "criticality": "CRITICAL",
+      "verification_ready_wave0": true,
+      "field_sources": {
+        "criticality": "DECLARED (demo_bank_app/services.py)",
+        "verification_ready_wave0": "DECLARED (demo_bank_app/services.py)",
+        "duration_minutes": "DECLARED (demo_bank_app/services.py)",
+        "rollout_cost": "DECLARED (demo_bank_app/services.py)"
+      },
+      "features": {
+        "group_purpose_pairs": [
+          [
+            "EC",
+            "unknown"
+          ],
+          [
+            "WEAK_HASH",
+            "unknown"
+          ]
+        ],
+        "network_exposure": "unknown",
+        "criticality": "CRITICAL",
+        "dependents_norm": 1.0,
+        "verification_ready_wave0": true
+      },
+      "risk": {
+        "score": 7.75,
+        "contributions": {
+          "crypto_exposure": 3.0,
+          "network_exposure": 0.75,
+          "criticality": 2.0,
+          "dependents": 1.5,
+          "verification_readiness": 0.5
+        },
+        "inputs": {
+          "crypto_exposure": 1.0,
+          "network_exposure": 0.5,
+          "criticality": 1.0,
+          "dependents": 1.0,
+          "verification_readiness": 1.0
+        },
+        "reason": "crypto_exposure=1.00x3=3.00; network_exposure=0.50x1.5=0.75; criticality=1.00x2=2.00; dependents=1.00x1.5=1.50; verification_readiness=1.00x0.5=0.50 | pairs=['EC/unknown', 'WEAK_HASH/unknown'] | criticality=CRITICAL | exposure=unknown",
+        "label": "PROVISIONAL, UNVALIDATED"
+      }
+    },
+    "payment_signing": {
+      "service_id": "payment_signing",
+      "evidence_source": "OBSERVED",
+      "finding_ids": [
+        "INV-0014",
+        "INV-0015"
+      ],
+      "hold_finding_ids": [],
+      "files": [
+        "demo_bank_app/configs/payment_signing_service.py"
+      ],
+      "legacy_algorithms": [
+        "ECDSA",
+        "RSA"
+      ],
+      "candidate_targets": [
+        "Candidate: ML-DSA (FIPS 204) or SLH-DSA (FIPS 205), subject to library/peer support [digital_signature]"
+      ],
+      "duration_minutes": 45,
+      "rollout_cost": 26.0,
+      "criticality": "CRITICAL",
+      "verification_ready_wave0": true,
+      "field_sources": {
+        "criticality": "DECLARED (demo_bank_app/services.py)",
+        "verification_ready_wave0": "DECLARED (demo_bank_app/services.py)",
+        "duration_minutes": "DECLARED (demo_bank_app/services.py)",
+        "rollout_cost": "DECLARED (demo_bank_app/services.py)"
+      },
+      "features": {
+        "group_purpose_pairs": [
+          [
+            "EC",
+            "digital_signature"
+          ],
+          [
+            "RSA",
+            "digital_signature"
+          ]
+        ],
+        "network_exposure": "none_observed",
+        "criticality": "CRITICAL",
+        "dependents_norm": 0.3333333333333333,
+        "verification_ready_wave0": true
+      },
+      "risk": {
+        "score": 7.8,
+        "contributions": {
+          "crypto_exposure": 4.8,
+          "network_exposure": 0.0,
+          "criticality": 2.0,
+          "dependents": 0.5,
+          "verification_readiness": 0.5
+        },
+        "inputs": {
+          "crypto_exposure": 1.6,
+          "network_exposure": 0.0,
+          "criticality": 1.0,
+          "dependents": 0.3333333333333333,
+          "verification_readiness": 1.0
+        },
+        "reason": "crypto_exposure=1.60x3=4.80; network_exposure=0.00x1.5=0.00; criticality=1.00x2=2.00; dependents=0.33x1.5=0.50; verification_readiness=1.00x0.5=0.50 | pairs=['EC/digital_signature', 'RSA/digital_signature'] | criticality=CRITICAL | exposure=none_observed",
+        "label": "PROVISIONAL, UNVALIDATED"
+      }
+    },
+    "settlement_batch": {
+      "service_id": "settlement_batch",
+      "evidence_source": "DECLARED_ONLY",
+      "finding_ids": [],
+      "hold_finding_ids": [],
+      "files": [],
+      "legacy_algorithms": [
+        "DH-2048",
+        "RSA-2048",
+        "3DES"
+      ],
+      "candidate_targets": [
+        "HOLD: no scanned evidence; algorithms only DECLARED in synthetic descriptor (purpose unverified)"
+      ],
+      "duration_minutes": 50,
+      "rollout_cost": 28.0,
+      "criticality": "CRITICAL",
+      "verification_ready_wave0": false,
+      "field_sources": {
+        "criticality": "DECLARED (demo_bank_app/services.py)",
+        "verification_ready_wave0": "DECLARED (demo_bank_app/services.py)",
+        "duration_minutes": "DECLARED (demo_bank_app/services.py)",
+        "rollout_cost": "DECLARED (demo_bank_app/services.py)"
+      },
+      "features": {
+        "group_purpose_pairs": [
+          [
+            "DH",
+            "unknown"
+          ],
+          [
+            "RSA",
+            "unknown"
+          ],
+          [
+            "LEGACY_SYM",
+            "unknown"
+          ]
+        ],
+        "network_exposure": "unknown",
+        "criticality": "CRITICAL",
+        "dependents_norm": 0.0,
+        "verification_ready_wave0": false
+      },
+      "risk": {
+        "score": 7.85,
+        "contributions": {
+          "crypto_exposure": 5.1,
+          "network_exposure": 0.75,
+          "criticality": 2.0,
+          "dependents": 0.0,
+          "verification_readiness": 0.0
+        },
+        "inputs": {
+          "crypto_exposure": 1.7,
+          "network_exposure": 0.5,
+          "criticality": 1.0,
+          "dependents": 0.0,
+          "verification_readiness": 0.0
+        },
+        "reason": "crypto_exposure=1.70x3=5.10; network_exposure=0.50x1.5=0.75; criticality=1.00x2=2.00; dependents=0.00x1.5=0.00; verification_readiness=0.00x0.5=0.00 | pairs=['DH/unknown', 'LEGACY_SYM/unknown', 'RSA/unknown'] | criticality=CRITICAL | exposure=unknown",
+        "label": "PROVISIONAL, UNVALIDATED"
+      }
+    }
+  },
+  "edges": [
+    {
+      "upstream": "auth_gateway",
+      "downstream": "card_vault",
+      "provenance": "OBSERVED",
+      "file": "demo_bank_app/configs/card_vault_crypto.yaml",
+      "line": 10,
+      "reason": "config_depends_on",
+      "evidence": "- auth_gateway",
+      "kind": "config_depends_on",
+      "confidence": "high",
+      "evidence_id": "REL-0001",
+      "producer": "inventory.relationships (Member 2)"
+    },
+    {
+      "upstream": "ledger_audit",
+      "downstream": "interbank_tls",
+      "provenance": "OBSERVED",
+      "file": "demo_bank_app/configs/interbank_tls_nginx.conf",
+      "line": 21,
+      "reason": "nginx_proxy_pass (medium confidence host match)",
+      "evidence": "proxy_pass https://ledger_audit.demo-bank.internal:9443;",
+      "kind": "nginx_proxy_pass",
+      "confidence": "medium",
+      "evidence_id": "REL-0002",
+      "producer": "inventory.relationships (Member 2)"
+    },
+    {
+      "upstream": "auth_gateway",
+      "downstream": "payment_signing",
+      "provenance": "OBSERVED",
+      "file": "demo_bank_app/configs/payment_signing_service.py",
+      "line": 5,
+      "reason": "config_depends_on",
+      "evidence": "DEPENDS_ON = [\"auth_gateway\", \"ledger_audit\"]",
+      "kind": "config_depends_on",
+      "confidence": "high",
+      "evidence_id": "REL-0003",
+      "producer": "inventory.relationships (Member 2)"
+    },
+    {
+      "upstream": "ledger_audit",
+      "downstream": "payment_signing",
+      "provenance": "OBSERVED",
+      "file": "demo_bank_app/configs/payment_signing_service.py",
+      "line": 5,
+      "reason": "config_depends_on",
+      "evidence": "DEPENDS_ON = [\"auth_gateway\", \"ledger_audit\"]",
+      "kind": "config_depends_on",
+      "confidence": "high",
+      "evidence_id": "REL-0004",
+      "producer": "inventory.relationships (Member 2)"
+    },
+    {
+      "upstream": "auth_gateway",
+      "downstream": "card_vault",
+      "provenance": "DECLARED",
+      "file": "demo_bank_app/services.py",
+      "line": null,
+      "reason": "synthetic service descriptor",
+      "evidence": ""
+    },
+    {
+      "upstream": "auth_gateway",
+      "downstream": "payment_signing",
+      "provenance": "DECLARED",
+      "file": "demo_bank_app/services.py",
+      "line": null,
+      "reason": "synthetic service descriptor",
+      "evidence": ""
+    },
+    {
+      "upstream": "ledger_audit",
+      "downstream": "payment_signing",
+      "provenance": "DECLARED",
+      "file": "demo_bank_app/services.py",
+      "line": null,
+      "reason": "synthetic service descriptor",
+      "evidence": ""
+    },
+    {
+      "upstream": "payment_signing",
+      "downstream": "settlement_batch",
+      "provenance": "DECLARED",
+      "file": "demo_bank_app/services.py",
+      "line": null,
+      "reason": "synthetic service descriptor",
+      "evidence": ""
+    },
+    {
+      "upstream": "interbank_tls",
+      "downstream": "settlement_batch",
+      "provenance": "DECLARED",
+      "file": "demo_bank_app/services.py",
+      "line": null,
+      "reason": "synthetic service descriptor",
+      "evidence": ""
+    }
+  ],
+  "unknown_endpoints": [],
+  "graph_analysis": {
+    "enforced_provenance": [
+      "DECLARED",
+      "OBSERVED"
+    ],
+    "cycles": [],
+    "has_cycles": false,
+    "conflicts": [
+      {
+        "upstream": "interbank_tls",
+        "downstream": "settlement_batch",
+        "issue": "DECLARED in descriptor but no OBSERVED evidence in scanned files"
+      },
+      {
+        "upstream": "ledger_audit",
+        "downstream": "interbank_tls",
+        "issue": "OBSERVED in code/config but not DECLARED in descriptor"
+      },
+      {
+        "upstream": "payment_signing",
+        "downstream": "settlement_batch",
+        "issue": "DECLARED in descriptor but no OBSERVED evidence in scanned files"
+      }
+    ],
+    "edge_counts": {
+      "OBSERVED": 4,
+      "DECLARED": 5,
+      "INFERRED": 0
+    },
+    "dependents": {
+      "auth_gateway": 3,
+      "card_vault": 0,
+      "interbank_tls": 1,
+      "ledger_audit": 3,
+      "payment_signing": 1,
+      "settlement_batch": 0
+    }
+  },
+  "config_status": "PROVISIONAL and UNVALIDATED. Every number in this file is an ASSUMPTION chosen for the hackathon prototype (see docs/member3/assumptions.md); none was fitted to data.",
+  "schedule": {
+    "feasible": true,
+    "objective": 299.1,
+    "task_to_wave": {
+      "auth_gateway": 1,
+      "card_vault": 2,
+      "interbank_tls": 0,
+      "ledger_audit": 0,
+      "payment_signing": 1,
+      "settlement_batch": 2
+    },
+    "waves": {
+      "0": [
+        "interbank_tls",
+        "ledger_audit"
+      ],
+      "1": [
+        "auth_gateway",
+        "payment_signing"
+      ],
+      "2": [
+        "card_vault",
+        "settlement_batch"
+      ]
+    },
+    "config": {
+      "num_waves": 3,
+      "max_services_per_wave": 2,
+      "max_minutes_per_wave": 85,
+      "enforce_verification_gate": true,
+      "risk_delay_weight": 3.5
+    },
+    "dependency_violations": [],
+    "constraint_violations": [],
+    "dependencies_outside_task_set": []
+  },
+  "schedule_run": {
+    "solver": "Deterministic Dependency-Aware Fallback Scheduler",
+    "runtime_seconds": 0.007687,
+    "diagnostics": {
+      "method": "exact_constrained_combinatorial_search",
+      "candidates_evaluated": 729,
+      "feasible_schedules_found": 2,
+      "optimality_guarantee": "exact_discrete_optimum_for_6_services"
+    }
+  },
+  "sensitivity": {
+    "base_rank": [
+      "interbank_tls",
+      "auth_gateway",
+      "settlement_batch",
+      "payment_signing",
+      "ledger_audit",
+      "card_vault"
+    ],
+    "n_runs": 10,
+    "rank_changed_runs": 6,
+    "schedule_changed_runs": 3,
+    "min_kendall_tau": 0.4667
+  },
+  "steps": [
+    {
+      "step_id": "migrate:auth_gateway",
+      "service_id": "auth_gateway",
+      "purposes": [
+        "digital_signature",
+        "key_establishment",
+        "message_digest",
+        "unknown"
+      ],
+      "gates": [
+        {
+          "gate": "purpose_resolved",
+          "status": "FAIL",
+          "evidence": "plan#services.auth_gateway",
+          "reason": "HOLD findings need human purpose review: ['INV-0002']"
+        },
+        {
+          "gate": "rollback_rehearsal",
+          "status": "PASS",
+          "evidence": "scratch/derived/member3/verification_evidence.json#rollback_rehearsal",
+          "reason": "forced failure detected=True, restored hash matches=True, classical recovery handshake ok=True, originals unchanged=True"
+        },
+        {
+          "gate": "mlkem_roundtrip_selftest",
+          "status": "PASS",
+          "evidence": "scratch/derived/member3/verification_evidence.json#selftests",
+          "reason": "2/2 ML-KEM-768 round-trip self-tests passed (not NIST KATs)"
+        },
+        {
+          "gate": "hybrid_handshake",
+          "status": "PASS",
+          "evidence": "scratch/derived/member3/verification_evidence.json#traces.after_hybrid",
+          "reason": "loopback handshake ok=True, protocol=TLSv1.3, group=X25519MLKEM768"
+        },
+        {
+          "gate": "compatibility_matrix",
+          "status": "PASS",
+          "evidence": "scratch/derived/member3/verification_evidence.json#compatibility_matrix",
+          "reason": "11/11 cases matched expectation"
+        },
+        {
+          "gate": "overhead",
+          "status": "PASS",
+          "evidence": "scratch/derived/member3/verification_evidence.json#overhead",
+          "reason": "median ratio 0.963 (limit 1.5, ASSUMPTION); extra handshake bytes 2264 (limit 4096, ASSUMPTION); loopback only"
+        },
+        {
+          "gate": "mldsa_sign_verify_selftest",
+          "status": "PASS",
+          "evidence": "scratch/derived/member3/verification_evidence.json#selftests",
+          "reason": "2/2 ML-DSA-65 sign/verify self-tests passed (incl. tamper rejection)"
+        }
+      ],
+      "state": "PROPOSED",
+      "blocking_gates": [
+        "purpose_resolved"
+      ],
+      "evidence_scope": "Generic loopback lab evidence (OpenSSL 3.5 s_server/s_client, test keys). It does NOT exercise the service's own stack (e.g. KMS key wrapping, JWT libraries, partner peers); READY means 'eligible for human review', not 'verified in production'."
+    },
+    {
+      "step_id": "migrate:card_vault",
+      "service_id": "card_vault",
+      "purposes": [
+        "key_establishment",
+        "symmetric_encryption"
+      ],
+      "gates": [
+        {
+          "gate": "purpose_resolved",
+          "status": "PASS",
+          "evidence": "plan#services.card_vault",
+          "reason": "all findings have a resolved purpose"
+        },
+        {
+          "gate": "rollback_rehearsal",
+          "status": "PASS",
+          "evidence": "scratch/derived/member3/verification_evidence.json#rollback_rehearsal",
+          "reason": "forced failure detected=True, restored hash matches=True, classical recovery handshake ok=True, originals unchanged=True"
+        },
+        {
+          "gate": "mlkem_roundtrip_selftest",
+          "status": "PASS",
+          "evidence": "scratch/derived/member3/verification_evidence.json#selftests",
+          "reason": "2/2 ML-KEM-768 round-trip self-tests passed (not NIST KATs)"
+        },
+        {
+          "gate": "hybrid_handshake",
+          "status": "PASS",
+          "evidence": "scratch/derived/member3/verification_evidence.json#traces.after_hybrid",
+          "reason": "loopback handshake ok=True, protocol=TLSv1.3, group=X25519MLKEM768"
+        },
+        {
+          "gate": "compatibility_matrix",
+          "status": "PASS",
+          "evidence": "scratch/derived/member3/verification_evidence.json#compatibility_matrix",
+          "reason": "11/11 cases matched expectation"
+        },
+        {
+          "gate": "overhead",
+          "status": "PASS",
+          "evidence": "scratch/derived/member3/verification_evidence.json#overhead",
+          "reason": "median ratio 0.963 (limit 1.5, ASSUMPTION); extra handshake bytes 2264 (limit 4096, ASSUMPTION); loopback only"
+        }
+      ],
+      "state": "READY",
+      "blocking_gates": [],
+      "evidence_scope": "Generic loopback lab evidence (OpenSSL 3.5 s_server/s_client, test keys). It does NOT exercise the service's own stack (e.g. KMS key wrapping, JWT libraries, partner peers); READY means 'eligible for human review', not 'verified in production'."
+    },
+    {
+      "step_id": "migrate:interbank_tls",
+      "service_id": "interbank_tls",
+      "purposes": [
+        "digital_signature",
+        "key_establishment",
+        "symmetric_encryption"
+      ],
+      "gates": [
+        {
+          "gate": "purpose_resolved",
+          "status": "PASS",
+          "evidence": "plan#services.interbank_tls",
+          "reason": "all findings have a resolved purpose"
+        },
+        {
+          "gate": "rollback_rehearsal",
+          "status": "PASS",
+          "evidence": "scratch/derived/member3/verification_evidence.json#rollback_rehearsal",
+          "reason": "forced failure detected=True, restored hash matches=True, classical recovery handshake ok=True, originals unchanged=True"
+        },
+        {
+          "gate": "mlkem_roundtrip_selftest",
+          "status": "PASS",
+          "evidence": "scratch/derived/member3/verification_evidence.json#selftests",
+          "reason": "2/2 ML-KEM-768 round-trip self-tests passed (not NIST KATs)"
+        },
+        {
+          "gate": "hybrid_handshake",
+          "status": "PASS",
+          "evidence": "scratch/derived/member3/verification_evidence.json#traces.after_hybrid",
+          "reason": "loopback handshake ok=True, protocol=TLSv1.3, group=X25519MLKEM768"
+        },
+        {
+          "gate": "compatibility_matrix",
+          "status": "PASS",
+          "evidence": "scratch/derived/member3/verification_evidence.json#compatibility_matrix",
+          "reason": "11/11 cases matched expectation"
+        },
+        {
+          "gate": "overhead",
+          "status": "PASS",
+          "evidence": "scratch/derived/member3/verification_evidence.json#overhead",
+          "reason": "median ratio 0.963 (limit 1.5, ASSUMPTION); extra handshake bytes 2264 (limit 4096, ASSUMPTION); loopback only"
+        },
+        {
+          "gate": "mldsa_sign_verify_selftest",
+          "status": "PASS",
+          "evidence": "scratch/derived/member3/verification_evidence.json#selftests",
+          "reason": "2/2 ML-DSA-65 sign/verify self-tests passed (incl. tamper rejection)"
+        }
+      ],
+      "state": "READY",
+      "blocking_gates": [],
+      "evidence_scope": "Generic loopback lab evidence (OpenSSL 3.5 s_server/s_client, test keys). It does NOT exercise the service's own stack (e.g. KMS key wrapping, JWT libraries, partner peers); READY means 'eligible for human review', not 'verified in production'."
+    },
+    {
+      "step_id": "migrate:ledger_audit",
+      "service_id": "ledger_audit",
+      "purposes": [
+        "unknown"
+      ],
+      "gates": [
+        {
+          "gate": "purpose_resolved",
+          "status": "FAIL",
+          "evidence": "plan#services.ledger_audit",
+          "reason": "no scanned evidence (DECLARED_ONLY): operation purposes unverified -> HOLD"
+        },
+        {
+          "gate": "rollback_rehearsal",
+          "status": "PASS",
+          "evidence": "scratch/derived/member3/verification_evidence.json#rollback_rehearsal",
+          "reason": "forced failure detected=True, restored hash matches=True, classical recovery handshake ok=True, originals unchanged=True"
+        }
+      ],
+      "state": "PROPOSED",
+      "blocking_gates": [
+        "purpose_resolved"
+      ],
+      "evidence_scope": "Generic loopback lab evidence (OpenSSL 3.5 s_server/s_client, test keys). It does NOT exercise the service's own stack (e.g. KMS key wrapping, JWT libraries, partner peers); READY means 'eligible for human review', not 'verified in production'."
+    },
+    {
+      "step_id": "migrate:payment_signing",
+      "service_id": "payment_signing",
+      "purposes": [
+        "digital_signature"
+      ],
+      "gates": [
+        {
+          "gate": "purpose_resolved",
+          "status": "PASS",
+          "evidence": "plan#services.payment_signing",
+          "reason": "all findings have a resolved purpose"
+        },
+        {
+          "gate": "rollback_rehearsal",
+          "status": "PASS",
+          "evidence": "scratch/derived/member3/verification_evidence.json#rollback_rehearsal",
+          "reason": "forced failure detected=True, restored hash matches=True, classical recovery handshake ok=True, originals unchanged=True"
+        },
+        {
+          "gate": "mldsa_sign_verify_selftest",
+          "status": "PASS",
+          "evidence": "scratch/derived/member3/verification_evidence.json#selftests",
+          "reason": "2/2 ML-DSA-65 sign/verify self-tests passed (incl. tamper rejection)"
+        }
+      ],
+      "state": "READY",
+      "blocking_gates": [],
+      "evidence_scope": "Generic loopback lab evidence (OpenSSL 3.5 s_server/s_client, test keys). It does NOT exercise the service's own stack (e.g. KMS key wrapping, JWT libraries, partner peers); READY means 'eligible for human review', not 'verified in production'."
+    },
+    {
+      "step_id": "migrate:settlement_batch",
+      "service_id": "settlement_batch",
+      "purposes": [
+        "unknown"
+      ],
+      "gates": [
+        {
+          "gate": "purpose_resolved",
+          "status": "FAIL",
+          "evidence": "plan#services.settlement_batch",
+          "reason": "no scanned evidence (DECLARED_ONLY): operation purposes unverified -> HOLD"
+        },
+        {
+          "gate": "rollback_rehearsal",
+          "status": "PASS",
+          "evidence": "scratch/derived/member3/verification_evidence.json#rollback_rehearsal",
+          "reason": "forced failure detected=True, restored hash matches=True, classical recovery handshake ok=True, originals unchanged=True"
+        }
+      ],
+      "state": "PROPOSED",
+      "blocking_gates": [
+        "purpose_resolved"
+      ],
+      "evidence_scope": "Generic loopback lab evidence (OpenSSL 3.5 s_server/s_client, test keys). It does NOT exercise the service's own stack (e.g. KMS key wrapping, JWT libraries, partner peers); READY means 'eligible for human review', not 'verified in production'."
+    }
+  ],
+  "verification_evidence_ref": "scratch/derived/member3/verification_evidence.json",
+  "rollback": {
+    "label": "Rollback plan; rehearsed on a temporary COPY (TEST SCENARIO)",
+    "profile": "interbank_tls_nginx.conf",
+    "restore": "restore the profile copy from snapshot sha256:457d33bd76ef598f3d9715d8bde0dddee2c6ee56f233ebdefc35953e78003421",
+    "snapshot_sha256": "457d33bd76ef598f3d9715d8bde0dddee2c6ee56f233ebdefc35953e78003421",
+    "trigger": "compatibility gate: classical-only peer must still connect after the change",
+    "recovery_check": "re-run the classical handshake against the restored profile; success required",
+    "rehearsal_result": {
+      "forced_failure_detected": true,
+      "restored_hash_matches_snapshot": true,
+      "recovered": true,
+      "originals_unchanged": true
+    },
+    "recovery_command": "openssl s_client -connect 127.0.0.1:56031 -servername localhost -groups P-256",
+    "warnings": [
+      "Restored profile still enables 3DES (DES-CBC3-SHA); NIST SP 800-131A disallows it - compensating control or cipher clean-up needed",
+      "Never restore SHA-1 or 3DES configurations as a rollback target; fall back to SHA-256 / AES-256-GCM classical baselines."
+    ],
+    "applies_to_steps": [
+      "migrate:auth_gateway",
+      "migrate:card_vault",
+      "migrate:interbank_tls",
+      "migrate:ledger_audit",
+      "migrate:payment_signing",
+      "migrate:settlement_batch"
+    ]
+  },
+  "scheduler_comparison": {
+    "baseline": {
+      "objective": 299.1,
+      "waves": {
+        "0": [
+          "interbank_tls",
+          "ledger_audit"
+        ],
+        "1": [
+          "auth_gateway",
+          "payment_signing"
+        ],
+        "2": [
+          "card_vault",
+          "settlement_batch"
+        ]
+      },
+      "runtime_seconds": 0.007111
+    },
+    "qpiai_opt": {
+      "sdk_versions": {
+        "qpiai-opt": "0.0.9",
+        "qpiai-quantum": "0.3.0"
+      },
+      "problem_class": "MILP",
+      "binary_variables": 18,
+      "constraints": 20,
+      "baseline_feasible_in_opt_model": true,
+      "authenticated_local_solve": {
+        "status": "RUN",
+        "solver_status": "optimal",
+        "execution_mode": "local",
+        "problem_class": "MILP",
+        "objective": 299.1,
+        "assignment": {
+          "auth_gateway": 1,
+          "card_vault": 2,
+          "interbank_tls": 0,
+          "ledger_audit": 0,
+          "payment_signing": 1,
+          "settlement_batch": 2
+        },
+        "solver_time_s": 0.0443464,
+        "runtime_seconds": 0.974,
+        "same_input_comparison": {
+          "baseline_objective": 299.1,
+          "qpiai_opt_objective": 299.1,
+          "difference": 0.0,
+          "same_assignment": true,
+          "note": "Lower is better. 'Better' is claimed only if the difference is negative."
+        }
+      }
+    },
+    "qaoa_simulator": {
+      "label": "SIMULATOR (QpiAI-QSV-Local, in-process statevector; not a QPU)",
+      "exact_optimum": {
+        "selection": [
+          "interbank_tls",
+          "ledger_audit"
+        ],
+        "energy": -21.25,
+        "bits": "0110"
+      },
+      "optimum_probability": 0.085,
+      "uniform_probability": 0.0625,
+      "feasible_shot_fraction": 0.3359
+    },
+    "wave0": {
+      "baseline_full_schedule_wave0": [
+        "interbank_tls",
+        "ledger_audit"
+      ],
+      "qubo_exact_optimum_wave0": [
+        "interbank_tls",
+        "ledger_audit"
+      ],
+      "qaoa_most_frequent_sample": [
+        "auth_gateway",
+        "interbank_tls"
+      ],
+      "qaoa_best_feasible_sample": [
+        "interbank_tls",
+        "ledger_audit"
+      ],
+      "qpiai_opt_wave0": [
+        "interbank_tls",
+        "ledger_audit"
+      ],
+      "note": "The full schedule minimises rollout_cost + alpha*risk*wave over all waves; the Wave-0 QUBO maximises risk reward for Wave 0 alone. They are different objectives, so different Wave-0 picks are possible and are not errors."
+    }
+  },
+  "plan_hash": "ac4ea7e56f24a867ce1e510741d7708c2d363c9c1cd5bffa7c2480d1bef52dc7",
+  "approval": {
+    "plan_hash": "ac4ea7e56f24a867ce1e510741d7708c2d363c9c1cd5bffa7c2480d1bef52dc7",
+    "approved_steps": [],
+    "invalidated_approvals": [],
+    "records": 0
+  }
+}

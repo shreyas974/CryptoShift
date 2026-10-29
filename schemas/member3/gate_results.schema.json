@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Gate results (list of plan steps)",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "step_id",
+      "service_id",
+      "purposes",
+      "gates",
+      "state",
+      "blocking_gates",
+      "evidence_scope"
+    ],
+    "properties": {
+      "step_id": {
+        "type": "string",
+        "pattern": "^migrate:"
+      },
+      "service_id": {
+        "type": "string"
+      },
+      "purposes": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "gates": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "gate",
+            "status",
+            "evidence",
+            "reason"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "gate": {
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "PASS",
+                "FAIL",
+                "BLOCKED"
+              ]
+            },
+            "evidence": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "state": {
+        "enum": [
+          "PROPOSED",
+          "READY",
+          "APPROVED"
+        ]
+      },
+      "blocking_gates": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "evidence_scope": {
+        "type": "string"
+      }
+    }
+  }
+}

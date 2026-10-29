@@ -1,0 +1,409 @@
+{
+  "format": "cryptoshift-cbom-like/1.1",
+  "format_note": "CBOM-like inventory inspired by CycloneDX CBOM concepts; NOT CycloneDX. Not complete: static analysis of supported file types only.",
+  "generated_at_utc": "2026-10-29T10:52:50+00:00",
+  "scan": {
+    "started_utc": "2026-10-29T10:52:50+00:00",
+    "finished_utc": "2026-10-29T10:52:50+00:00",
+    "detector_versions": {
+      "python_ast": "python_ast/1.1 (adds scoped algorithm-constant rule)",
+      "tls_config": "tls_config/1.1 (Apache ECDHParameters, DHE-DSS)",
+      "dependency_manifest": "manifests/1.0",
+      "certificate": "certificates/1.0",
+      "structured_config": "structured_config/1.0",
+      "haproxy": "haproxy/1.0",
+      "shell_script": "shell_scripts/1.0",
+      "java_source": "java_source/1.0 (limited scope)",
+      "service_attribution": "services/1.0",
+      "relationships": "relationships/1.0"
+    },
+    "input_files_parsed": 12,
+    "input_sha256": {
+      "docker-compose.yml": "d9fa109a09b74f365945a2e16d59294c40ed31c50b57e932498987dac3f3ac71",
+      "edge/haproxy.cfg": "0293dad2da524ff24c7916e04bcce5d6e6e1dd5b9ba77e47ea3f5c037ea53223",
+      "gateway/nginx.conf": "bb502ad5c0cef9de44d2041310bd737d32b1a5691238bf0f2784229853a9bd67",
+      "scripts/rotate_keys.sh": "4729414604ba8ec4183ff0374b1f1bf2ae1a5fade68ab61af90a00043de9cfd3",
+      "services/ledger/application.yaml": "ec098d37cfc205e8444ce974275290c72805e852fa6d7239bcdc29aa84da14be",
+      "services/ledger/Dockerfile": "5790ce7e64cc6e4535f002ac8d837968071d7d88ab17135a690b3a1a80be66a6",
+      "services/ledger/java/src/LedgerCrypto.java": "f083d83738204be4f1489f37ff6413cf51db38273e3b872cfcf713cd78864d6b",
+      "services/ledger/ledger/__init__.py": "803f12bc5fb4cd5684a9c6ebdd0c109687672f850579773d9ae40dcdda13d548",
+      "services/ledger/ledger/client.py": "ca29e8af1bd54f08b415e8242d670816dbfa663ebd69ed94f61f101aa490c827",
+      "services/payments/application.properties": "6dbe29cd7b144e9ce1fddffe3bb9ea577859f22b87a5c278550f13d3bfe54cca",
+      "services/payments/payments/__init__.py": "803f12bc5fb4cd5684a9c6ebdd0c109687672f850579773d9ae40dcdda13d548",
+      "services/payments/payments/signer.py": "474cf7f3ee26934e4c725a4d436f08897bf17611e93fe993cc9b47a6fa76730d"
+    },
+    "input_set_sha256": "719f96a3577b7b354385dc921adf0b5ee8a6bc5ecf5de96ea35f79d9380b328f"
+  },
+  "target": "tests/fixtures/multiservice_bank",
+  "review_policy": "Every migration target is a candidate for human review. Unknown purpose => HOLD.",
+  "summary": {
+    "files_seen": 14,
+    "files_by_detector": {
+      "structured_config": 3,
+      "haproxy": 1,
+      "tls_config": 1,
+      "shell_script": 2,
+      "java_source": 1,
+      "python_ast": 4
+    },
+    "skipped_sensitive_files": 0,
+    "parse_errors": 0,
+    "findings_total": 45,
+    "findings_quantum_or_classically_weak": 42,
+    "findings_pqc_or_hybrid_info": 3,
+    "by_family": {
+      "RSA": 12,
+      "ECDH": 7,
+      "TLS-protocol": 6,
+      "ECDSA": 4,
+      "DH": 3,
+      "SHA-1": 3,
+      "Hybrid-ML-KEM": 2,
+      "EC": 2,
+      "3DES": 2,
+      "DSA": 1,
+      "Ed25519": 1,
+      "ML-DSA": 1,
+      "MD5": 1
+    },
+    "by_purpose": {
+      "key_establishment": 17,
+      "digital_signature": 13,
+      "transport_protocol": 6,
+      "message_digest": 4,
+      "unknown": 3,
+      "symmetric_encryption": 2
+    },
+    "by_ambiguity": {
+      "none": 42,
+      "ambiguous": 3
+    },
+    "by_service": {
+      "ledger": 14,
+      "payments": 10,
+      "edge": 8,
+      "gateway": 7,
+      "unknown": 6
+    },
+    "by_service_confidence": {
+      "high": 39,
+      "none": 6
+    },
+    "in_test_files": 0,
+    "relationships": {
+      "edges": 9,
+      "unknown_references": 3,
+      "by_kind": {
+        "compose_depends_on": 3,
+        "compose_links": 1,
+        "config_url": 1,
+        "haproxy_server": 1,
+        "nginx_proxy_pass": 1,
+        "nginx_upstream": 1,
+        "python_import": 1
+      }
+    }
+  },
+  "services": {
+    "compose_files": [
+      "docker-compose.yml"
+    ],
+    "compose_services": {
+      "edge": {
+        "dirs": [
+          "edge"
+        ],
+        "file": "docker-compose.yml",
+        "line": 10
+      },
+      "gateway": {
+        "dirs": [
+          "gateway/nginx.conf"
+        ],
+        "file": "docker-compose.yml",
+        "line": 3
+      },
+      "ledger": {
+        "dirs": [
+          "services/ledger"
+        ],
+        "file": "docker-compose.yml",
+        "line": 21
+      },
+      "payments": {
+        "dirs": [
+          "services/payments"
+        ],
+        "file": "docker-compose.yml",
+        "line": 16
+      }
+    },
+    "folder_services": {
+      "services/ledger": "ledger",
+      "services/payments": "payments"
+    },
+    "declared_in_files": {
+      "services/payments/application.properties": {
+        "service_id": "payments",
+        "line": 2,
+        "form": "spring.application.name"
+      }
+    },
+    "known_services": [
+      "edge",
+      "gateway",
+      "ledger",
+      "payments"
+    ]
+  },
+  "parse_errors": [],
+  "findings": [
+    {
+      "finding_id": "INV-0001",
+      "service_id": "edge",
+      "file_path": "edge/haproxy.cfg",
+      "line_number": 3,
+      "legacy_algorithm": "ECDH",
+      "quantum_threat": "Shor-CRQC (harvest-now-decrypt-later exposure of key establishment)",
+      "target_pqc_algorithm": "Candidate: ML-KEM (FIPS 203), e.g. ML-KEM-768 or hybrid X25519MLKEM768 in TLS 1.3",
+      "nist_standard": "FIPS 203 (ML-KEM)",
+      "severity": "CRITICAL",
+      "evidence_type": "config_file",
+      "operation_purpose": "key_establishment",
+      "confidence": "medium",
+      "rationale": "haproxy ssl-default-bind-ciphers: cipher string enables classical ECDHE key exchange (token 'ECDHE-RSA-AES256-GCM-SHA384')",
+      "owner": "unknown",
+      "library_or_protocol": "haproxy",
+      "human_review_status": "requires_human_review",
+      "detector": "haproxy",
+      "algorithm_family": "ECDH",
+      "detected_value": "ssl-default-bind-ciphers ECDHE-RSA-AES256-GCM-SHA384:AES128-SHA",
+      "location": "haproxy ssl-default-bind-ciphers (line 3)",
+      "snippet_redacted": "ssl-default-bind-ciphers ECDHE-RSA-AES256-GCM-SHA384:AES128-SHA",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "docker-compose service 'edge' volume mount 'edge' (docker-compose.yml:10)",
+      "service_id_confidence": "high"
+    },
+    {
+      "finding_id": "INV-0002",
+      "service_id": "edge",
+      "file_path": "edge/haproxy.cfg",
+      "line_number": 3,
+      "legacy_algorithm": "RSA",
+      "quantum_threat": "Shor-CRQC (signature forgery once a CRQC exists)",
+      "target_pqc_algorithm": "Candidate: ML-DSA (FIPS 204) or SLH-DSA (FIPS 205), subject to library/peer support",
+      "nist_standard": "FIPS 204 (ML-DSA) / FIPS 205 (SLH-DSA)",
+      "severity": "CRITICAL",
+      "evidence_type": "config_file",
+      "operation_purpose": "digital_signature",
+      "confidence": "medium",
+      "rationale": "haproxy ssl-default-bind-ciphers: cipher string enables RSA-authenticated suites (server certificate signature) (token 'ECDHE-RSA-AES256-GCM-SHA384')",
+      "owner": "unknown",
+      "library_or_protocol": "haproxy",
+      "human_review_status": "requires_human_review",
+      "detector": "haproxy",
+      "algorithm_family": "RSA",
+      "detected_value": "ssl-default-bind-ciphers ECDHE-RSA-AES256-GCM-SHA384:AES128-SHA",
+      "location": "haproxy ssl-default-bind-ciphers (line 3)",
+      "snippet_redacted": "ssl-default-bind-ciphers ECDHE-RSA-AES256-GCM-SHA384:AES128-SHA",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "docker-compose service 'edge' volume mount 'edge' (docker-compose.yml:10)",
+      "service_id_confidence": "high"
+    },
+    {
+      "finding_id": "INV-0003",
+      "service_id": "edge",
+      "file_path": "edge/haproxy.cfg",
+      "line_number": 3,
+      "legacy_algorithm": "RSA",
+      "quantum_threat": "Shor-CRQC (harvest-now-decrypt-later exposure of key establishment)",
+      "target_pqc_algorithm": "Candidate: ML-KEM (FIPS 203), e.g. ML-KEM-768 or hybrid X25519MLKEM768 in TLS 1.3",
+      "nist_standard": "FIPS 203 (ML-KEM)",
+      "severity": "CRITICAL",
+      "evidence_type": "config_file",
+      "operation_purpose": "key_establishment",
+      "confidence": "medium",
+      "rationale": "haproxy ssl-default-bind-ciphers: cipher string enables static RSA key transport (no forward secrecy) (token 'AES128-SHA')",
+      "owner": "unknown",
+      "library_or_protocol": "haproxy",
+      "human_review_status": "requires_human_review",
+      "detector": "haproxy",
+      "algorithm_family": "RSA",
+      "detected_value": "ssl-default-bind-ciphers ECDHE-RSA-AES256-GCM-SHA384:AES128-SHA",
+      "location": "haproxy ssl-default-bind-ciphers (line 3)",
+      "snippet_redacted": "ssl-default-bind-ciphers ECDHE-RSA-AES256-GCM-SHA384:AES128-SHA",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "docker-compose service 'edge' volume mount 'edge' (docker-compose.yml:10)",
+      "service_id_confidence": "high"
+    },
+    {
+      "finding_id": "INV-0004",
+      "service_id": "edge",
+      "file_path": "edge/haproxy.cfg",
+      "line_number": 5,
+      "legacy_algorithm": "TLS-protocol",
+      "quantum_threat": "Protocol version cannot negotiate hybrid ML-KEM groups (TLS 1.3 required)",
+      "target_pqc_algorithm": "Candidate: TLS 1.3 only, then hybrid ML-KEM groups (e.g. X25519MLKEM768)",
+      "nist_standard": "RFC 8446 / NIST SP 800-52r2",
+      "severity": "HIGH",
+      "evidence_type": "config_file",
+      "operation_purpose": "transport_protocol",
+      "confidence": "high",
+      "rationale": "haproxy ssl-default-bind-options: minimum TLS version TLSv1.1 allows deprecated protocols",
+      "owner": "unknown",
+      "library_or_protocol": "haproxy",
+      "human_review_status": "requires_human_review",
+      "detector": "haproxy",
+      "algorithm_family": "TLS-protocol",
+      "detected_value": "ssl-default-bind-options ssl-min-ver TLSv1.1 no-tls-tickets",
+      "location": "haproxy ssl-default-bind-options (line 5)",
+      "snippet_redacted": "ssl-default-bind-options ssl-min-ver TLSv1.1 no-tls-tickets",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "docker-compose service 'edge' volume mount 'edge' (docker-compose.yml:10)",
+      "service_id_confidence": "high"
+    }
+  ],
+  "relationships": {
+    "edges": [
+      {
+        "edge_id": "REL-0001",
+        "source": "gateway",
+        "target": "payments",
+        "kind": "compose_depends_on",
+        "provenance": "OBSERVED",
+        "file": "docker-compose.yml",
+        "line": 8,
+        "confidence": "high",
+        "evidence": "- payments",
+        "reference": "payments"
+      },
+      {
+        "edge_id": "REL-0002",
+        "source": "gateway",
+        "target": "ledger",
+        "kind": "compose_depends_on",
+        "provenance": "OBSERVED",
+        "file": "docker-compose.yml",
+        "line": 9,
+        "confidence": "high",
+        "evidence": "- ledger",
+        "reference": "ledger"
+      },
+      {
+        "edge_id": "REL-0003",
+        "source": "edge",
+        "target": "gateway",
+        "kind": "compose_links",
+        "provenance": "OBSERVED",
+        "file": "docker-compose.yml",
+        "line": 15,
+        "confidence": "high",
+        "evidence": "- \"gateway:gw\"",
+        "reference": "gateway"
+      },
+      {
+        "edge_id": "REL-0004",
+        "source": "payments",
+        "target": "ledger",
+        "kind": "compose_depends_on",
+        "provenance": "OBSERVED",
+        "file": "docker-compose.yml",
+        "line": 19,
+        "confidence": "high",
+        "evidence": "ledger:",
+        "reference": "ledger"
+      },
+      {
+        "edge_id": "REL-0005",
+        "source": "edge",
+        "target": "gateway",
+        "kind": "haproxy_server",
+        "provenance": "OBSERVED",
+        "file": "edge/haproxy.cfg",
+        "line": 17,
+        "confidence": "high",
+        "evidence": "server gw1 gateway:443 ssl verify required ssl-max-ver TLSv1.2",
+        "reference": "gateway"
+      },
+      {
+        "edge_id": "REL-0006",
+        "source": "gateway",
+        "target": "payments",
+        "kind": "nginx_upstream",
+        "provenance": "OBSERVED",
+        "file": "gateway/nginx.conf",
+        "line": 3,
+        "confidence": "high",
+        "evidence": "server payments:8080;",
+        "reference": "payments"
+      },
+      {
+        "edge_id": "REL-0007",
+        "source": "gateway",
+        "target": "ledger",
+        "kind": "nginx_proxy_pass",
+        "provenance": "OBSERVED",
+        "file": "gateway/nginx.conf",
+        "line": 17,
+        "confidence": "high",
+        "evidence": "proxy_pass https://ledger:9443/api;",
+        "reference": "ledger"
+      },
+      {
+        "edge_id": "REL-0008",
+        "source": "payments",
+        "target": "ledger",
+        "kind": "config_url",
+        "provenance": "OBSERVED",
+        "file": "services/payments/application.properties",
+        "line": 6,
+        "confidence": "high",
+        "evidence": "ledger.base-url=https://ledger:9443",
+        "reference": "ledger"
+      },
+      {
+        "edge_id": "REL-0009",
+        "source": "payments",
+        "target": "ledger",
+        "kind": "python_import",
+        "provenance": "OBSERVED",
+        "file": "services/payments/payments/signer.py",
+        "line": 6,
+        "confidence": "high",
+        "evidence": "from ledger.client import post_entry",
+        "reference": "ledger"
+      }
+    ],
+    "unknown_references": [
+      {
+        "source": "edge",
+        "reference": "10.20.30.40",
+        "kind": "haproxy_server",
+        "file": "edge/haproxy.cfg",
+        "line": 18,
+        "reason": "reference does not match any known service"
+      },
+      {
+        "source": "gateway",
+        "reference": "fraud-scoring.partner.example",
+        "kind": "nginx_proxy_pass",
+        "file": "gateway/nginx.conf",
+        "line": 20,
+        "reason": "reference does not match any known service"
+      },
+      {
+        "source": "payments",
+        "reference": "fraud-scoring.partner.example",
+        "kind": "config_host",
+        "file": "services/payments/application.properties",
+        "line": 7,
+        "reason": "reference does not match any known service"
+      }
+    ]
+  },
+  "_example_note": "Real output of scripts/inventory_v11.py on tests/fixtures/multiservice_bank (SYNTHETIC fixture), truncated to 4 findings."
+}

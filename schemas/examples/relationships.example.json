@@ -1,0 +1,160 @@
+{
+  "format": "cryptoshift-relationships/1.0",
+  "provenance_policy": "OBSERVED only; unresolved references listed, never turned into edges",
+  "known_services": [
+    "edge",
+    "gateway",
+    "ledger",
+    "payments"
+  ],
+  "edges": [
+    {
+      "edge_id": "REL-0001",
+      "source": "gateway",
+      "target": "payments",
+      "kind": "compose_depends_on",
+      "provenance": "OBSERVED",
+      "file": "docker-compose.yml",
+      "line": 8,
+      "confidence": "high",
+      "evidence": "- payments",
+      "reference": "payments"
+    },
+    {
+      "edge_id": "REL-0002",
+      "source": "gateway",
+      "target": "ledger",
+      "kind": "compose_depends_on",
+      "provenance": "OBSERVED",
+      "file": "docker-compose.yml",
+      "line": 9,
+      "confidence": "high",
+      "evidence": "- ledger",
+      "reference": "ledger"
+    },
+    {
+      "edge_id": "REL-0003",
+      "source": "edge",
+      "target": "gateway",
+      "kind": "compose_links",
+      "provenance": "OBSERVED",
+      "file": "docker-compose.yml",
+      "line": 15,
+      "confidence": "high",
+      "evidence": "- \"gateway:gw\"",
+      "reference": "gateway"
+    },
+    {
+      "edge_id": "REL-0004",
+      "source": "payments",
+      "target": "ledger",
+      "kind": "compose_depends_on",
+      "provenance": "OBSERVED",
+      "file": "docker-compose.yml",
+      "line": 19,
+      "confidence": "high",
+      "evidence": "ledger:",
+      "reference": "ledger"
+    },
+    {
+      "edge_id": "REL-0005",
+      "source": "edge",
+      "target": "gateway",
+      "kind": "haproxy_server",
+      "provenance": "OBSERVED",
+      "file": "edge/haproxy.cfg",
+      "line": 17,
+      "confidence": "high",
+      "evidence": "server gw1 gateway:443 ssl verify required ssl-max-ver TLSv1.2",
+      "reference": "gateway"
+    },
+    {
+      "edge_id": "REL-0006",
+      "source": "gateway",
+      "target": "payments",
+      "kind": "nginx_upstream",
+      "provenance": "OBSERVED",
+      "file": "gateway/nginx.conf",
+      "line": 3,
+      "confidence": "high",
+      "evidence": "server payments:8080;",
+      "reference": "payments"
+    },
+    {
+      "edge_id": "REL-0007",
+      "source": "gateway",
+      "target": "ledger",
+      "kind": "nginx_proxy_pass",
+      "provenance": "OBSERVED",
+      "file": "gateway/nginx.conf",
+      "line": 17,
+      "confidence": "high",
+      "evidence": "proxy_pass https://ledger:9443/api;",
+      "reference": "ledger"
+    },
+    {
+      "edge_id": "REL-0008",
+      "source": "payments",
+      "target": "ledger",
+      "kind": "config_url",
+      "provenance": "OBSERVED",
+      "file": "services/payments/application.properties",
+      "line": 6,
+      "confidence": "high",
+      "evidence": "ledger.base-url=https://ledger:9443",
+      "reference": "ledger"
+    },
+    {
+      "edge_id": "REL-0009",
+      "source": "payments",
+      "target": "ledger",
+      "kind": "python_import",
+      "provenance": "OBSERVED",
+      "file": "services/payments/payments/signer.py",
+      "line": 6,
+      "confidence": "high",
+      "evidence": "from ledger.client import post_entry",
+      "reference": "ledger"
+    }
+  ],
+  "unknown_references": [
+    {
+      "source": "edge",
+      "reference": "10.20.30.40",
+      "kind": "haproxy_server",
+      "file": "edge/haproxy.cfg",
+      "line": 18,
+      "reason": "reference does not match any known service"
+    },
+    {
+      "source": "gateway",
+      "reference": "fraud-scoring.partner.example",
+      "kind": "nginx_proxy_pass",
+      "file": "gateway/nginx.conf",
+      "line": 20,
+      "reason": "reference does not match any known service"
+    },
+    {
+      "source": "payments",
+      "reference": "fraud-scoring.partner.example",
+      "kind": "config_host",
+      "file": "services/payments/application.properties",
+      "line": 7,
+      "reason": "reference does not match any known service"
+    }
+  ],
+  "summary": {
+    "edges": 9,
+    "unknown_references": 3,
+    "by_kind": {
+      "compose_depends_on": 3,
+      "compose_links": 1,
+      "config_url": 1,
+      "haproxy_server": 1,
+      "nginx_proxy_pass": 1,
+      "nginx_upstream": 1,
+      "python_import": 1
+    }
+  },
+  "_example_note": "Real output of scripts/inventory_v11.py on tests/fixtures/multiservice_bank (SYNTHETIC fixture), 2026-10-29."
+}
