@@ -1,6 +1,7 @@
 # Documentation Map
 
 - [Project Structure & Organization Guide](setup/project-structure.md)
+- [Shared Team QpiAI SDK & Local Workspace Setup](setup/qpiai-shared-setup.md)
 - [PQC Basics and Solution Overview](pqc-basics-and-solution.md)
 - [Architecture and Workflow](architecture.md)
 - [Dataset and Evaluation Guide](dataset-and-evaluation.md)

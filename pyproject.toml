@@ -16,6 +16,13 @@ qpiai = [
     "qpiai-quantum==0.3.0",
     "python-dotenv>=1.0.0",
 ]
+mvp = [
+    "pyyaml>=6.0.0",
+    "tables>=3.9.0",
+    "h5py>=3.10.0",
+    "streamlit>=1.35.0",
+    "pytest>=8.0.0",
+]
 
 [project.scripts]
 cryptoshift = "cryptoshift.cli:main"

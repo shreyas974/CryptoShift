@@ -1,3 +1,12 @@
+# Real banking PQC data — use this as the real-world dataset
+
+The source-filtered dataset at [`data/real/bank_tls_pqc_observations.csv`](../data/real/bank_tls_pqc_observations.csv) contains original public TLS 1.3 probe observations tagged `banking` from one run, with one record per anonymized target ID. The source record is the [PQ Readiness Index](https://github.com/xuxu298/PQReadinessIndex), which licenses data under CC BY 4.0. Inspect [`data/real/README.md`](../data/real/README.md) before making claims.
+
+The single-run banking filter has 64 unique target IDs: 49 `PQ-SAFE`, 3 `CLASSICAL`, 12 `ERROR`. Errors are unclassified outcomes, not classical/PQC-negative labels. The index’s published fixed comparison cohort uses 50 banking hosts; keep that separate from these 64 single-run records. Public TLS observations do not reveal the bank’s internal software or overall readiness.
+
+Do not combine this data with synthetic fixtures or cryptographic-misuse benchmark labels. Synthetic fixture scores in the remaining legacy sections are demo-only and are not real-bank metrics. For the product, use these observations only as real public-edge context; separate source-code scanner precision/recall and migration-plan verification still need their own real, ground-truthed banking data, which this public dataset does not provide.
+
+---
 # Dataset and Evaluation Guide
 
 ## 1. Dataset Separation & Provenance Policy
@@ -27,3 +36,4 @@
   - **Recall (`TP / (TP + FN)`):** **`0.8750`** (`7 / 8`)
 
 See the full generated breakdown in [`reports/evaluation/evaluation_report.md`](../reports/evaluation/evaluation_report.md).
+

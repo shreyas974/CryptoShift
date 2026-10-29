@@ -1,3 +1,10 @@
+# CryptoShift Data
+
+## Current real dataset for banking PQC
+
+The current real-world dataset is [`data/real/bank_tls_pqc_observations.csv`](real/bank_tls_pqc_observations.csv), with provenance and interpretation in [`data/real/README.md`](real/README.md) and [`data/real/dataset_manifest.json`](real/dataset_manifest.json). It is a one-run, source-filtered set of public TLS 1.3 observations tagged `banking`; the source IDs are anonymized. It is not internal bank application data. No synthetic rows or unrelated crypto-misuse labels are mixed into this dataset.
+
+The repository still has older synthetic demo fixtures in `data/fixtures/synthetic/`; they are excluded from `data/real/` and must not be cited as real banking evidence. The real dataset currently covers public-edge TLS key establishment only. It does not satisfy the separate need for internal banking code/config inventory or migration-plan ground truth.
 # CryptoShift Dataset, Provenance, and Evaluation Guide (`data/`)
 
 This directory separates **reviewed label metadata**, **public open-source repository provenance**, and **visibly synthetic fixtures** in accordance with the CryptoShift evaluation policy.
@@ -32,4 +39,14 @@ data/
 3. **Unit of Analysis & Repository-Level Splits:**
    - **Unit of Analysis:** One labelled file-level cryptographic operation instance (`instance_id`), evaluated on whether the scanner detects a migration-relevant primitive **and** classifies its `operation_purpose` (`key_establishment`, `digital_signature`, `symmetric_encryption`, or `message_digest`).
    - **Split Strategy:** Repository-level split (`project_alpha_auth` in `calibration`; `project_beta_tls` and `project_gamma_noncrypto` in `held_out_test`) to prevent same-project template leakage.
+
+
+## Real public-source corpus
+
+See [data/public/README.md](public/README.md) for the pinned, license-documented real source snapshots, retrieval/scanning commands, annotation protocol, and limitations. Raw source snapshots and local candidate reports are Git-ignored; only provenance and reviewed annotations should be considered for check-in.
+
+## Real, labeled public-source reference data
+
+The project now includes a normalized companion CSV of the published LICMA Python study findings at `data/public/processed/licma_real_misuse_findings.csv`. It preserves the study's `critical` versus `warning` distinction and provides repository/path metadata without bundling upstream source trees. See `data/public/README.md` and `data/labels/real_dataset_sources.json` for attribution, license, source checksums, and limits. This dataset labels cryptographic API misuse, not PQC migration relevance; keep it out of PQC migration precision/recall until code context is reviewed and separately labeled.
+
 

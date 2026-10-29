@@ -30,3 +30,14 @@ build/
 .mypy_cache/
 .ruff_cache/
 .coverage
+
+# Original third-party research snapshots stay local; only filtered, attributed data is tracked
+data/public/raw/
+
+# Local dataset path overrides, large HDF5 binaries, and local SQLite state (NEVER commit)
+.cryptoshift_datasets.local.json
+*.h5
+*.hdf5
+*.db
+*.sqlite
+*.sqlite3

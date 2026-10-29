@@ -127,6 +127,7 @@ CryptoShift/
 
 - [Documentation Index](docs/README.md)
 - [Project Structure & Organization Guide](docs/setup/project-structure.md)
+- [Shared Team QpiAI SDK & Local Workspace Setup](docs/setup/qpiai-shared-setup.md)
 - [PQC Basics & Solution Overview](docs/pqc-basics-and-solution.md) ([Word Guide](assets/CryptoShift_PQC_Concept_and_Solution_Guide.docx) | [Mentor Deck](assets/CryptoShift_Mentor_Deck.pptx) | [Team Roles & 36h Stack](docs/team/CryptoShift_Team_Roles_36h_and_Technical_Stack.docx))
 - [Architecture & Trust Boundaries](docs/architecture.md)
 - [Dataset & Evaluation Guide](docs/dataset-and-evaluation.md) ([Verified Evaluation Report](reports/evaluation/evaluation_report.md))
