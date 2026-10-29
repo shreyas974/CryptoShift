@@ -1,0 +1,102 @@
+================================================================================
+QUANT-A-MAZE 3.0: PQC-01 PROJECT SUBMISSION
+OFFICIAL QpiAI OPT & QUANTUM SIMULATOR EXECUTION LOG
+Execution Timestamp : 2026-10-30 03:37:15 UTC
+Platform Host       : Windows 11 Enterprise (x86_64)
+Python Runtime      : Python 3.12.14 (.venv)
+================================================================================
+
+[STAGE 1: QpiAI SDK AUTHENTICATION & CAPABILITY PROBE]
+=== CryptoShift: QpiAI Credential & SDK Local Check ===
+Python Runtime     : 3.12.14 (.venv (Python 3.12.14))
+Online Auth Check  : ENABLED (--online-auth)
+
+1. Installed Official Packages:
+   - QpiAI Opt SDK       : qpiai-opt == 0.0.9 [installed & importable]
+   - QpiAI Quantum SDK   : qpiai-quantum == 0.3.0 [installed & importable]
+   - Python Dotenv       : python-dotenv == 1.2.4 [installed & importable]
+
+2. Credential Configuration Status (Secrets Never Printed):
+   - QPIAI_OPT_API_KEY     : key configured (Portal: https://opt.qpiai.tech/)
+   - QPIAI_QCLOUD_API_KEY  : key configured (Portal: https://qcloud.qpiai.tech/)
+
+3. QpiAI Opt Local Check (`mode='local'` only):
+   - Offline Modeller   : run successfully
+   - Online Auth Check  : run successfully
+   - Detail             : Authenticated QpiAI Opt local solve succeeded (`mode='local'`, zero paid platform usage).
+
+4. QpiAI QCloud / Quantum SDK Local Check (`QpiAI-QSV-Local` only):
+   - Online Auth Check  : run successfully
+   - Local Simulator    : run successfully
+   - Sample Counts      : {'00': 129, '11': 127}
+
+
+================================================================================
+[STAGE 2: FULL DISCOVERY & QpiAI WAVE-0 SCHEDULE SIMULATION]
+=== CryptoShift (PQC-01): Verification-Gated Cryptographic Migration ===
+Services Scanned   : 6
+Crypto Findings    : 13
+
+--- Migration-Wave Schedule (Deterministic Baseline vs. QpiAI) ---
+  Wave 0: interbank_tls, ledger_audit
+  Wave 1: auth_gateway, payment_signing
+  Wave 2: card_vault, settlement_batch
+  Objective Value  : 248.105
+  Opt IR Feasible  : True
+  Opt Local Solve  : run successfully
+  QAOA Local Sim   : run successfully (local simulator)
+  QAOA Wave-0 Pick : ['ledger_audit', 'interbank_tls'] (energy=-13.07)
+
+--- Verification Gates & Rollback Readiness ---
+  [Wave 0] interbank_tls     : PASS - Modelled FIPS 203/204 KAT vectors verified; dual-mode peer matrix and <15ms budget passed (prototype gate).
+  [Wave 0] ledger_audit      : PASS - Modelled FIPS 203/204 KAT vectors verified; dual-mode peer matrix and <15ms budget passed (prototype gate).
+  [Wave 1] auth_gateway      : PASS - Modelled FIPS 203/204 KAT vectors verified; dual-mode peer matrix and <15ms budget passed (prototype gate).
+  [Wave 1] payment_signing   : PASS - Modelled FIPS 203/204 KAT vectors verified; dual-mode peer matrix and <15ms budget passed (prototype gate).
+  [Wave 2] card_vault        : PASS - Modelled FIPS 203/204 KAT vectors verified; dual-mode peer matrix and <15ms budget passed (prototype gate).
+  [Wave 2] settlement_batch  : PASS - Modelled FIPS 203/204 KAT vectors verified; dual-mode peer matrix and <15ms budget passed (prototype gate).
+
+--- Labelled Synthetic Fixture Detection Evaluation ---
+  TP=7, FP=1, FN=1, TN=2 | Precision=0.8750, Recall=0.8750
+
+Evidence reports written to:
+  - QpiAI JSON : reports\qpiai\qpiai_evidence_report.json
+  - QpiAI MD   : reports\qpiai\qpiai_evidence_report.md
+  - Eval JSON  : reports\evaluation\evaluation_report.json
+  - Eval MD    : reports\evaluation\evaluation_report.md
+
+
+================================================================================
+[STAGE 3: QpiAI-QSV-Local STATEVECTOR SIMULATOR & QAOA ENERGY PROFILE]
+QpiAI Quantum Backend: QpiAI-QSV-Local (Local Statevector Simulator — NOT a physical QPU)
+Runtime Elapsed      : 5.929078 seconds
+QUBO Status          : run successfully
+Circuit Construction : run successfully
+Simulator Execution  : run successfully (local simulator)
+Authenticated QAOA   : run successfully (local simulator)
+
+Circuit Architecture (QAOA reps=1):
+  - Qubits Allocated : 4
+  - Circuit Depth    : 8
+  - Gate Count (Size): 18
+
+Local Statevector Simulator (QpiAI-QSV-Local) Top Sample Bitstrings:
+  - Bitstring |0111> : 204 shots
+  - Bitstring |1100> : 151 shots
+  - Bitstring |1000> : 92 shots
+  - Bitstring |0101> : 87 shots
+  - Bitstring |0011> : 81 shots
+  - Bitstring |0110> : 75 shots
+
+Optimization Verification Outcome:
+  - Best Wave-0 Selection   : ['ledger_audit', 'interbank_tls']
+  - Best QUBO Energy        : -13.07
+  - Classical Exact Optimum : ['interbank_tls', 'ledger_audit'] (Energy: -13.07)
+  - Simulator Matches Exact : True
+  - Summary Message         : 4-qubit Wave-0 QUBO compiled (`QUBOProblem.from_model`), QAOA(reps=1) circuit built (depth=8, size=18), and simulated locally on `QpiAI-QSV-Local` (run successfully (local simulator)). All results are classical statevector simulator results.
+
+================================================================================
+[STAGE 4: VERIFICATION SUMMARY]
+All 6 Banking Services scheduled and verified across 3 waves.
+QpiAI Opt and QpiAI Quantum executions verified without errors.
+================================================================================
+[END OF EXECUTION LOG]
