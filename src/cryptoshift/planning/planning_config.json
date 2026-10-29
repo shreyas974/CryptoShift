@@ -1,0 +1,32 @@
+{
+  "status": "PROVISIONAL and UNVALIDATED. Every number in this file is an ASSUMPTION chosen for the hackathon prototype (see docs/member3/assumptions.md); none was fitted to data.",
+  "risk_weights": {
+    "crypto_exposure": 3.0,
+    "network_exposure": 1.5,
+    "criticality": 2.0,
+    "dependents": 1.5,
+    "verification_readiness": 0.5
+  },
+  "algorithm_class_points": {
+    "shor_key_establishment": 1.0,
+    "shor_signature": 0.8,
+    "asymmetric_unknown_purpose": 0.6,
+    "legacy_symmetric": 0.5,
+    "weak_hash": 0.4,
+    "legacy_protocol": 0.4,
+    "other": 0.2
+  },
+  "crypto_exposure_cap": 3.0,
+  "criticality_points": {"CRITICAL": 1.0, "HIGH": 0.7, "MEDIUM": 0.4, "LOW": 0.2, "unknown": 0.5},
+  "network_exposure_points": {"observed_listener": 1.0, "none_observed": 0.0, "unknown": 0.5},
+  "constraints": {
+    "num_waves": 3,
+    "max_services_per_wave": 2,
+    "max_minutes_per_wave": 85,
+    "enforce_verification_gate": true,
+    "risk_delay_weight": 3.5
+  },
+  "enforced_edge_provenance": ["OBSERVED", "DECLARED"],
+  "default_duration_minutes": 45,
+  "default_rollout_cost": 20.0
+}
