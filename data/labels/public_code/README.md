@@ -34,3 +34,16 @@ Reproduce:
 .\.venv\Scripts\python.exe scripts/fetch_public_label_sources.py
 .\.venv\Scripts\python.exe scripts/evaluate_public_labels.py --split held_out
 ```
+
+## Round 2 (added by Member 2, 2026-10-29; guidelines: `docs/data/labelling-guidelines-v2.md`)
+
+- **Splits:**
+  - The Stage 1 `held_out` repos (python-jose, certbot, h5bp-apache) are now `calibration-2`. Their results had been seen, and two detector fixes were made from them.
+  - Their labels are unchanged; only the `split` value changed.
+- **New labels, `labels_held_out_round2.json`:**
+  - **Count:** 293 labels (155 positive, 62 ambiguous, 76 hard negative) on 16 files of 4 new held-out repos: nginx-proxy (MIT), mitmproxy (MIT), josepy (Apache-2.0) and spring-security (Apache-2.0).
+  - **Provenance:** commits pinned; file SHA-256 recorded in `sources.json`; files fetched by `"fetch": "raw"`.
+  - **Status:** `annotator: "AI-assisted (Claude) draft"`, `reviewer: "pending-human"`. These are not reviewed and not ground truth.
+  - **Order of work:** detector and scoring sources were frozen first (`detector_freeze_round2.json`, 2026-10-29T10:43:28Z), then the labels were written, then the frozen detector was run once.
+  - **Excluded:** `mitmproxy/certs.py` embeds a PEM private-key block (a publicly disclosed third-party CA key), so it was dropped before labelling.
+- **Review:** `review_sheet.csv` lists every label (449 rows) with empty `reviewer`, `verdict` and `notes` columns. After filling it in, run `scripts/review_label_sheet.py --score` to get agreement, Cohen's kappa and recomputed metrics.

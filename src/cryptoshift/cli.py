@@ -238,23 +238,28 @@ def cmd_data_summary(
     return 0
 
 
-def _display(path: Path) -> str:
-    try:
-        return str(Path(path).resolve().relative_to(PROJECT_ROOT))
-    except ValueError:
-        return Path(path).name
+def _display(path: Path, base: Optional[Path] = None) -> str:
+    """Repo-relative path, else relative to `base` (the scan root), else the bare name; never an absolute path."""
+    for root in (PROJECT_ROOT, base.resolve().parent if base and base.resolve().is_file() else base):
+        if root is None:
+            continue
+        try:
+            return str(Path(path).resolve().relative_to(Path(root).resolve()))
+        except ValueError:
+            pass
+    return Path(path).name
 
 
 def cmd_scan(target_path: Optional[str] = None) -> int:
     """Scan a directory or file of source code and TLS configurations with line/directive evidence."""
     resolved = Path(target_path) if target_path else DEFAULT_CONFIGS_DIR
     findings, meta = scan_repository_path(resolved)
-    print(f"=== CryptoShift: Traceable File & Config Scanner ({resolved}) ===")
+    print(f"=== CryptoShift: Traceable File & Config Scanner ({_display(resolved)}) ===")
     print(f"Services Discovered : {len(meta)} ({', '.join(meta.keys())})")
     print(f"Findings Detected   : {len(findings)}")
     for f in findings:
         print(
-            f"  - [{f.finding_id}] {f.service_id} | {f.file_path}:{f.line_number} | "
+            f"  - [{f.finding_id}] {f.service_id} | {_display(Path(f.file_path), base=resolved).replace(chr(92), '/')}:{f.line_number} | "
             f"{f.legacy_algorithm} ({f.operation_purpose}) -> {f.target_pqc_algorithm} [{f.nist_standard}]"
         )
     return 0
@@ -262,12 +267,17 @@ def cmd_scan(target_path: Optional[str] = None) -> int:
 
 def cmd_inventory(target_path: Optional[str] = None, out_dir: Optional[str] = None) -> int:
     """Stage 1 inventory: AST/TLS-config/manifest/certificate detectors -> CBOM-like JSON + Markdown (git-ignored)."""
-    from cryptoshift.inventory import build_cbom_like, scan_inventory, write_inventory
+    from datetime import datetime, timezone
 
+    from cryptoshift.inventory import build_cbom_like, scan_inventory, write_inventory
+    from cryptoshift.inventory.relationships import extract_relationships
+
+    started = datetime.now(timezone.utc).isoformat(timespec="seconds")
     resolved = Path(target_path) if target_path else DEFAULT_CONFIGS_DIR
     findings, stats = scan_inventory(resolved)
+    rels = extract_relationships(resolved, catalog=stats["_catalog"])
     label = _display(resolved) if resolved.resolve().is_relative_to(PROJECT_ROOT) else resolved.name
-    cbom = build_cbom_like(findings, stats, target_label=label.replace("\\", "/"))
+    cbom = build_cbom_like(findings, stats, target_label=label.replace("\\", "/"), relationships=rels, scan_started_utc=started)
     paths = write_inventory(cbom, Path(out_dir) if out_dir else PROJECT_ROOT / "scratch" / "derived" / "inventory")
     s = cbom["summary"]
     print(f"=== CryptoShift: Stage 1 Inventory ({cbom['target']}) ===")
@@ -275,6 +285,7 @@ def cmd_inventory(target_path: Optional[str] = None, out_dir: Optional[str] = No
     print(f"Findings          : {s['findings_total']} (vulnerable/weak {s['findings_quantum_or_classically_weak']}, PQC/hybrid info {s['findings_pqc_or_hybrid_info']})")
     print(f"By purpose        : {s['by_purpose']}")
     print(f"By ambiguity      : {s['by_ambiguity']}")
+    print(f"By service        : {s['by_service']} | relationships: {s['relationships']}")
     for f in findings:
         where = f"{f.file_path}:{f.line_number}" if f.line_number else f"{f.file_path} ({f.location})"
         print(f"  - [{f.finding_id}] {where} | {f.legacy_algorithm} | {f.operation_purpose} | {f.confidence} | {f.ambiguity}")
