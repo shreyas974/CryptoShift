@@ -1,0 +1,24 @@
+# Member 3 environment (versions pinned from the .venv actually used on 2026-10-29, Python 3.12.14).
+# Install inside .venv only:  .\.venv\Scripts\python.exe -m pip install -r requirements-member3.txt
+jupyterlab==4.6.4
+ipykernel==7.4.0
+nbformat==5.11.1
+nbconvert==7.17.2
+pandas==3.1.0
+numpy==2.5.4
+scikit-learn==1.9.1
+matplotlib==3.11.2
+networkx==3.7
+h5py==3.16.0
+hdf5plugin==7.1.0
+tables==3.11.1
+PyYAML==6.0.3
+fastapi==0.162.0
+uvicorn==0.54.0
+httpx==0.28.1
+cryptography==50.0.2
+python-dotenv==1.2.4
+jsonschema==4.26.0
+# QpiAI SDKs (offline model checks + local statevector simulator only)
+qpiai-opt[quantum]==0.0.9
+qpiai-quantum==0.3.0

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CryptoShift Assistant API (POST /ask)",
+  "type": "object",
+  "properties": {
+    "request": {
+      "type": "object",
+      "required": [
+        "question"
+      ],
+      "properties": {
+        "question": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "response": {
+      "type": "object",
+      "required": [
+        "answer",
+        "citations",
+        "tools_used",
+        "refused",
+        "backend"
+      ],
+      "properties": {
+        "answer": {
+          "type": "string"
+        },
+        "citations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tools_used": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "refused": {
+          "type": "boolean"
+        },
+        "backend": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "required": [
+    "request",
+    "response"
+  ]
+}
