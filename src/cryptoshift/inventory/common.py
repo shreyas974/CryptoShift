@@ -20,20 +20,32 @@ ASYMMETRIC_FAMILIES = {"RSA", "EC", "ECDSA", "ECDH", "DH", "DSA", "X25519", "X44
 PQC_FAMILIES = {"ML-KEM", "ML-DSA", "SLH-DSA", "Hybrid-ML-KEM"}
 
 SNIPPET_MAX = 160
-_LONG_TOKEN_RE = re.compile(r"[A-Za-z0-9+/=_\-]{32,}")
 _SECRET_ASSIGN_RE = re.compile(
     r"((?:password|passwd|secret|token|api[_-]?key|private[_-]?key|passphrase)\w*\s*[=:]\s*)(['\"]).*?\2",
     re.IGNORECASE,
 )
 
 
+_ALGORITHM_TOKEN_RE = re.compile(
+    r"(?:TLS|SSL)_[A-Z0-9_]+"  # IANA cipher suite names (upper-case only)
+    r"|[A-Za-z0-9]+/[A-Z0-9]{2,5}/[A-Za-z0-9-]*Padding"  # JCA transformations, e.g. RSA/ECB/OAEPWith...Padding
+    r"|[A-Za-z0-9-]*With[A-Za-z0-9-]*And[A-Za-z0-9-]*"  # JCA names such as OAEPWithSHA-256AndMGF1Padding
+)
+
+
+def _mask_long_token(m: "re.Match[str]") -> str:
+    return m.group(0) if _ALGORITHM_TOKEN_RE.fullmatch(m.group(0)) else "[REDACTED_TOKEN]"
+
+
 def redact_snippet(line: str) -> str:
-    """Return a short, safe snippet: secrets, long key-like tokens and user paths are masked."""
+    """Return a short, safe snippet: secrets, long key-like tokens and user paths are masked.
+
+    Long tokens are masked unless they have the exact shape of an algorithm identifier (IANA suite or JCA name)."""
     text = line.strip()
     if "PRIVATE KEY" in text or "BEGIN CERTIFICATE" in text:
         return "[REDACTED: key/certificate material]"
     text = _SECRET_ASSIGN_RE.sub(r"\1\2[REDACTED]\2", text)
-    text = _LONG_TOKEN_RE.sub("[REDACTED_TOKEN]", text)
+    text = re.sub(r"[A-Za-z0-9+/=_\-]{32,}", _mask_long_token, text)
     text = redact_secrets(text)
     if len(text) > SNIPPET_MAX:
         text = text[: SNIPPET_MAX - 3] + "..."
@@ -129,6 +141,8 @@ def make_finding(
     location: Optional[str] = None,
     service_id: str = "scanned_repo",
     algorithm_label: Optional[str] = None,
+    service_id_basis: str = "",
+    service_id_confidence: str = "",
 ) -> CryptoFinding:
     if ambiguity == "unknown" and purpose != "unknown":
         purpose = "unknown"
@@ -152,9 +166,11 @@ def make_finding(
         human_review_status="requires_human_review",
         detector=detector,
         algorithm_family=family,
-        detected_value=detected_value[:200],
+        detected_value=redact_snippet(detected_value)[:200],
         location=location or f"line {line}",
         snippet_redacted=redact_snippet(snippet) if snippet else "",
         ambiguity=ambiguity,
         in_test_file=is_test_path(rel_path),
+        service_id_basis=service_id_basis,
+        service_id_confidence=service_id_confidence,
     )

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cryptoshift.local/schemas/relationships.schema.json",
+  "title": "CryptoShift service relationships (OBSERVED evidence for the dependency graph)",
+  "description": "Produced by src/cryptoshift/inventory/relationships.py. Only OBSERVED edges with file and line; unresolved references are listed separately and are never edges.",
+  "type": "object",
+  "required": ["format", "known_services", "edges", "unknown_references", "summary"],
+  "properties": {
+    "format": {"const": "cryptoshift-relationships/1.0"},
+    "provenance_policy": {"type": "string"},
+    "known_services": {"type": "array", "items": {"type": "string"}},
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["edge_id", "source", "target", "kind", "provenance", "file", "line", "confidence", "evidence"],
+        "additionalProperties": false,
+        "properties": {
+          "edge_id": {"type": "string", "pattern": "^REL-[0-9]{4,}$"},
+          "source": {"type": "string", "minLength": 1},
+          "target": {"type": "string", "minLength": 1},
+          "kind": {"enum": ["nginx_upstream", "nginx_proxy_pass", "nginx_grpc_pass", "nginx_uwsgi_pass", "nginx_fastcgi_pass",
+                            "haproxy_server", "compose_depends_on", "compose_links", "config_url", "config_host",
+                            "config_depends_on", "python_import"]},
+          "provenance": {"const": "OBSERVED"},
+          "file": {"type": "string", "minLength": 1},
+          "line": {"type": "integer", "minimum": 1},
+          "confidence": {"enum": ["high", "medium", "low"]},
+          "evidence": {"type": "string", "maxLength": 160},
+          "reference": {"type": "string"}
+        }
+      }
+    },
+    "unknown_references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source", "reference", "kind", "file", "line", "reason"],
+        "properties": {
+          "source": {"type": "string"},
+          "reference": {"type": "string"},
+          "kind": {"type": "string"},
+          "file": {"type": "string"},
+          "line": {"type": "integer", "minimum": 1},
+          "reason": {"type": "string"}
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["edges", "unknown_references"],
+      "properties": {
+        "edges": {"type": "integer", "minimum": 0},
+        "unknown_references": {"type": "integer", "minimum": 0},
+        "by_kind": {"type": "object", "additionalProperties": {"type": "integer"}}
+      }
+    }
+  }
+}
