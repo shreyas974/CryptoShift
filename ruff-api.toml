@@ -1,0 +1,9 @@
+# Ruff settings for the web app v2 backend (src/cryptoshift/api) and its tests. Run:
+#   .\.venv\Scripts\python.exe -m ruff check --config ruff-api.toml src/cryptoshift/api tests/test_webapp_api.py
+# Kept separate from pyproject.toml (shared file) on purpose.
+line-length = 140
+target-version = "py312"
+
+[lint]
+# B008 flags FastAPI's documented `Depends(...)` default-argument pattern; it is the framework's intended usage.
+ignore = ["B008"]
