@@ -33,6 +33,9 @@ def collect(n: int = 30, warmup: int = 5) -> dict:
     with lab.lab_dir() as d:
         ev["selftests"] = [lab.mlkem_roundtrip_openssl(d), lab.mlkem_roundtrip_cryptography(),
                            lab.mldsa_sign_verify_openssl(d), lab.mldsa_sign_verify_cryptography()]
+        ev["deterministic_kats"] = lab.deterministic_kat_vectors()
+        ev["service_stack_integration"] = lab.service_stack_integration_checks()
+        ev["in_process_timing"] = lab.in_process_crypto_timing()
         ev["traces"] = lab.traces(d)
         ev["compatibility_matrix"] = lab.compatibility_matrix(d)
         ev["overhead"] = lab.overhead(d, n=n, warmup=warmup)

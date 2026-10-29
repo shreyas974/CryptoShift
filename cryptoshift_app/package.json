@@ -1,0 +1,17 @@
+{
+  "name": "cryptoshift",
+  "private": true,
+  "version": "0.1.0",
+  "description": "CryptoShift: verification-gated post-quantum cryptographic migration for banking applications (Quant-A-Maze 3.0, PQC-01).",
+  "type": "module",
+  "engines": { "node": ">=20.10" },
+  "scripts": {
+    "setup": "npm --prefix frontend install",
+    "dev": "node scripts/dev.mjs",
+    "api": "node backend/src/server.js",
+    "build": "npm --prefix frontend run build",
+    "start": "npm run build && node backend/src/server.js",
+    "typecheck": "npm --prefix frontend run typecheck",
+    "test": "node tests/api.test.mjs"
+  }
+}

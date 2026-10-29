@@ -309,40 +309,40 @@
     },
     "incremental_streaming_benchmark": {
       "chunk_size": 25000,
-      "streamed_rows": 100000,
-      "chunks_processed": 4,
-      "streamed_unique_flow_ids": 100000,
+      "streamed_rows": 50000,
+      "chunks_processed": 2,
+      "streamed_unique_flow_ids": 50000,
       "streamed_duplicate_flow_ids": 0,
-      "elapsed_seconds": 0.3188,
-      "throughput_rows_per_sec": 313690.9,
-      "mean_forward_bytes": 21347.28,
-      "mean_forward_packets": 60.6,
-      "mean_duration_seconds": 7.4462,
+      "elapsed_seconds": 0.3399,
+      "throughput_rows_per_sec": 147115.2,
+      "mean_forward_bytes": 17944.52,
+      "mean_forward_packets": 65.54,
+      "mean_duration_seconds": 8.1487,
       "top_categories_in_stream": {
-        "Other services and APIs": 15666,
-        "Streaming media": 9396,
-        "Social": 9104,
-        "Analytics & Telemetry": 8449,
-        "Antivirus": 7855,
-        "File sharing": 6900,
-        "Software updates": 6687,
-        "Advertising": 5758,
-        "Videoconferencing": 5724,
-        "Music": 4873
+        "Other services and APIs": 7691,
+        "Social": 5330,
+        "Streaming media": 4996,
+        "Analytics & Telemetry": 3912,
+        "Antivirus": 3459,
+        "Advertising": 3268,
+        "File sharing": 3109,
+        "Software updates": 3037,
+        "Music": 2685,
+        "Videoconferencing": 2538
       },
       "top_apps_in_stream": {
-        "microsoft-update": 4896,
-        "microsoft-diagnostic": 4324,
-        "tiktok": 3976,
-        "uzis-api": 3467,
-        "facebook-graph": 3039,
-        "skype": 2979,
-        "apple-itunes": 2811,
-        "outlook": 2698,
-        "microsoft-settings": 2400,
-        "teams": 2237,
-        "office-365": 2194,
-        "appnexus": 2066
+        "tiktok": 2277,
+        "microsoft-update": 2173,
+        "microsoft-diagnostic": 1838,
+        "facebook-graph": 1690,
+        "apple-itunes": 1510,
+        "skype": 1305,
+        "uzis-api": 1298,
+        "instagram": 1234,
+        "outlook": 1206,
+        "appnexus": 1162,
+        "spotify": 1096,
+        "microsoft-settings": 1038
       }
     },
     "allowed_use_in_cryptoshift": [
@@ -357,5 +357,5 @@
       "NEVER use CESNET-TLS22 service labels to compute PQC detector precision or recall."
     ]
   },
-  "evaluation_separation_policy": "Real public TLS endpoint observations (320 banking rows across 5 dates) and real encrypted TLS flow metadata (CESNET-TLS22-S, 25M rows) are kept strictly separate from code/config scanner precision/recall. Code/config detector precision and recall are reported only on separately labelled code/configuration fixtures (and any future verified real code corpus with defensible ground truth), never from CESNET service labels."
+  "evaluation_separation_policy": "CESNET service labels are never used for PQC detector precision/recall."
 }

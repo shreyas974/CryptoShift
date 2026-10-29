@@ -1,0 +1,21 @@
+services:
+  cryptoshift-agent:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.agent
+    ports:
+      - "127.0.0.1:8765:8765"
+    environment:
+      - CRYPTOSHIFT_AGENT_MODE=template
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  cryptoshift-tls-lab:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.tls_lab
+    network_mode: "none"
+    tmpfs:
+      - /tmp
+

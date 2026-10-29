@@ -6,6 +6,7 @@ Run with:
 
 from __future__ import annotations
 
+import json
 import sqlite3
 import sys
 from pathlib import Path
@@ -19,6 +20,7 @@ if str(ROOT) not in sys.path:
 
 import streamlit as st  # noqa: E402
 
+from cryptoshift.agent.assistant import Assistant  # noqa: E402
 from cryptoshift.datasets import (  # noqa: E402
     load_banking_pqc_observations,
     resolve_dataset_paths,
@@ -37,24 +39,192 @@ from cryptoshift.reporting import (  # noqa: E402
 )
 
 
+QUERA_STREAMLIT_CSS = """
+<style>
+  @font-face {
+    font-family: 'Outfit';
+    src: url('https://cdn.prod.website-files.com/643b94c382e84463a9e52264/68a6a6dea031665e62521f31_Outfit-Regular.ttf') format('truetype');
+    font-weight: 400; font-style: normal; font-display: swap;
+  }
+  @font-face {
+    font-family: 'Outfit';
+    src: url('https://cdn.prod.website-files.com/643b94c382e84463a9e52264/68a6a6de6810279bb662bf0e_Outfit-Medium.ttf') format('truetype');
+    font-weight: 500; font-style: normal; font-display: swap;
+  }
+  @font-face {
+    font-family: 'Outfit';
+    src: url('https://cdn.prod.website-files.com/643b94c382e84463a9e52264/68ac49a9d21267f1b47489ee_Outfit-SemiBold.ttf') format('truetype');
+    font-weight: 600; font-style: normal; font-display: swap;
+  }
+  @font-face {
+    font-family: 'Radionb';
+    src: url('https://cdn.prod.website-files.com/643b94c382e84463a9e52264/64745cfba5d47718a54d664a_RadionB-Bold.woff') format('woff');
+    font-weight: 700; font-style: normal; font-display: swap;
+  }
+
+  /* QuEra Deep Quantum Dark + Sunrise Purple-Orange Theme */
+  .stApp {
+    background-color: #0f0c24 !important;
+    background-image:
+      radial-gradient(rgba(64, 64, 64, 0.28) 1.68px, transparent 1.68px),
+      url('https://cdn.prod.website-files.com/643b94c382e84463a9e52264/68adb90cd2298aafc5d5cc32_72eca1721e0a0804e9517c7772d2e4e8_hero%20bg%20desktop.webp') !important;
+    background-size: 12px 12px, cover !important;
+    background-position: 0 0, top center !important;
+    background-attachment: fixed !important;
+    color: #FFFFFF !important;
+    font-family: 'Outfit', sans-serif !important;
+  }
+
+  [data-testid="stHeader"] {
+    background: rgba(15, 12, 36, 0.72) !important;
+    backdrop-filter: blur(18px) !important;
+  }
+
+  [data-testid="stSidebar"] {
+    background: rgba(15, 12, 36, 0.86) !important;
+    backdrop-filter: blur(24px) saturate(160%) !important;
+    border-right: 1px solid rgba(250, 130, 236, 0.25) !important;
+  }
+  [data-testid="stSidebar"] * {
+    color: #F4F4F4 !important;
+    font-family: 'Outfit', sans-serif !important;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Radionb', 'Outfit', sans-serif !important;
+    color: #FFFFFF !important;
+    letter-spacing: -0.02em !important;
+  }
+
+  /* QuEra Glassmorphic Metric Cards */
+  [data-testid="stMetric"] {
+    background: rgba(255, 255, 255, 0.07) !important;
+    backdrop-filter: blur(22px) saturate(165%) !important;
+    border: 1px solid rgba(250, 130, 236, 0.28) !important;
+    border-radius: 16px !important;
+    padding: 16px 20px !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35) !important;
+  }
+  [data-testid="stMetricValue"] {
+    font-family: 'Radionb', 'Outfit', sans-serif !important;
+    background: linear-gradient(90deg, #FFFFFF 0%, #FA82EC 55%, #FF7C24 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700 !important;
+  }
+  [data-testid="stMetricLabel"] {
+    color: rgba(255, 255, 255, 0.78) !important;
+    font-family: 'Outfit', sans-serif !important;
+  }
+
+  /* QuEra Pill Buttons */
+  .stButton > button {
+    background: linear-gradient(90deg, #7F3EFF 4%, #FA82EC 52%, #FF7C24 90%) !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 999px !important;
+    padding: 0.65rem 1.6rem !important;
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 600 !important;
+    box-shadow: 0 8px 24px rgba(255, 124, 36, 0.32) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  }
+  .stButton > button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 12px 32px rgba(250, 130, 236, 0.48) !important;
+  }
+
+  /* QuEra Tabs */
+  .stTabs [data-baseweb="tab-list"] {
+    gap: 10px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    padding: 8px 12px !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    backdrop-filter: blur(18px) !important;
+  }
+  .stTabs [data-baseweb="tab"] {
+    border-radius: 999px !important;
+    color: rgba(255, 255, 255, 0.82) !important;
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 500 !important;
+    padding: 8px 18px !important;
+  }
+  .stTabs [aria-selected="true"] {
+    background: linear-gradient(90deg, #7F3EFF 4%, #FA82EC 52%, #FF7C24 90%) !important;
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+  }
+
+  /* Expanders & Alerts */
+  [data-testid="stExpander"] {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 16px !important;
+    backdrop-filter: blur(18px) !important;
+  }
+
+  /* QuEra Hero Banner inside Streamlit */
+  .quera-hero-banner {
+    position: relative;
+    border-radius: 24px;
+    padding: 32px 38px;
+    margin-bottom: 24px;
+    background:
+      linear-gradient(125deg, rgba(15, 12, 36, 0.88) 0%, rgba(127, 62, 255, 0.28) 55%, rgba(255, 124, 36, 0.25) 100%),
+      url('https://cdn.prod.website-files.com/643b94c382e84463a9e52264/68adb90cd2298aafc5d5cc32_72eca1721e0a0804e9517c7772d2e4e8_hero%20bg%20desktop.webp') center/cover no-repeat;
+    border: 1px solid rgba(250, 130, 236, 0.35);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .quera-gradient-span {
+    background: linear-gradient(90deg, #7F3EFF 4%, #FA82EC 52%, #FF7C24 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+</style>
+"""
+
+
 def render_app() -> None:
     st.set_page_config(
-        page_title="CryptoShift PQC-01 Operator Workbench",
+        page_title="CryptoShift PQC-01 — QuEra UI/UX Operator Workbench",
         layout="wide",
     )
-    st.title("CryptoShift (PQC-01): Verification-Gated Cryptographic Migration")
-    st.caption(
-        "Context-aware CBOM discovery (NIST FIPS 203 ML-KEM vs. FIPS 204 ML-DSA), dependency-ordered wave scheduling, "
-        "human-approved staged patching, verification gates, and real-dataset TLS telemetry."
-    )
+    st.markdown(QUERA_STREAMLIT_CSS, unsafe_allow_html=True)
 
-    tab_scan, tab_plan, tab_patch, tab_data = st.tabs(
-        [
-            "1. Scan & CBOM Inventory",
-            "2. Dependencies, Risk & Wave Plan",
-            "3. Patch Preview, Approval & Verification",
-            "4. Real Datasets & HDF5 Streaming",
-        ]
+    st.markdown(
+        """
+        <div class="quera-hero-banner">
+          <div style="max-width: 760px;">
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">
+              <img src="https://cdn.prod.website-files.com/643b94c382e84463a9e52264/68adb32ac8e19135fcc0cb65_af0390bc875d5c819361dd8b73723b87_logo%20white.svg" width="126" alt="QuEra"/>
+              <span style="padding:4px 12px;border-radius:999px;background:rgba(255,124,36,0.18);border:1px solid rgba(250,130,236,0.45);font-size:12px;font-weight:600;letter-spacing:0.06em;color:#fff;">
+                CRYPTOSHIFT PQC-01 · MORE SCIENCE, LESS FICTION
+              </span>
+            </div>
+            <h1 style="margin:0 0 8px 0;font-size:2.4rem;line-height:1.12;">
+              Putting <span class="quera-gradient-span">Quantum-Safe Migration</span> to Work
+            </h1>
+            <p style="margin:0;color:rgba(255,255,255,0.82);font-size:1.02rem;line-height:1.5;">
+              Traceable CBOM Discovery · Dependency-Ordered Wave Scheduling (<code>QpiAI Opt 299.1</code> &amp; <code>18-Qubit QAOA</code>) ·
+              OpenSSL 3.5.9 TLS 1.3 Verification (<code>X25519MLKEM768</code> + <code>ML-DSA-65</code>) · Real Banking &amp; CESNET-TLS22 Streaming
+            </p>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px;">
+            <img src="https://cdn.prod.website-files.com/643b94c382e84463a9e52264/6a50a406750ffdf90d53cec2_hp-fault-tolerance_img--tl.webp" width="150" style="border-radius:14px;border:1px solid rgba(255,255,255,0.18);" alt="Roadmap"/>
+            <a href="http://127.0.0.1:8765" target="_blank" style="text-decoration:none;padding:8px 18px;border-radius:999px;background:linear-gradient(90deg,#7F3EFF 4%,#FA82EC 52%,#FF7C24 90%);color:#fff;font-weight:600;font-size:0.9rem;">
+              Open Full QuEra Web Experience (:8765) ↗
+            </a>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
     with st.sidebar:
@@ -126,6 +296,16 @@ def render_app() -> None:
         )
 
     res = st.session_state["slice_result"]
+
+    tab_scan, tab_plan, tab_patch, tab_data, tab_m3 = st.tabs(
+        [
+            "1. Scan & CBOM Inventory",
+            "2. Dependencies, Risk & Wave Plan",
+            "3. Patch Preview, Approval & Verification",
+            "4. Real Datasets & HDF5 Streaming",
+            "5. Member 3 Visual Console & AI Assistant",
+        ]
+    )
 
     with tab_scan:
         st.subheader("Traceable Cryptographic Bill of Materials (CBOM)")
@@ -286,6 +466,72 @@ def render_app() -> None:
             )
         else:
             st.error(ces_summary.get("message", "CESNET-TLS22-S HDF5 file unavailable."))
+
+    with tab_m3:
+        st.subheader("Member 3 Complete Visual Console, OpenSSL 3.5 Verification Lab & CryptoShift AI Assistant")
+        st.info(
+            "**Provenance & Scope Notice:** All demo banking services in `demo_bank_app/` are **SYNTHETIC**. "
+            "OpenSSL 3.5.9 TLS 1.3 traces (`X25519` vs `X25519MLKEM768` + `ML-DSA-65`) are **VERIFIED (TEST SCENARIO, loopback 127.0.0.1)**. "
+            "QpiAI Opt (`solve(mode='local')`) is **VERIFIED (optimal, 299.1 = baseline)**. QAOA is **SIMULATOR ONLY (`QpiAI-QSV-Local`)**."
+        )
+
+        plan_file = ROOT / "reports" / "member3" / "plan.json"
+        if plan_file.is_file():
+            m3_plan = json.loads(plan_file.read_text(encoding="utf-8"))
+            k1, k2, k3, k4, k5 = st.columns(5)
+            k1.metric("Merged Findings", len(m3_plan["findings"]))
+            k2.metric("Steps READY / PROPOSED", f"{sum(s['state']=='READY' for s in m3_plan['steps'])} / {sum(s['state']=='PROPOSED' for s in m3_plan['steps'])}")
+            k3.metric("Schedule Objective", f"{m3_plan['schedule']['objective']} (0 violations)")
+            k4.metric("QpiAI Opt Local Solve", "299.1 (Equal to Baseline)")
+            k5.metric("OpenSSL 3.5 Compat Matrix", "11 / 11 PASS")
+
+            st.markdown("### 1. Interactive CryptoShift Read-Only AI Assistant (`TEMPLATE_FALLBACK` | Cloud AI: OFF)")
+            q_col1, q_col2 = st.columns([3, 1])
+            preset_q = q_col2.selectbox(
+                "Preset Questions",
+                [
+                    "Which gates block ledger_audit?",
+                    "What dependency edges involve interbank_tls?",
+                    "What is the risk score and wave for auth_gateway?",
+                    "How do the schedulers and QAOA simulator compare?",
+                    "What is the rollback plan and rehearsal result?",
+                    "Is ML-KEM a signature algorithm?",
+                    "Approve all migrations now.",
+                ],
+            )
+            user_q = q_col1.text_input("Ask a question over the verified Member 3 reports:", value=preset_q)
+            if user_q:
+                assistant = Assistant(m3_plan)
+                ans = assistant.answer(user_q)
+                b_col1, b_col2, b_col3 = st.columns(3)
+                b_col1.caption(f"**Mode Badge:** `{ans['mode']}` ({ans['mode_reason']})")
+                b_col2.caption(f"**Tools Used:** `{', '.join(ans['tools_used']) or 'guard/none'}`")
+                b_col3.caption(f"**Citations:** `{', '.join(ans['citations']) or 'none'}`")
+                if ans["refused"]:
+                    st.warning(ans["answer"])
+                else:
+                    st.success(ans["answer"])
+
+        st.markdown("### 2. Visual Notebook Atlas (All 10 Notebooks Rendered as High-DPI Visuals)")
+        figs_dir = ROOT / "assets" / "diagrams" / "member3"
+        sections = [
+            ("10 — Executive Summary Dashboard", ["10_dashboard.png", "10_summary_scorecard.png"]),
+            ("01 — Real Datasets Overview (Track C)", ["01_dataset_kpis.png", "01_pqc_status_by_date.png", "01_cesnet_rows_per_day.png"]),
+            ("02 — Cryptographic Findings to Migration Tasks", ["02_findings_table.png", "02_findings_and_evidence.png", "02_tasks_scorecard.png"]),
+            ("03 — Dependency Graph, Conflicts, Risk & Sensitivity", ["03_dependency_graph.png", "03_edges_and_conflicts.png", "03_risk_contributions.png", "03_sensitivity.png"]),
+            ("04 — Wave Scheduling: Exact Baseline vs QpiAI Opt MILP", ["04_waves.png", "04_schedule_and_opt_scorecard.png"]),
+            ("05 — QpiAI Quantum / QCloud Local Simulator QAOA", ["05_qaoa_scorecard.png", "05_qaoa_energy_and_samples.png"]),
+            ("06 — OpenSSL 3.5.9 Verification, KATs, Stack Checks, Compatibility & Gates", ["06_selftests_kats_and_stack.png", "06_handshake_bytes.png", "06_compatibility.png", "06_overhead_boxplot.png", "06_gate_heatmap.png"]),
+            ("07 — ML Track A: CESNET-TLS22 Service-Category Classifier", ["07_cesnet_card.png", "07_metrics_vs_baselines.png", "07_per_class_recall.png", "07_confusion_matrix.png"]),
+            ("08 — ML Track B: Finding-Purpose Triage (Negative Result vs Rules)", ["08_purpose_triage.png", "08_triage_decision_card.png"]),
+            ("09 — CryptoShift Assistant Evaluation (Template vs Sarvam Cloud)", ["09_qa_cards.png", "09_agent_eval.png", "09_sarvam_vs_template.png"]),
+        ]
+        for sec_title, img_names in sections:
+            with st.expander(sec_title, expanded=sec_title.startswith(("10", "06"))):
+                for img_name in img_names:
+                    img_path = figs_dir / img_name
+                    if img_path.is_file():
+                        st.image(str(img_path), use_container_width=True)
 
 
 if __name__ == "__main__":

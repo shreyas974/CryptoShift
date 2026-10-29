@@ -1,17 +1,17 @@
 {
-  "run_id": "RUN-20261029T020623Z",
-  "created_at_utc": "2026-10-29T02:06:23.228446+00:00",
+  "run_id": "RUN-20261029T180929Z",
+  "created_at_utc": "2026-10-29T18:09:29.167204+00:00",
   "target_path": "demo_bank_app/configs",
-  "approval_status": "APPROVED_AND_STAGED",
-  "approver": "Security Architect Reviewer",
+  "approval_status": "HELD_FOR_HUMAN_APPROVAL",
+  "approver": null,
   "original_source_files_unmodified": true,
   "scanned_file_findings_count": 10,
-  "post_patch_staged_findings_count": 0,
+  "post_patch_staged_findings_count": null,
   "scanned_file_findings": [
     {
       "finding_id": "YML-auth_gateway_tls-01",
       "service_id": "auth_gateway",
-      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/auth_gateway_tls.yaml",
+      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift_Member3/demo_bank_app/configs/auth_gateway_tls.yaml",
       "line_number": 11,
       "legacy_algorithm": "RSA-2048",
       "quantum_threat": "Shor-CRQC (Integer factorization broken by cryptanalytically relevant quantum computer)",
@@ -21,15 +21,24 @@
       "evidence_type": "config_file",
       "operation_purpose": "digital_signature",
       "confidence": "high",
-      "rationale": "YAML directive 'oauth_jwt.signing_algorithm: RS256' at line 11 (sha256:300815abf831110e).",
+      "rationale": "YAML directive 'oauth_jwt.signing_algorithm: RS256' at line 11 (sha256:85ad91f7a73221ec).",
       "owner": "Identity & Access Team",
       "library_or_protocol": "yaml:oauth_jwt.signing_algorithm=RS256",
-      "human_review_status": "requires_human_review"
+      "human_review_status": "requires_human_review",
+      "detector": "legacy",
+      "algorithm_family": "",
+      "detected_value": "",
+      "location": "",
+      "snippet_redacted": "",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "",
+      "service_id_confidence": ""
     },
     {
       "finding_id": "YML-auth_gateway_tls-02",
       "service_id": "auth_gateway",
-      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/auth_gateway_tls.yaml",
+      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift_Member3/demo_bank_app/configs/auth_gateway_tls.yaml",
       "line_number": 13,
       "legacy_algorithm": "SHA-1",
       "quantum_threat": "Classical collision broken + Grover preimage reduction",
@@ -39,15 +48,24 @@
       "evidence_type": "config_file",
       "operation_purpose": "message_digest",
       "confidence": "high",
-      "rationale": "YAML directive 'oauth_jwt.thumbprint_digest: hashlib.sha1' at line 13 (sha256:300815abf831110e).",
+      "rationale": "YAML directive 'oauth_jwt.thumbprint_digest: hashlib.sha1' at line 13 (sha256:85ad91f7a73221ec).",
       "owner": "Identity & Access Team",
       "library_or_protocol": "yaml:oauth_jwt.thumbprint_digest=hashlib.sha1",
-      "human_review_status": "requires_human_review"
+      "human_review_status": "requires_human_review",
+      "detector": "legacy",
+      "algorithm_family": "",
+      "detected_value": "",
+      "location": "",
+      "snippet_redacted": "",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "",
+      "service_id_confidence": ""
     },
     {
       "finding_id": "YML-auth_gateway_tls-03",
       "service_id": "auth_gateway",
-      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/auth_gateway_tls.yaml",
+      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift_Member3/demo_bank_app/configs/auth_gateway_tls.yaml",
       "line_number": 17,
       "legacy_algorithm": "ECDHE-P256",
       "quantum_threat": "Shor-CRQC (Harvest-Now-Decrypt-Later ephemeral key exchange risk)",
@@ -57,15 +75,24 @@
       "evidence_type": "config_file",
       "operation_purpose": "key_establishment",
       "confidence": "high",
-      "rationale": "YAML directive 'tls_listener.key_exchange_curve: ECDHE-P256' at line 17 (sha256:300815abf831110e).",
+      "rationale": "YAML directive 'tls_listener.key_exchange_curve: ECDHE-P256' at line 17 (sha256:85ad91f7a73221ec).",
       "owner": "Identity & Access Team",
       "library_or_protocol": "yaml:tls_listener.key_exchange_curve=ECDHE-P256",
-      "human_review_status": "requires_human_review"
+      "human_review_status": "requires_human_review",
+      "detector": "legacy",
+      "algorithm_family": "",
+      "detected_value": "",
+      "location": "",
+      "snippet_redacted": "",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "",
+      "service_id_confidence": ""
     },
     {
       "finding_id": "YML-card_vault_crypto-01",
       "service_id": "card_vault",
-      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/card_vault_crypto.yaml",
+      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift_Member3/demo_bank_app/configs/card_vault_crypto.yaml",
       "line_number": 13,
       "legacy_algorithm": "RSA-2048",
       "quantum_threat": "Shor-CRQC (Harvest-Now-Decrypt-Later key transport/wrapping exposure)",
@@ -75,15 +102,24 @@
       "evidence_type": "config_file",
       "operation_purpose": "key_establishment",
       "confidence": "high",
-      "rationale": "YAML directive 'kms_envelope.dek_wrapping_algorithm: RSA_OAEP' at line 13 (sha256:3d2d5d578f2b4d54). [Mixed-posture warning: file also contains PQC token ['X25519MLKEM768'], but 'kms_envelope.dek_wrapping_algorithm=RSA_OAEP' remains quantum-vulnerable.]",
+      "rationale": "YAML directive 'kms_envelope.dek_wrapping_algorithm: RSA_OAEP' at line 13 (sha256:60fc2b7e43f826e6). [Mixed-posture warning: file also contains PQC token ['X25519MLKEM768'], but 'kms_envelope.dek_wrapping_algorithm=RSA_OAEP' remains quantum-vulnerable.]",
       "owner": "Card Security & PCI Vault Team",
       "library_or_protocol": "yaml:kms_envelope.dek_wrapping_algorithm=RSA_OAEP",
-      "human_review_status": "requires_human_review"
+      "human_review_status": "requires_human_review",
+      "detector": "legacy",
+      "algorithm_family": "",
+      "detected_value": "",
+      "location": "",
+      "snippet_redacted": "",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "",
+      "service_id_confidence": ""
     },
     {
       "finding_id": "YML-card_vault_crypto-02",
       "service_id": "card_vault",
-      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/card_vault_crypto.yaml",
+      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift_Member3/demo_bank_app/configs/card_vault_crypto.yaml",
       "line_number": 15,
       "legacy_algorithm": "3DES",
       "quantum_threat": "Grover-Weakened + Sweet32 64-bit block collision vulnerability",
@@ -93,15 +129,24 @@
       "evidence_type": "config_file",
       "operation_purpose": "symmetric_encryption",
       "confidence": "high",
-      "rationale": "YAML directive 'kms_envelope.pin_block_cipher: 3DES' at line 15 (sha256:3d2d5d578f2b4d54). [Mixed-posture warning: file also contains PQC token ['X25519MLKEM768'], but 'kms_envelope.pin_block_cipher=3DES' remains quantum-vulnerable.]",
+      "rationale": "YAML directive 'kms_envelope.pin_block_cipher: 3DES' at line 15 (sha256:60fc2b7e43f826e6). [Mixed-posture warning: file also contains PQC token ['X25519MLKEM768'], but 'kms_envelope.pin_block_cipher=3DES' remains quantum-vulnerable.]",
       "owner": "Card Security & PCI Vault Team",
       "library_or_protocol": "yaml:kms_envelope.pin_block_cipher=3DES",
-      "human_review_status": "requires_human_review"
+      "human_review_status": "requires_human_review",
+      "detector": "legacy",
+      "algorithm_family": "",
+      "detected_value": "",
+      "location": "",
+      "snippet_redacted": "",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "",
+      "service_id_confidence": ""
     },
     {
       "finding_id": "NGX-interbank_tls_nginx-01",
       "service_id": "interbank_tls",
-      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/interbank_tls_nginx.conf",
+      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift_Member3/demo_bank_app/configs/interbank_tls_nginx.conf",
       "line_number": 11,
       "legacy_algorithm": "ECDHE-P256",
       "quantum_threat": "Shor-CRQC (Harvest-Now-Decrypt-Later ephemeral key exchange risk)",
@@ -111,15 +156,24 @@
       "evidence_type": "config_file",
       "operation_purpose": "key_establishment",
       "confidence": "high",
-      "rationale": "Nginx directive 'ssl_ecdh_curve prime256v1;' at line 11 (sha256:91b046db8a8c12d7) negotiates classical ECDHE key exchange without hybrid ML-KEM (FIPS 203).",
+      "rationale": "Nginx directive 'ssl_ecdh_curve prime256v1;' at line 11 (sha256:457d33bd76ef598f) negotiates classical ECDHE key exchange without hybrid ML-KEM (FIPS 203).",
       "owner": "Network & Interbank Connectivity Team",
       "library_or_protocol": "nginx:ssl_ecdh_curve=prime256v1",
-      "human_review_status": "requires_human_review"
+      "human_review_status": "requires_human_review",
+      "detector": "legacy",
+      "algorithm_family": "",
+      "detected_value": "",
+      "location": "",
+      "snippet_redacted": "",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "",
+      "service_id_confidence": ""
     },
     {
       "finding_id": "NGX-interbank_tls_nginx-02",
       "service_id": "interbank_tls",
-      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/interbank_tls_nginx.conf",
+      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift_Member3/demo_bank_app/configs/interbank_tls_nginx.conf",
       "line_number": 12,
       "legacy_algorithm": "3DES",
       "quantum_threat": "Grover-Weakened + Sweet32 64-bit block collision vulnerability",
@@ -129,15 +183,24 @@
       "evidence_type": "config_file",
       "operation_purpose": "symmetric_encryption",
       "confidence": "high",
-      "rationale": "Nginx directive 'ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384:DES-CBC3-SHA;' at line 12 (sha256:91b046db8a8c12d7) enables legacy 3DES cipher suite (Sweet32 / Grover-weakened).",
+      "rationale": "Nginx directive 'ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384:DES-CBC3-SHA;' at line 12 (sha256:457d33bd76ef598f) enables legacy 3DES cipher suite (Sweet32 / Grover-weakened).",
       "owner": "Network & Interbank Connectivity Team",
       "library_or_protocol": "nginx:ssl_ciphers=ECDHE-RSA-AES256-GCM-SHA384:DES-CBC3-SHA",
-      "human_review_status": "requires_human_review"
+      "human_review_status": "requires_human_review",
+      "detector": "legacy",
+      "algorithm_family": "",
+      "detected_value": "",
+      "location": "",
+      "snippet_redacted": "",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "",
+      "service_id_confidence": ""
     },
     {
       "finding_id": "NGX-interbank_tls_nginx-03",
       "service_id": "interbank_tls",
-      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/interbank_tls_nginx.conf",
+      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift_Member3/demo_bank_app/configs/interbank_tls_nginx.conf",
       "line_number": 16,
       "legacy_algorithm": "RSA-2048",
       "quantum_threat": "Shor-CRQC (Integer factorization broken by cryptanalytically relevant quantum computer)",
@@ -147,15 +210,24 @@
       "evidence_type": "config_file",
       "operation_purpose": "digital_signature",
       "confidence": "high",
-      "rationale": "Nginx directive 'ssl_certificate /etc/nginx/certs/interbank_rsa2048_cert.pem;' at line 16 (sha256:91b046db8a8c12d7) uses classical RSA-2048 X.509 certificate authentication (requires FIPS 204 ML-DSA migration).",
+      "rationale": "Nginx directive 'ssl_certificate /etc/nginx/certs/interbank_rsa2048_cert.pem;' at line 16 (sha256:457d33bd76ef598f) uses classical RSA-2048 X.509 certificate authentication (requires FIPS 204 ML-DSA migration).",
       "owner": "Network & Interbank Connectivity Team",
       "library_or_protocol": "nginx:ssl_certificate=/etc/nginx/certs/interbank_rsa2048_cert.pem",
-      "human_review_status": "requires_human_review"
+      "human_review_status": "requires_human_review",
+      "detector": "legacy",
+      "algorithm_family": "",
+      "detected_value": "",
+      "location": "",
+      "snippet_redacted": "",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "",
+      "service_id_confidence": ""
     },
     {
       "finding_id": "SCAN-payment_signing_service-01",
       "service_id": "payment_signing",
-      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/payment_signing_service.py",
+      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift_Member3/demo_bank_app/configs/payment_signing_service.py",
       "line_number": 8,
       "legacy_algorithm": "ECDSA-P256",
       "quantum_threat": "Shor-CRQC (Elliptic curve discrete logarithm broken)",
@@ -165,15 +237,24 @@
       "evidence_type": "source_code",
       "operation_purpose": "digital_signature",
       "confidence": "high",
-      "rationale": "Detected 'ECDSA_P256' on line 8 (sha256:4997e9d4a194171c). [Mixed-posture warning: PQC identifier appears elsewhere in this file, but this legacy primitive remains active and requires migration.]",
+      "rationale": "Detected 'ECDSA_P256' on line 8 (sha256:23139e89a9439b5c). [Mixed-posture warning: PQC identifier appears elsewhere in this file, but this legacy primitive remains active and requires migration.]",
       "owner": "Real-Time Payments Team",
       "library_or_protocol": "static_file_scan",
-      "human_review_status": "requires_human_review"
+      "human_review_status": "requires_human_review",
+      "detector": "legacy",
+      "algorithm_family": "",
+      "detected_value": "",
+      "location": "",
+      "snippet_redacted": "",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "",
+      "service_id_confidence": ""
     },
     {
       "finding_id": "SCAN-payment_signing_service-02",
       "service_id": "payment_signing",
-      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/payment_signing_service.py",
+      "file_path": "C:/Users/lohig/OneDrive/Documents/CryptoShift_Member3/demo_bank_app/configs/payment_signing_service.py",
       "line_number": 9,
       "legacy_algorithm": "RSA-2048",
       "quantum_threat": "Shor-CRQC (Integer factorization broken by cryptanalytically relevant quantum computer)",
@@ -183,10 +264,19 @@
       "evidence_type": "source_code",
       "operation_purpose": "digital_signature",
       "confidence": "high",
-      "rationale": "Detected 'RS256' on line 9 (sha256:4997e9d4a194171c). [Mixed-posture warning: PQC identifier appears elsewhere in this file, but this legacy primitive remains active and requires migration.]",
+      "rationale": "Detected 'RS256' on line 9 (sha256:23139e89a9439b5c). [Mixed-posture warning: PQC identifier appears elsewhere in this file, but this legacy primitive remains active and requires migration.]",
       "owner": "Real-Time Payments Team",
       "library_or_protocol": "static_file_scan",
-      "human_review_status": "requires_human_review"
+      "human_review_status": "requires_human_review",
+      "detector": "legacy",
+      "algorithm_family": "",
+      "detected_value": "",
+      "location": "",
+      "snippet_redacted": "",
+      "ambiguity": "none",
+      "in_test_file": false,
+      "service_id_basis": "",
+      "service_id_confidence": ""
     }
   ],
   "discovered_service_metadata": {
@@ -195,7 +285,7 @@
       "owner": "Identity & Access Team",
       "dependencies": [],
       "files": [
-        "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/auth_gateway_tls.yaml"
+        "C:/Users/lohig/OneDrive/Documents/CryptoShift_Member3/demo_bank_app/configs/auth_gateway_tls.yaml"
       ],
       "pqc_identifiers_present": []
     },
@@ -206,7 +296,7 @@
         "auth_gateway"
       ],
       "files": [
-        "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/card_vault_crypto.yaml"
+        "C:/Users/lohig/OneDrive/Documents/CryptoShift_Member3/demo_bank_app/configs/card_vault_crypto.yaml"
       ],
       "pqc_identifiers_present": [
         "X25519MLKEM768"
@@ -219,7 +309,7 @@
         "ledger_audit"
       ],
       "files": [
-        "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/interbank_tls_nginx.conf"
+        "C:/Users/lohig/OneDrive/Documents/CryptoShift_Member3/demo_bank_app/configs/interbank_tls_nginx.conf"
       ],
       "pqc_identifiers_present": []
     },
@@ -231,7 +321,7 @@
         "ledger_audit"
       ],
       "files": [
-        "C:/Users/lohig/OneDrive/Documents/CryptoShift/demo_bank_app/configs/payment_signing_service.py"
+        "C:/Users/lohig/OneDrive/Documents/CryptoShift_Member3/demo_bank_app/configs/payment_signing_service.py"
       ],
       "pqc_identifiers_present": []
     }
@@ -432,7 +522,7 @@
         "settlement_batch"
       ]
     },
-    "runtime_seconds": 0.002928,
+    "runtime_seconds": 0.004548,
     "diagnostics": {
       "method": "exact_constrained_combinatorial_search",
       "candidates_evaluated": 729,
@@ -445,8 +535,8 @@
   },
   "patch_proposals": [
     {
-      "proposal_id": "RUN-20261029T020623Z-P01",
-      "run_id": "RUN-20261029T020623Z",
+      "proposal_id": "RUN-20261029T180929Z-P01",
+      "run_id": "RUN-20261029T180929Z",
       "service_id": "auth_gateway",
       "assigned_wave": 1,
       "source_file": "demo_bank_app/configs/auth_gateway_tls.yaml",
@@ -459,13 +549,13 @@
         "Upgrade TLS listener key exchange from `ECDHE-P256` to hybrid `X25519MLKEM768` (NIST FIPS 203 ML-KEM)."
       ],
       "unified_diff": "--- a/demo_bank_app/configs/auth_gateway_tls.yaml\n+++ b/staged/demo_bank_app/configs/auth_gateway_tls.yaml\n@@ -8,10 +8,10 @@\n depends_on: []\n \n oauth_jwt:\n-  signing_algorithm: RS256\n-  key_type: RSA-2048\n-  thumbprint_digest: hashlib.sha1\n+  signing_algorithm: ML-DSA-65-HYBRID\n+  key_type: ML-DSA-65\n+  thumbprint_digest: hashlib.sha3_256\n \n tls_listener:\n   protocol_min: TLSv1.2\n-  key_exchange_curve: ECDHE-P256\n+  key_exchange_curve: X25519MLKEM768",
-      "approval_status": "APPROVED",
+      "approval_status": "PENDING_HUMAN_APPROVAL",
       "human_approval_required": true,
-      "approver": "Security Architect Reviewer",
-      "approved_at_utc": "2026-10-29T02:06:23.228446+00:00",
-      "applied_to_staging": true,
-      "staged_file_path": "scratch/mvp_workspace/runs/RUN-20261029T020623Z/staged/auth_gateway_tls.yaml",
-      "backup_file_path": "scratch/mvp_workspace/runs/RUN-20261029T020623Z/backups/auth_gateway_tls.yaml",
+      "approver": null,
+      "approved_at_utc": null,
+      "applied_to_staging": false,
+      "staged_file_path": null,
+      "backup_file_path": null,
       "finding_ids": [
         "YML-auth_gateway_tls-01",
         "YML-auth_gateway_tls-02",
@@ -473,8 +563,8 @@
       ]
     },
     {
-      "proposal_id": "RUN-20261029T020623Z-P02",
-      "run_id": "RUN-20261029T020623Z",
+      "proposal_id": "RUN-20261029T180929Z-P02",
+      "run_id": "RUN-20261029T180929Z",
       "service_id": "card_vault",
       "assigned_wave": 2,
       "source_file": "demo_bank_app/configs/card_vault_crypto.yaml",
@@ -485,21 +575,21 @@
         "Migrate vault PIN block cipher from `3DES` to `AES-256-GCM` (NIST SP 800-38D)."
       ],
       "unified_diff": "--- a/demo_bank_app/configs/card_vault_crypto.yaml\n+++ b/staged/demo_bank_app/configs/card_vault_crypto.yaml\n@@ -10,9 +10,9 @@\n   - auth_gateway\n \n kms_envelope:\n-  dek_wrapping_algorithm: RSA_OAEP\n+  dek_wrapping_algorithm: ML-KEM-768-HYBRID-KW\n   dek_wrapping_key_bits: 2048\n-  pin_block_cipher: 3DES\n+  pin_block_cipher: AES-256-GCM\n \n tls_client:\n   # Note: Presence of X25519MLKEM768 here does NOT make card_vault PQC-safe while RSA_OAEP and 3DES remain unmigrated.",
-      "approval_status": "APPROVED",
+      "approval_status": "PENDING_HUMAN_APPROVAL",
       "human_approval_required": true,
-      "approver": "Security Architect Reviewer",
-      "approved_at_utc": "2026-10-29T02:06:23.228446+00:00",
-      "applied_to_staging": true,
-      "staged_file_path": "scratch/mvp_workspace/runs/RUN-20261029T020623Z/staged/card_vault_crypto.yaml",
-      "backup_file_path": "scratch/mvp_workspace/runs/RUN-20261029T020623Z/backups/card_vault_crypto.yaml",
+      "approver": null,
+      "approved_at_utc": null,
+      "applied_to_staging": false,
+      "staged_file_path": null,
+      "backup_file_path": null,
       "finding_ids": [
         "YML-card_vault_crypto-01",
         "YML-card_vault_crypto-02"
       ]
     },
     {
-      "proposal_id": "RUN-20261029T020623Z-P03",
-      "run_id": "RUN-20261029T020623Z",
+      "proposal_id": "RUN-20261029T180929Z-P03",
+      "run_id": "RUN-20261029T180929Z",
       "service_id": "interbank_tls",
       "assigned_wave": 0,
       "source_file": "demo_bank_app/configs/interbank_tls_nginx.conf",
@@ -511,13 +601,13 @@
         "Transition mTLS peer authentication certificate to dual-mode `ML-DSA-65` (NIST FIPS 204)."
       ],
       "unified_diff": "--- a/demo_bank_app/configs/interbank_tls_nginx.conf\n+++ b/staged/demo_bank_app/configs/interbank_tls_nginx.conf\n@@ -8,12 +8,12 @@\n     server_name interbank-mtls.demo-bank.internal;\n \n     ssl_protocols TLSv1.2 TLSv1.3;\n-    ssl_ecdh_curve prime256v1;\n-    ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384:DES-CBC3-SHA;\n+    ssl_ecdh_curve X25519MLKEM768:X25519:prime256v1;\n+    ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384;\n     ssl_prefer_server_ciphers on;\n \n     # RSA-2048 certificate authentication (digital_signature role -> FIPS 204 ML-DSA)\n-    ssl_certificate /etc/nginx/certs/interbank_rsa2048_cert.pem;\n+    ssl_certificate /etc/nginx/certs/interbank_mldsa65_dual_cert.pem;\n     ssl_certificate_key /etc/nginx/certs/interbank_rsa2048.key;\n     ssl_verify_client on;\n ",
-      "approval_status": "APPROVED",
+      "approval_status": "PENDING_HUMAN_APPROVAL",
       "human_approval_required": true,
-      "approver": "Security Architect Reviewer",
-      "approved_at_utc": "2026-10-29T02:06:23.228446+00:00",
-      "applied_to_staging": true,
-      "staged_file_path": "scratch/mvp_workspace/runs/RUN-20261029T020623Z/staged/interbank_tls_nginx.conf",
-      "backup_file_path": "scratch/mvp_workspace/runs/RUN-20261029T020623Z/backups/interbank_tls_nginx.conf",
+      "approver": null,
+      "approved_at_utc": null,
+      "applied_to_staging": false,
+      "staged_file_path": null,
+      "backup_file_path": null,
       "finding_ids": [
         "NGX-interbank_tls_nginx-01",
         "NGX-interbank_tls_nginx-02",
@@ -525,8 +615,8 @@
       ]
     },
     {
-      "proposal_id": "RUN-20261029T020623Z-P04",
-      "run_id": "RUN-20261029T020623Z",
+      "proposal_id": "RUN-20261029T180929Z-P04",
+      "run_id": "RUN-20261029T180929Z",
       "service_id": "payment_signing",
       "assigned_wave": 1,
       "source_file": "demo_bank_app/configs/payment_signing_service.py",
@@ -537,13 +627,13 @@
         "Migrate XMLDSig fallback signature from `RS256` to `ML-DSA-65_XMLDSIG_HYBRID` (NIST FIPS 204)."
       ],
       "unified_diff": "--- a/demo_bank_app/configs/payment_signing_service.py\n+++ b/staged/demo_bank_app/configs/payment_signing_service.py\n@@ -5,5 +5,5 @@\n DEPENDS_ON = [\"auth_gateway\", \"ledger_audit\"]\n \n # Digital signature primitives -> must migrate to ML-DSA-65 (FIPS 204), NEVER ML-KEM\n-PRIMARY_SIGNATURE_SCHEME = \"ECDSA_P256\"\n-FALLBACK_XMLDSIG_SCHEME = \"RS256\"\n+PRIMARY_SIGNATURE_SCHEME = \"ML-DSA-65_HYBRID\"\n+FALLBACK_XMLDSIG_SCHEME = \"ML-DSA-65_XMLDSIG_HYBRID\"",
-      "approval_status": "APPROVED",
+      "approval_status": "PENDING_HUMAN_APPROVAL",
       "human_approval_required": true,
-      "approver": "Security Architect Reviewer",
-      "approved_at_utc": "2026-10-29T02:06:23.228446+00:00",
-      "applied_to_staging": true,
-      "staged_file_path": "scratch/mvp_workspace/runs/RUN-20261029T020623Z/staged/payment_signing_service.py",
-      "backup_file_path": "scratch/mvp_workspace/runs/RUN-20261029T020623Z/backups/payment_signing_service.py",
+      "approver": null,
+      "approved_at_utc": null,
+      "applied_to_staging": false,
+      "staged_file_path": null,
+      "backup_file_path": null,
       "finding_ids": [
         "SCAN-payment_signing_service-01",
         "SCAN-payment_signing_service-02"
