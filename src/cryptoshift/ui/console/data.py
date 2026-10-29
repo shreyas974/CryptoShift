@@ -49,7 +49,8 @@ SPEC: Dict[str, tuple] = {
 }
 
 KNOWN_STATUSES = {"VERIFIED", "PARTIAL", "MOCKED", "SIMULATED", "SIMULATOR", "SYNTHETIC", "PLANNED", "BLOCKED", "PASS",
-                  "FAIL", "READY", "PROPOSED", "APPROVED", "RUN", "OBSERVED", "DECLARED", "INFERRED", "HOLD"}
+                  "FAIL", "READY", "PROPOSED", "APPROVED", "RUN", "OBSERVED", "DECLARED", "INFERRED", "HOLD",
+                  "NOT RUN", "NOT APPLICABLE"}
 
 
 def norm_status(value: Any) -> str:

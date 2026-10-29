@@ -485,3 +485,9 @@
 .menu-panel {
   background: var(--surface-solid);
 }
+#finding-detail {
+  scroll-margin-top: 160px;
+}
+section:has(> #finding-detail) {
+  scroll-margin-top: 90px;
+}

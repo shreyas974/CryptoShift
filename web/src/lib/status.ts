@@ -18,6 +18,8 @@ export const KNOWN = [
   "DECLARED",
   "INFERRED",
   "HOLD",
+  "NOT RUN",
+  "NOT APPLICABLE",
 ] as const;
 export type Status = (typeof KNOWN)[number] | "UNKNOWN";
 
@@ -49,6 +51,8 @@ const MAP: Record<Status, [string, Tone, string]> = {
   PLANNED: ["⏳", "info", "not built yet"],
   BLOCKED: ["⛔", "bad", "cannot run; reason shown"],
   FAIL: ["✖", "bad", "check failed"],
+  "NOT RUN": ["⊘", "neutral", "not executed yet; never counted as a pass"],
+  "NOT APPLICABLE": ["–", "neutral", "not required for this step's cryptographic purposes"],
 };
 
 export function badgeInfo(value: unknown): { status: Status; icon: string; tone: Tone; meaning: string } {

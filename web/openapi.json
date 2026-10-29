@@ -900,6 +900,76 @@
         }
       }
     },
+    "/api/v1/demo-repos": {
+      "get": {
+        "tags": [
+          "runs"
+        ],
+        "summary": "Demo Repos",
+        "operationId": "demo_repos_api_v1_demo_repos_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "title": "Response Demo Repos Api V1 Demo Repos Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/runs/demo": {
+      "post": {
+        "tags": [
+          "runs"
+        ],
+        "summary": "Create Demo Run",
+        "description": "Run a pipeline on a built-in SYNTHETIC repository (no upload). Files are copied into the run folder first.",
+        "operationId": "create_demo_run_api_v1_runs_demo_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DemoRunIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Create Demo Run Api V1 Runs Demo Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/runs/{run_id}": {
       "get": {
         "tags": [
@@ -1578,6 +1648,33 @@
           "authorized"
         ],
         "title": "Body_scan_upload_api_v1_scans_upload_post"
+      },
+      "DemoRunIn": {
+        "properties": {
+          "repo_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Repo Id"
+          },
+          "pipeline": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Pipeline"
+          },
+          "authorized": {
+            "type": "boolean",
+            "title": "Authorized"
+          }
+        },
+        "type": "object",
+        "required": [
+          "repo_id",
+          "pipeline",
+          "authorized"
+        ],
+        "title": "DemoRunIn"
       },
       "HTTPValidationError": {
         "properties": {

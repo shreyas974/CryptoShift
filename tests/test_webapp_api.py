@@ -410,3 +410,58 @@ def test_full_report(env):
     r = client_as(app, "viewer").get("/api/v1/report").json()
     assert {"overview", "plan", "verification", "approvals", "audit", "must_not_claim"} <= set(r)
     assert not SECRET_RE.search(json.dumps(r))
+
+
+# ---------------------------------------------------------------- user-audit fixes (docs/USER_AUDIT_AND_FIX_REPORT.md)
+def test_demo_repository_run_needs_no_upload(env):
+    app, _, _ = env
+    an = client_as(app, "analyst")
+    repos = {r["id"]: r for r in an.get("/api/v1/demo-repos").json()}
+    assert repos["demo_bank"]["available"] and repos["demo_bank"]["files"] > 0
+    assert an.post("/api/v1/runs/demo", json={"repo_id": "../../etc", "pipeline": "discovery", "authorized": True}).status_code == 422
+    assert an.post("/api/v1/runs/demo", json={"repo_id": "demo_bank", "pipeline": "discovery", "authorized": False}).status_code == 422
+    r = an.post("/api/v1/runs/demo", json={"repo_id": "demo_bank", "pipeline": "plan", "authorized": True})
+    assert r.status_code == 200, r.text
+    run = _wait_run(an, r.json()["run_id"], timeout=180)
+    assert run["status"] == "succeeded", run.get("log_tail")
+    plan = run["summary"]["stages"]["plan"]
+    assert plan["steps"] > 0 and plan["feasible"] is True
+
+
+def test_findings_state_role_certainty_and_risk_is_explained(env):
+    app, _, _ = env
+    vw = client_as(app, "viewer")
+    rows = vw.get("/api/v1/findings").json()["rows"]
+    assert {r["role_certainty"] for r in rows} <= {"INFERRED", "UNKNOWN / MANUAL REVIEW"}
+    assert all(r["role_certainty"] == "UNKNOWN / MANUAL REVIEW" for r in rows if r["hold"])  # never shown as known
+    assert all(r["detected_value"] for r in rows)
+    for t in vw.get("/api/v1/plan").json()["tasks"]:
+        f = {x["factor"]: x for x in t["risk_factors"]}
+        assert set(f) == {"crypto_exposure", "network_exposure", "criticality", "dependents", "verification_readiness"}
+        assert abs(sum(x["points"] for x in f.values()) - t["risk"]) < 0.01  # the breakdown adds up to the shown score
+        if f["network_exposure"]["label"] == "unknown":
+            assert f["network_exposure"]["unknown"] is True and f["network_exposure"]["input"] == 0.5  # unknown is not "low"
+
+
+def test_exports_are_valid_files(env):
+    app, _, _ = env
+    vw = client_as(app, "viewer")
+    j = vw.get("/api/v1/export/json?page=plan")
+    assert j.status_code == 200 and "attachment" in j.headers["content-disposition"]
+    body = j.json()
+    assert body["page"] == "plan" and body["data"]["tasks"]
+    m = vw.get("/api/v1/export/md?page=verification")
+    assert m.status_code == 200 and m.text.startswith("# CryptoShift export: verification")
+    json.loads(m.text.split("```json\n", 1)[1].rsplit("\n```", 1)[0])  # embedded JSON parses
+    assert not SECRET_RE.search(j.text + m.text)
+
+
+def test_every_audited_action_has_plain_words_in_the_activity_feed():
+    import ast
+
+    from cryptoshift.api.main import ACTIVITY
+
+    tree = ast.parse((ROOT / "src" / "cryptoshift" / "api" / "main.py").read_text(encoding="utf-8"))
+    used = {n.args[2].value for n in ast.walk(tree) if isinstance(n, ast.Call) and getattr(n.func, "id", "") == "audit"
+            and len(n.args) > 2 and isinstance(n.args[2], ast.Constant)}
+    assert used - set(ACTIVITY) == set(), f"audit actions without feed wording: {used - set(ACTIVITY)}"

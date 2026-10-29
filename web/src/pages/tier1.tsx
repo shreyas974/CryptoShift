@@ -1,7 +1,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { api, type ApprovalStep, type FindingRow, type Me } from "../api/client";
 import { DataTable } from "../components/DataTable";
 import { HeroSphere } from "../components/HeroSphere";
@@ -63,6 +63,55 @@ export function OverviewPage({ me, go, prefs }: { me: Me; go: (p: string) => voi
           </div>
         </div>
         <HeroSphere theme={prefs.theme} reduceMotion={prefs.reduceMotion} nodes={nodes} />
+      </section>
+      <section className="section" aria-labelledby="workflow">
+        <div className="eyebrow">The workflow</div>
+        <h2 id="workflow" className="h-section">
+          The tool proposes. Verification checks. People approve.
+        </h2>
+        <p className="t-muted mt-0 mb-4 max-w-3xl">
+          Each step below links to where it happens, with its honest status. Candidates are rule-based text
+          recommendations; CryptoShift does not generate or apply code patches.
+        </p>
+        <ol className="m-0 grid list-none grid-cols-1 gap-2 p-0 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {(
+            [
+              ["1", "Repository", "runs", "VERIFIED", "Pick a demo repo or upload your own"],
+              ["2", "Discovery & inventory", "inventory", "VERIFIED", "File and line evidence per finding"],
+              ["3", "Risk assessment", "plan", "PARTIAL", "Prototype formula, explained per factor"],
+              ["4", "Migration plan", "plan", "VERIFIED", "Dependency-aware waves"],
+              ["5", "Candidate change", "inventory", "PARTIAL", "Text candidates only; no code patches"],
+              ["6", "Verification", "verification", "VERIFIED", "Loopback gates: PASS, FAIL, NOT RUN"],
+              ["7", "Protocol traces", "verification", "VERIFIED", "Before and after handshakes (test scenario)"],
+              ["8", "Human approval", "approval", "PARTIAL", "Built and tested; no real approval recorded yet"],
+              ["9", "Rollback", "approval", "VERIFIED", "Rehearsed on a copy"],
+              ["10", "Report & audit", "reports", "VERIFIED", "Printable report, exports, hash-chained log"],
+            ] as const
+          ).map(([n, label, to, status, note]) => (
+            <li key={n}>
+              <a
+                href={`#/${to}`}
+                className="glass glass-card lift block h-full p-3 no-underline"
+                style={{ color: "var(--text)" }}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="fc-num mono text-xs" style={{ color: "var(--accent-2)" }}>
+                    {n.padStart(2, "0")}
+                  </span>
+                  <strong className="text-sm">{label}</strong>
+                </div>
+                <div className="my-2">
+                  <Badge
+                    value={
+                      label === "Human approval" && (appr.data?.approved_steps.length ?? 0) > 0 ? "APPROVED" : status
+                    }
+                  />
+                </div>
+                <div className="t-muted text-xs">{note}</div>
+              </a>
+            </li>
+          ))}
+        </ol>
       </section>
       <section className="section" aria-labelledby="pillars">
         <div className="eyebrow">How it works</div>
@@ -298,6 +347,70 @@ function JobsCard() {
   );
 }
 
+/** CONFIRMED = read literally from the file; INFERRED = rule-based reading of context; UNKNOWN = a person must decide. */
+export function Certainty({ value }: { value: string }) {
+  const tone = value === "CONFIRMED" ? "t-ok" : value === "INFERRED" ? "t-warn" : "t-neutral";
+  const icon = value === "CONFIRMED" ? "✔" : value === "INFERRED" ? "↯" : "?";
+  return (
+    <span className={`badge ${tone}`} title={CERTAINTY_TEXT[value] ?? CERTAINTY_TEXT["UNKNOWN / MANUAL REVIEW"]}>
+      <span aria-hidden="true">{icon}</span>
+      {value}
+    </span>
+  );
+}
+const CERTAINTY_TEXT: Record<string, string> = {
+  CONFIRMED: "read literally from the file at this line",
+  INFERRED: "rule-based reading of the surrounding config or code; a person should confirm",
+  "UNKNOWN / MANUAL REVIEW": "the tool cannot tell the role; HOLD until a person decides",
+};
+
+function FindingDetail({ f }: { f: FindingRow }) {
+  const next =
+    f.role_certainty === "UNKNOWN / MANUAL REVIEW"
+      ? "A person decides the role first (signing or key establishment). Only then can a candidate be chosen; the migration step stays PROPOSED."
+      : "Review the candidate with the service owner, then check its gates on the Verification page.";
+  const rows: [string, ReactNode][] = [
+    ["What was found", <ScannedText key="v" value={f.detected_value || f.family} limit={200} />],
+    [
+      "Where",
+      <span key="w">
+        <ScannedText value={`${f.file}:${f.line}`} limit={300} />
+        {f.where && <span className="t-muted"> · {plainText(f.where, 120)}</span>}
+        {f.in_test_file && <span className="t-warn"> · test file</span>}
+      </span>,
+    ],
+    ["Evidence (redacted)", <ScannedText key="s" value={f.snippet} />],
+    [
+      "Algorithm",
+      <span key="a">
+        <Certainty value={f.confidence === "low" ? "INFERRED" : "CONFIRMED"} /> {f.family} (detector: {f.detector},{" "}
+        {f.confidence} confidence)
+      </span>,
+    ],
+    [
+      "Cryptographic role",
+      <span key="r">
+        <Certainty value={f.role_certainty} /> {f.purpose === "unknown" ? "not stated in the file" : f.purpose}
+      </span>,
+    ],
+    ["Why", plainText(f.rationale, 500)],
+    ["Why migrate", plainText(f.threat || "classical algorithm with a post-quantum replacement path", 300)],
+    ["Candidate (for review)", plainText(f.candidate, 300)],
+    ["Service", `${f.service} (${plainText(f.service_basis, 200)}, ${f.service_confidence} confidence)`],
+    ["Next step", next],
+  ];
+  return (
+    <dl className="m-0 grid grid-cols-1 gap-x-4 gap-y-2 text-sm sm:grid-cols-[150px_1fr]">
+      {rows.map(([k, v]) => (
+        <div key={k} className="contents">
+          <dt className="t-muted font-semibold">{k}</dt>
+          <dd className="m-0">{v}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 export function InventoryPage() {
   const q = useQuery({ queryKey: ["findings"], queryFn: api.findings });
   const [hold, setHold] = useState(false);
@@ -319,6 +432,11 @@ export function InventoryPage() {
       header: "Purpose",
       accessorKey: "purpose",
       cell: (c) => (c.getValue() === "unknown" ? <Badge value="HOLD" /> : String(c.getValue())),
+    },
+    {
+      header: "Role certainty",
+      accessorKey: "role_certainty",
+      cell: (c) => <Certainty value={String(c.getValue())} />,
     },
     { header: "Confidence", accessorKey: "confidence" },
     {
@@ -351,41 +469,68 @@ export function InventoryPage() {
         }
         className="mb-4"
       >
-        <DataTable data={rows} columns={cols} caption="Findings" onRowClick={setSel} />
+        <DataTable
+          data={rows}
+          columns={cols}
+          caption="Findings"
+          onRowClick={(r) => {
+            setSel(r);
+            // the detail sits under the table: bring it into view so the click visibly does something
+            requestAnimationFrame(() =>
+              document.getElementById("finding-detail")?.closest("section")?.scrollIntoView({ block: "start" }),
+            );
+          }}
+        />
       </Card>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card title="By purpose">
-          <BarList title="Findings by purpose (current filter)" rows={byPurpose} />
-        </Card>
-        <Card title="Selected finding">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr]">
+        <Card title={sel ? `Finding ${sel.id}` : "Selected finding"}>
+          <div id="finding-detail" tabIndex={-1} />
           {sel ? (
-            <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
-              <dt className="t-muted">ID</dt>
-              <dd className="m-0 mono">{sel.id}</dd>
-              <dt className="t-muted">Location</dt>
-              <dd className="m-0">
-                <ScannedText value={`${sel.file}:${sel.line}`} limit={300} />
-              </dd>
-              <dt className="t-muted">Snippet (redacted)</dt>
-              <dd className="m-0">
-                <ScannedText value={sel.snippet} />
-              </dd>
-              <dt className="t-muted">Rationale</dt>
-              <dd className="m-0">{plainText(sel.rationale, 500)}</dd>
-              <dt className="t-muted">Service basis</dt>
-              <dd className="m-0">
-                {plainText(sel.service_basis, 300)} ({sel.service_confidence})
-              </dd>
-              <dt className="t-muted">Detector</dt>
-              <dd className="m-0">{sel.detector}</dd>
-            </dl>
+            <FindingDetail f={sel} />
           ) : (
             <p className="t-muted">Select a row (click or Enter) to see its evidence.</p>
           )}
         </Card>
+        <Card title="By purpose">
+          <BarList title="Findings by purpose (current filter)" rows={byPurpose} />
+        </Card>
       </div>
       <SourceFooter sources={[d.source]} />
     </>
+  );
+}
+
+function RiskBreakdown({ task }: { task: any }) {
+  const factors = (task.risk_factors ?? []) as any[];
+  if (!factors.length) return <p className="t-muted text-xs">{plainText(task.risk_reason, 400)}</p>;
+  return (
+    <table className="dtable mt-2 min-w-[520px]">
+      <caption className="t-muted text-left text-xs">
+        {task.service}: {factors.map((f) => f.points).join(" + ")} = {task.risk}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">Factor</th>
+          <th scope="col">Input</th>
+          <th scope="col">Weight</th>
+          <th scope="col">Points</th>
+        </tr>
+      </thead>
+      <tbody>
+        {factors.map((f) => (
+          <tr key={f.factor}>
+            <td className="text-xs">
+              {plainText(f.meaning, 160)}
+              {f.label && <span className="t-muted"> ({f.label})</span>}
+              {f.unknown && <div className="t-warn">Unknown: scored in the middle, not as low risk.</div>}
+            </td>
+            <td className="num">{f.input}</td>
+            <td className="num">{f.weight}</td>
+            <td className="num">{f.points}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }
 
@@ -421,11 +566,29 @@ export function PlanPage() {
           ))}
         </div>
       </Card>
-      <Card title="Tasks" className="mb-4">
+      <Card
+        title="Tasks: why each service has its priority"
+        className="mb-4"
+        actions={
+          <span className="flex flex-wrap gap-2">
+            <a className="btn text-xs no-underline" href="/api/v1/export/md?page=plan" download>
+              ⤓ Plan (Markdown)
+            </a>
+            <a className="btn text-xs no-underline" href="/api/v1/export/json?page=plan" download>
+              ⤓ Plan (JSON)
+            </a>
+          </span>
+        }
+      >
+        <p className="t-muted mt-0 text-sm">
+          Risk score = sum of five weighted factors (prototype formula; weights are hand-set assumptions, not fitted to
+          data). A higher score moves a service earlier, but only as far as its dependencies allow. Open a row to see
+          each factor. Missing information is flagged and never treated as low risk.
+        </p>
         <table className="dtable">
           <thead>
             <tr>
-              {["Service", "Wave", "Risk (provisional)", "Evidence", "Findings", "Reason"].map((h) => (
+              {["Service", "Wave", "Risk (provisional)", "Evidence", "Findings", "Missing information"].map((h) => (
                 <th key={h} scope="col">
                   {h}
                 </th>
@@ -433,18 +596,36 @@ export function PlanPage() {
             </tr>
           </thead>
           <tbody>
-            {(p.tasks as any[]).map((t) => (
-              <tr key={t.service}>
-                <td>{t.service}</td>
-                <td className="num">{t.wave ?? "–"}</td>
-                <td className="num">{t.risk}</td>
-                <td>
-                  <Badge value={t.evidence_source === "OBSERVED" ? "OBSERVED" : "DECLARED"} />
-                </td>
-                <td className="mono text-xs">{(t.finding_ids as string[]).join(", ") || "–"}</td>
-                <td className="text-xs">{plainText(t.risk_reason, 300)}</td>
-              </tr>
-            ))}
+            {(p.tasks as any[]).map((t) => {
+              const unknown = (t.risk_factors as any[] | undefined)?.filter((f) => f.unknown) ?? [];
+              return (
+                <tr key={t.service}>
+                  <td>
+                    <details>
+                      <summary className="cursor-pointer font-semibold">{t.service}</summary>
+                      <RiskBreakdown task={t} />
+                    </details>
+                  </td>
+                  <td className="num">{t.wave ?? "–"}</td>
+                  <td className="num">{t.risk}</td>
+                  <td>
+                    <Badge value={t.evidence_source === "OBSERVED" ? "OBSERVED" : "DECLARED"} />
+                  </td>
+                  <td className="mono text-xs">{(t.finding_ids as string[]).join(", ") || "–"}</td>
+                  <td className="text-sm">
+                    {unknown.length ? (
+                      unknown.map((f) => (
+                        <div key={f.factor} className="t-warn">
+                          {f.factor.replace("_", " ")} unknown
+                        </div>
+                      ))
+                    ) : (
+                      <span className="t-muted">none</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </Card>
@@ -478,6 +659,14 @@ export function PlanPage() {
       <SourceFooter sources={[p.source, p.scheduling_source]} />
     </>
   );
+}
+
+/** A gate missing from a step was not evaluated: the gate code only runs the gates a step's purposes require. */
+export function missingGate(step: { gates: { gate: string; status: string }[] }): { status: string; why: string } {
+  const purpose = step.gates.find((g) => g.gate === "purpose_resolved");
+  return purpose && purpose.status !== "PASS"
+    ? { status: "NOT RUN", why: "not run: decided after a human resolves the operation purpose" }
+    : { status: "NOT APPLICABLE", why: "not required for this step's cryptographic purposes" };
 }
 
 export function VerificationPage() {
@@ -514,9 +703,10 @@ export function VerificationPage() {
                   </td>
                   {gates.map((g) => {
                     const gg = s.gates.find((x: any) => x.gate === g);
+                    const missing = missingGate(s);
                     return (
-                      <td key={g} title={gg ? plainText(gg.reason, 200) : ""}>
-                        <Badge value={gg?.status ?? "UNKNOWN"} />
+                      <td key={g} title={gg ? plainText(gg.reason, 200) : missing.why}>
+                        <Badge value={gg?.status ?? missing.status} title={gg ? undefined : missing.why} />
                       </td>
                     );
                   })}
@@ -525,6 +715,12 @@ export function VerificationPage() {
             </tbody>
           </table>
         </div>
+        <p className="t-muted mb-0 text-sm">
+          A step is <strong>READY</strong> only when every gate its cryptographic purposes require shows PASS. A gate a
+          step does not need is <strong>NOT APPLICABLE</strong> (for example ML-DSA for a key-establishment-only
+          service). While a purpose is unresolved, the purpose-specific gates are <strong>NOT RUN</strong>. Neither ever
+          counts as a pass, and READY still needs a human approval.
+        </p>
       </Card>
       <Card title="Compatibility matrix (negative cases must be rejected)" className="mb-4">
         <div className="overflow-auto" tabIndex={0} role="region" aria-label="Scrollable table">

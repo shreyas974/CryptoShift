@@ -91,6 +91,13 @@ COMMANDS: dict[str, dict[str, Any]] = {
     "agent_eval_template": {"label": "Assistant evaluation (template, no cloud)", "argv": ["scripts/evaluate_agent.py"], "timeout": 300},
     "snapshot": {"label": "Freeze an offline demo snapshot", "argv": ["scripts/ui_snapshot.py"], "timeout": 120},
 }
+# Built-in SYNTHETIC repositories a first-time user can analyse without uploading anything.
+DEMO_REPOS: dict[str, dict[str, str]] = {
+    "demo_bank": {"label": "Demo bank configs (synthetic)", "path": "demo_bank_app/configs",
+                  "note": "Six banking services: TLS, JWT signing, card vault, settlement; the project's main demo"},
+    "multiservice_bank": {"label": "Multi-service bank fixture (synthetic)", "path": "tests/fixtures/multiservice_bank",
+                          "note": "Compose, nginx, haproxy and Python services with real dependency edges"},
+}
 # Pipelines a user can run on an uploaded dataset (scripts/webapp_run.py); the run folder is added by the API.
 PIPELINES: dict[str, dict[str, Any]] = {
     "discovery": {"label": "Discovery", "stages": ["Inventory", "Relationships", "CBOM-like + CycloneDX"], "timeout": 300,

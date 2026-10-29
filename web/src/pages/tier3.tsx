@@ -22,10 +22,15 @@ const when = (ts: string | null | undefined) => (ts ? ts.replace("T", " ").slice
 
 // ================================================================ Datasets & runs
 export function RunsPage({ me }: { me: Me }) {
-  const [selected, setSelected] = useState<number | null>(() => {
+  const [selected, setSelectedState] = useState<number | null>(() => {
     const m = /run=(\d+)/.exec(window.location.hash);
     return m ? Number(m[1]) : null;
   });
+  // keep the open run in the address so a refresh or a shared link shows the same run
+  const setSelected = (id: number | null) => {
+    setSelectedState(id);
+    window.history.replaceState(null, "", id === null ? "#/runs" : `#/runs?run=${id}`);
+  };
   const runs = useQuery({
     queryKey: ["runs"],
     queryFn: api.runs,
@@ -36,7 +41,10 @@ export function RunsPage({ me }: { me: Me }) {
       {me.role === "viewer" ? (
         <Notice tone="info">Viewers can read runs. Ask an approver for the analyst role to upload a dataset.</Notice>
       ) : (
-        <UploadForm onStarted={(id) => setSelected(id)} />
+        <>
+          <DemoRepoCard onStarted={(id) => setSelected(id)} />
+          <UploadForm onStarted={(id) => setSelected(id)} />
+        </>
       )}
       {selected !== null && <RunDetail id={selected} me={me} onDeleted={() => setSelected(null)} />}
       <Card title="All runs" className="mb-4">
@@ -78,6 +86,66 @@ export function RunsPage({ me }: { me: Me }) {
   );
 }
 
+function DemoRepoCard({ onStarted }: { onStarted: (id: number) => void }) {
+  const qc = useQueryClient();
+  const repos = useQuery({ queryKey: ["demo-repos"], queryFn: api.demoRepos });
+  const [repo, setRepo] = useState("demo_bank");
+  const [err, setErr] = useState("");
+  const start = useMutation({
+    mutationFn: () => api.createDemoRun(repo, "plan"),
+    onSuccess: (r) => {
+      void qc.invalidateQueries({ queryKey: ["runs"] });
+      void qc.invalidateQueries({ queryKey: ["activity"] });
+      onStarted(r.run_id);
+    },
+    onError: (e) => setErr(e instanceof Error ? e.message : "failed"),
+  });
+  return (
+    <Card title="New here? Start with a demo repository" className="mb-4">
+      <p className="t-muted mt-0 text-sm">
+        Built-in SYNTHETIC banking repositories (no real systems or keys). One click runs discovery and the migration
+        plan, about 10 seconds.
+      </p>
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        {(repos.data ?? []).map((r) => (
+          <label key={r.id} className="choice">
+            <input
+              type="radio"
+              name="demo-repo"
+              value={r.id}
+              checked={repo === r.id}
+              disabled={!r.available}
+              onChange={() => setRepo(r.id)}
+              className="mr-2"
+            />
+            <strong>{r.label}</strong> <Badge value="SYNTHETIC" />
+            <div className="t-muted mt-1 text-sm">{r.note}</div>
+            <div className="t-muted mt-1 text-xs">
+              <code>{r.path}</code> · {r.files} files{r.available ? "" : " · not found in this checkout"}
+            </div>
+          </label>
+        ))}
+      </div>
+      {err && (
+        <p role="alert" className="t-bad text-sm">
+          {plainText(err, 300)}
+        </p>
+      )}
+      <button
+        type="button"
+        className="btn btn-primary mt-4"
+        disabled={start.isPending || !repos.data?.some((r) => r.id === repo && r.available)}
+        onClick={() => {
+          setErr("");
+          start.mutate();
+        }}
+      >
+        {start.isPending ? "Starting…" : "Scan and plan this repository"}
+      </button>
+    </Card>
+  );
+}
+
 function UploadForm({ onStarted }: { onStarted: (id: number) => void }) {
   const qc = useQueryClient();
   const pipes = useQuery({ queryKey: ["pipelines"], queryFn: api.pipelines });
@@ -110,7 +178,7 @@ function UploadForm({ onStarted }: { onStarted: (id: number) => void }) {
   });
   const total = files.reduce((n, f) => n + f.size, 0);
   return (
-    <Card title="Analyse your own dataset" className="mb-4">
+    <Card title="Or analyse your own dataset" className="mb-4">
       <p className="t-muted mt-0 text-sm">
         Upload a folder of configs and source code, a .zip, or single files. Only text files are kept; .env files, keys
         and keystores are always skipped. Everything stays on this machine: runs are written under{" "}
