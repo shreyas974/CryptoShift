@@ -1,0 +1,19 @@
+# Synthetic Banking Fixture: Card Tokenization & Key Vault (YAML Config)
+# Demonstrates mixed posture: X25519MLKEM768 is present, but RSA_OAEP and 3DES remain active.
+service_id: card_vault
+service_name: Card Tokenization & Key Vault
+owner: Card Security & PCI Vault Team
+criticality: HIGH
+data_retention_years: 10
+verification_ready_wave0: false
+depends_on:
+  - auth_gateway
+
+kms_envelope:
+  dek_wrapping_algorithm: RSA_OAEP
+  dek_wrapping_key_bits: 2048
+  pin_block_cipher: 3DES
+
+tls_client:
+  # Note: Presence of X25519MLKEM768 here does NOT make card_vault PQC-safe while RSA_OAEP and 3DES remain unmigrated.
+  preferred_group: X25519MLKEM768

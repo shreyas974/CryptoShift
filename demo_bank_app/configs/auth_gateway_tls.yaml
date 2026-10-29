@@ -1,0 +1,17 @@
+# Synthetic Banking Fixture: Identity & OAuth Token Gateway (YAML Config)
+service_id: auth_gateway
+service_name: Identity & OAuth Token Gateway
+owner: Identity & Access Team
+criticality: HIGH
+data_retention_years: 10
+verification_ready_wave0: true
+depends_on: []
+
+oauth_jwt:
+  signing_algorithm: RS256
+  key_type: RSA-2048
+  thumbprint_digest: hashlib.sha1
+
+tls_listener:
+  protocol_min: TLSv1.2
+  key_exchange_curve: ECDHE-P256
