@@ -2,7 +2,7 @@
   "environment": {
     "python_version": "3.12.14",
     "virtualenv_name": ".venv (Python 3.12.14)",
-    "online_auth_executed": false
+    "online_auth_executed": true
   },
   "packages": {
     "QpiAI Opt SDK": {
@@ -27,13 +27,13 @@
   "credentials": {
     "QPIAI_OPT_API_KEY": {
       "configuration_status": "key configured",
-      "auth_verification_status": "not attempted (offline verification mode; pass --online-auth to authorize network key check)",
-      "message": "Offline algebraic model built and classified as MILP (`classify(model) == 'MILP'`). Online key-validation network check was not run in default offline mode (pass `--online-auth` to run)."
+      "auth_verification_status": "run successfully",
+      "message": "Authenticated QpiAI Opt local solve succeeded (`mode='local'`, zero paid platform usage)."
     },
     "QPIAI_QCLOUD_API_KEY": {
       "configuration_status": "key configured",
-      "auth_verification_status": "not attempted (offline verification mode; pass --online-auth to authorize network key check)",
-      "message": "Online QCloud key-validation network check skipped in default offline mode. Local simulator (`QpiAI-QSV-Local`): run successfully."
+      "auth_verification_status": "run successfully",
+      "message": "QpiAIQuantumAuth.login() and verify_api_key() succeeded. Local simulator (`QpiAI-QSV-Local`): run successfully."
     }
   },
   "components": [
@@ -44,7 +44,7 @@
       "backend": "CPU Exact Combinatorial Search",
       "objective_value": 248.105,
       "feasible": true,
-      "runtime_seconds": 0.004795
+      "runtime_seconds": 0.00511
     },
     {
       "name": "QpiAI Opt Algebraic Modeller & IR Feasibility (`qpiai-opt`)",
@@ -53,16 +53,16 @@
       "backend": "qpiai_opt.opt_modeller / opt_solvers",
       "objective_value": 248.105,
       "feasible": true,
-      "runtime_seconds": 0.015105
+      "runtime_seconds": 0.073251
     },
     {
       "name": "QpiAI Opt Authenticated Local Solver (`solve(mode='local')`)",
-      "status": "not attempted (offline verification mode; pass --online-auth to authorize network key check)",
+      "status": "run successfully",
       "execution_mode": "local",
       "backend": "qpiai_opt.opt_solvers.solve (mode='local')",
-      "objective_value": null,
+      "objective_value": 248.105,
       "feasible": true,
-      "runtime_seconds": 0.015105
+      "runtime_seconds": 0.073251
     },
     {
       "name": "QpiAI Quantum 4-Qubit Wave-0 QUBO & QAOA Circuit (`build_circuit`)",
@@ -71,7 +71,7 @@
       "backend": "qpiai_opt.quantum.QAOA",
       "objective_value": -13.07,
       "feasible": true,
-      "runtime_seconds": 0.044703
+      "runtime_seconds": 0.770489
     },
     {
       "name": "QpiAI Quantum Local Statevector Simulator (`QpiAI-QSV-Local`)",
@@ -80,16 +80,16 @@
       "backend": "QpiAI-QSV-Local",
       "objective_value": -13.07,
       "feasible": true,
-      "runtime_seconds": 0.044703
+      "runtime_seconds": 0.770489
     },
     {
       "name": "QpiAI QCloud Authenticated Variational QAOA (`solve(..., mode='local')`)",
-      "status": "not attempted (offline verification mode; pass --online-auth to authorize network key check)",
+      "status": "run successfully (local simulator)",
       "execution_mode": "local_simulator_authenticated",
       "backend": "QpiAIQuantumAuth + QpiAI-QSV-Local",
-      "objective_value": null,
+      "objective_value": -13.07,
       "feasible": true,
-      "runtime_seconds": 0.044703
+      "runtime_seconds": 0.770489
     }
   ],
   "problem_instance": {
@@ -244,7 +244,16 @@
         "rationale": "Service issues signed JWT bearer tokens using RS256.",
         "owner": "Identity & Access Team",
         "library_or_protocol": "OAuth2 / OIDC JWT RS256 Token Signing",
-        "human_review_status": "requires_human_review"
+        "human_review_status": "requires_human_review",
+        "detector": "legacy",
+        "algorithm_family": "",
+        "detected_value": "",
+        "location": "",
+        "snippet_redacted": "",
+        "ambiguity": "none",
+        "in_test_file": false,
+        "service_id_basis": "",
+        "service_id_confidence": ""
       },
       {
         "finding_id": "CS-F002",
@@ -262,7 +271,16 @@
         "rationale": "Certificate thumbprint calculation uses SHA-1.",
         "owner": "Identity & Access Team",
         "library_or_protocol": "Legacy Token Thumbprint Digest",
-        "human_review_status": "requires_human_review"
+        "human_review_status": "requires_human_review",
+        "detector": "legacy",
+        "algorithm_family": "",
+        "detected_value": "",
+        "location": "",
+        "snippet_redacted": "",
+        "ambiguity": "none",
+        "in_test_file": false,
+        "service_id_basis": "",
+        "service_id_confidence": ""
       },
       {
         "finding_id": "CS-F003",
@@ -280,7 +298,16 @@
         "rationale": "Signs immutable audit batches with ECDSA secp256r1.",
         "owner": "Core Ledger Team",
         "library_or_protocol": "Core Ledger Merkle-Root Notarization",
-        "human_review_status": "requires_human_review"
+        "human_review_status": "requires_human_review",
+        "detector": "legacy",
+        "algorithm_family": "",
+        "detected_value": "",
+        "location": "",
+        "snippet_redacted": "",
+        "ambiguity": "none",
+        "in_test_file": false,
+        "service_id_basis": "",
+        "service_id_confidence": ""
       },
       {
         "finding_id": "CS-F004",
@@ -298,7 +325,16 @@
         "rationale": "Secondary legacy digest computed with SHA-1.",
         "owner": "Core Ledger Team",
         "library_or_protocol": "Legacy Audit Record Digest",
-        "human_review_status": "requires_human_review"
+        "human_review_status": "requires_human_review",
+        "detector": "legacy",
+        "algorithm_family": "",
+        "detected_value": "",
+        "location": "",
+        "snippet_redacted": "",
+        "ambiguity": "none",
+        "in_test_file": false,
+        "service_id_basis": "",
+        "service_id_confidence": ""
       },
       {
         "finding_id": "CS-F005",
@@ -316,7 +352,16 @@
         "rationale": "TLS session key establishment uses ECDHE over P-256.",
         "owner": "Network & Interbank Connectivity Team",
         "library_or_protocol": "Interbank ISO-20022 mTLS Ephemeral Key Exchange",
-        "human_review_status": "requires_human_review"
+        "human_review_status": "requires_human_review",
+        "detector": "legacy",
+        "algorithm_family": "",
+        "detected_value": "",
+        "location": "",
+        "snippet_redacted": "",
+        "ambiguity": "none",
+        "in_test_file": false,
+        "service_id_basis": "",
+        "service_id_confidence": ""
       },
       {
         "finding_id": "CS-F006",
@@ -334,7 +379,16 @@
         "rationale": "mTLS leaf and intermediate certificates use RSA-2048 signatures.",
         "owner": "Network & Interbank Connectivity Team",
         "library_or_protocol": "Interbank mTLS Peer Certificate Authentication",
-        "human_review_status": "requires_human_review"
+        "human_review_status": "requires_human_review",
+        "detector": "legacy",
+        "algorithm_family": "",
+        "detected_value": "",
+        "location": "",
+        "snippet_redacted": "",
+        "ambiguity": "none",
+        "in_test_file": false,
+        "service_id_basis": "",
+        "service_id_confidence": ""
       },
       {
         "finding_id": "CS-F007",
@@ -352,7 +406,16 @@
         "rationale": "RSA-2048 wraps symmetric data encryption keys (key establishment/encapsulation role).",
         "owner": "Card Security & PCI Vault Team",
         "library_or_protocol": "PKCS#11 Vault DEK Key Wrapping (RSA-OAEP)",
-        "human_review_status": "requires_human_review"
+        "human_review_status": "requires_human_review",
+        "detector": "legacy",
+        "algorithm_family": "",
+        "detected_value": "",
+        "location": "",
+        "snippet_redacted": "",
+        "ambiguity": "none",
+        "in_test_file": false,
+        "service_id_basis": "",
+        "service_id_confidence": ""
       },
       {
         "finding_id": "CS-F008",
@@ -370,7 +433,16 @@
         "rationale": "Legacy payment HSM slot configured for Triple-DES.",
         "owner": "Card Security & PCI Vault Team",
         "library_or_protocol": "Legacy Card PIN Block / Track Envelope Encryption",
-        "human_review_status": "requires_human_review"
+        "human_review_status": "requires_human_review",
+        "detector": "legacy",
+        "algorithm_family": "",
+        "detected_value": "",
+        "location": "",
+        "snippet_redacted": "",
+        "ambiguity": "none",
+        "in_test_file": false,
+        "service_id_basis": "",
+        "service_id_confidence": ""
       },
       {
         "finding_id": "CS-F009",
@@ -388,7 +460,16 @@
         "rationale": "Signs outbound payment instructions with ECDSA-P256.",
         "owner": "Real-Time Payments Team",
         "library_or_protocol": "RTGS / UPI Payment Instruction Signature",
-        "human_review_status": "requires_human_review"
+        "human_review_status": "requires_human_review",
+        "detector": "legacy",
+        "algorithm_family": "",
+        "detected_value": "",
+        "location": "",
+        "snippet_redacted": "",
+        "ambiguity": "none",
+        "in_test_file": false,
+        "service_id_basis": "",
+        "service_id_confidence": ""
       },
       {
         "finding_id": "CS-F010",
@@ -406,7 +487,16 @@
         "rationale": "Fallback XMLDSig envelope signing uses RSA-2048.",
         "owner": "Real-Time Payments Team",
         "library_or_protocol": "ISO-20022 XMLDSig Detached Signature",
-        "human_review_status": "requires_human_review"
+        "human_review_status": "requires_human_review",
+        "detector": "legacy",
+        "algorithm_family": "",
+        "detected_value": "",
+        "location": "",
+        "snippet_redacted": "",
+        "ambiguity": "none",
+        "in_test_file": false,
+        "service_id_basis": "",
+        "service_id_confidence": ""
       },
       {
         "finding_id": "CS-F011",
@@ -424,7 +514,16 @@
         "rationale": "Batch transfer channel negotiates finite-field DH-2048 key exchange.",
         "owner": "Settlement & Treasury Operations",
         "library_or_protocol": "Clearinghouse SFTP/SSH Group14 Key Exchange",
-        "human_review_status": "requires_human_review"
+        "human_review_status": "requires_human_review",
+        "detector": "legacy",
+        "algorithm_family": "",
+        "detected_value": "",
+        "location": "",
+        "snippet_redacted": "",
+        "ambiguity": "none",
+        "in_test_file": false,
+        "service_id_basis": "",
+        "service_id_confidence": ""
       },
       {
         "finding_id": "CS-F012",
@@ -442,7 +541,16 @@
         "rationale": "Batch settlement manifest is signed with RSA-2048.",
         "owner": "Settlement & Treasury Operations",
         "library_or_protocol": "End-of-Day Settlement Manifest Signature",
-        "human_review_status": "requires_human_review"
+        "human_review_status": "requires_human_review",
+        "detector": "legacy",
+        "algorithm_family": "",
+        "detected_value": "",
+        "location": "",
+        "snippet_redacted": "",
+        "ambiguity": "none",
+        "in_test_file": false,
+        "service_id_basis": "",
+        "service_id_confidence": ""
       },
       {
         "finding_id": "CS-F013",
@@ -460,7 +568,16 @@
         "rationale": "Archive payload encrypted with 3DES-CBC for legacy partner.",
         "owner": "Settlement & Treasury Operations",
         "library_or_protocol": "Legacy Clearinghouse Batch Archive Cipher",
-        "human_review_status": "requires_human_review"
+        "human_review_status": "requires_human_review",
+        "detector": "legacy",
+        "algorithm_family": "",
+        "detected_value": "",
+        "location": "",
+        "snippet_redacted": "",
+        "ambiguity": "none",
+        "in_test_file": false,
+        "service_id_basis": "",
+        "service_id_confidence": ""
       }
     ]
   },
@@ -492,7 +609,7 @@
         "settlement_batch"
       ]
     },
-    "runtime_seconds": 0.004795,
+    "runtime_seconds": 0.00511,
     "diagnostics": {
       "method": "exact_constrained_combinatorial_search",
       "candidates_evaluated": 729,
@@ -505,55 +622,26 @@
   },
   "qpiai_opt": {
     "offline_model_status": "run successfully",
-    "online_solve_status": "not attempted (offline verification mode; pass --online-auth to authorize network key check)",
+    "online_solve_status": "run successfully",
     "problem_class": "MILP",
-    "model_inspection": {
-      "problem_class": "MILP",
-      "representation": "Model",
-      "metrics": {
-        "variables": 18,
-        "constraints": 19,
-        "nonzeros": 76
-      },
-      "valid": true
-    },
+    "execution_mode": "local",
+    "solver_status": "optimal",
+    "solver_method": "mixed-integer-linear-programming",
+    "guarantee": "global_optimum",
     "baseline_feasible_in_opt_ir": true,
-    "feasibility_check": {
-      "feasible": true,
-      "objective": 248.10500000000002,
-      "violations": {
-        "assign_auth_gateway": 0.0,
-        "assign_ledger_audit": 0.0,
-        "assign_interbank_tls": 0.0,
-        "assign_card_vault": 0.0,
-        "assign_payment_signing": 0.0,
-        "assign_settlement_batch": 0.0,
-        "wave_cap_w0": 0.0,
-        "wave_cap_w1": 0.0,
-        "wave_cap_w2": 0.0,
-        "wave_time_w0": 0.0,
-        "wave_time_w1": 0.0,
-        "wave_time_w2": 0.0,
-        "dep_auth_gateway_before_card_vault": 0.0,
-        "dep_auth_gateway_before_payment_signing": 0.0,
-        "dep_ledger_audit_before_payment_signing": 0.0,
-        "dep_payment_signing_before_settlement_batch": 0.0,
-        "dep_interbank_tls_before_settlement_batch": 0.0,
-        "verify_gate_w0_card_vault": 0.0,
-        "verify_gate_w0_settlement_batch": 0.0
-      },
-      "tolerance": 1e-06
-    },
-    "message": "Algebraic MILP model (18 binary variables, 19 constraints) built, validated, and verified offline with `qpiai_opt.opt_solvers.classify()`, `inspect()`, and `feasibility()`. Online key-validation network check (`solve(model, mode='local', client=...)`) was skipped by default in offline verification mode; deterministic fallback schedule is active."
+    "baseline_objective": 248.105,
+    "opt_objective": 248.105,
+    "violations": [],
+    "message": "QpiAI Opt local solver completed (`mode='local'`). Opt objective=248.1050 vs. Fallback objective=248.1050."
   },
   "qpiai_qcloud": {
     "status": "run successfully",
     "qubo_compilation_status": "run successfully",
     "circuit_construction_status": "run successfully",
     "local_qsv_simulator_status": "run successfully (local simulator)",
-    "authenticated_qaoa_status": "not attempted (offline verification mode; pass --online-auth to authorize network key check)",
+    "authenticated_qaoa_status": "run successfully (local simulator)",
     "backend": "QpiAI-QSV-Local (Local Statevector Simulator \u2014 NOT a physical QPU)",
-    "runtime_seconds": 0.044703,
+    "runtime_seconds": 0.770489,
     "circuit_metrics": {
       "qubits": 4,
       "depth": 8,
@@ -617,19 +705,32 @@
       }
     },
     "local_simulator_top_counts": {
-      "0111": 183,
-      "1100": 165,
-      "0101": 94,
-      "0110": 92,
-      "1000": 85,
-      "0011": 85
+      "0111": 186,
+      "1100": 167,
+      "1000": 94,
+      "0011": 93,
+      "0110": 93,
+      "0101": 76
     },
     "best_simulator_wave0_selection": [
       "ledger_audit",
       "interbank_tls"
     ],
     "best_simulator_wave0_energy": -13.07,
-    "authenticated_qaoa_result": {},
+    "authenticated_qaoa_result": {
+      "objective": -13.07,
+      "variable_assignment": {
+        "q_auth_gateway": 0,
+        "q_ledger_audit": 1,
+        "q_interbank_tls": 1,
+        "q_payment_signing": 0
+      },
+      "selected_wave0_services": [
+        "ledger_audit",
+        "interbank_tls"
+      ],
+      "backend": "QpiAI-QSV-Local"
+    },
     "baseline_comparison": {
       "deterministic_wave0": [
         "interbank_tls",
@@ -648,7 +749,7 @@
       "total_crypto_findings": 13,
       "shor_vulnerable_findings": 9,
       "grover_weakened_findings": 4,
-      "schedule_solver": "Deterministic Dependency-Aware Fallback Scheduler",
+      "schedule_solver": "QpiAI Opt SDK (`mode='local'`)",
       "schedule_status": "run successfully",
       "schedule_feasible": true,
       "schedule_objective": 248.105,
