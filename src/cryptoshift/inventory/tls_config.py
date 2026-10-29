@@ -64,6 +64,8 @@ def analyse_cipher_string(value: str) -> List[Detection]:
                     found.setdefault(("RSA", "digital_signature"), tok)
                 if "_ECDSA_" in p:
                     found.setdefault(("ECDSA", "digital_signature"), tok)
+                if "_DSS_" in p:
+                    found.setdefault(("DSA", "digital_signature"), tok)
                 if "3DES" in p:
                     found.setdefault(("3DES", "symmetric_encryption"), tok)
                 if "RC4" in p:
@@ -79,6 +81,8 @@ def analyse_cipher_string(value: str) -> List[Detection]:
                 found.setdefault(("RSA", "digital_signature"), tok)
             if p in ("AECDSA", "ECDSA") or "-ECDSA-" in p:
                 found.setdefault(("ECDSA", "digital_signature"), tok)
+            if p in ("ADSS", "DSS") or re.match(r"^(DHE|EDH)-DSS-", p):
+                found.setdefault(("DSA", "digital_signature"), tok)
             if p in ("3DES", "DES-CBC3") or "DES-CBC3" in p:
                 found.setdefault(("3DES", "symmetric_encryption"), tok)
             if p == "RC4" or p.startswith("RC4-") or "-RC4-" in p:
@@ -90,6 +94,7 @@ def analyse_cipher_string(value: str) -> List[Detection]:
         ("RSA", "key_establishment"): "cipher string enables static RSA key transport (no forward secrecy)",
         ("RSA", "digital_signature"): "cipher string enables RSA-authenticated suites (server certificate signature)",
         ("ECDSA", "digital_signature"): "cipher string enables ECDSA-authenticated suites",
+        ("DSA", "digital_signature"): "cipher string enables DSS (DSA)-authenticated suites",
         ("3DES", "symmetric_encryption"): "cipher string enables 3DES suites",
         ("RC4", "symmetric_encryption"): "cipher string enables RC4 suites",
     }
@@ -226,7 +231,7 @@ def scan_tls_config_text(text: str, path: Path, cert_inspector: Any = None) -> L
                 parts = _unquote(value).split(None, 1)
                 if len(parts) == 2:
                     sub, arg = parts[0].lower(), parts[1]
-                    if sub in ("groups", "curves"):
+                    if sub in ("groups", "curves", "ecdhparameters"):
                         detections = analyse_groups(arg)
                     elif sub == "cipherstring":
                         detections = analyse_cipher_string(arg)

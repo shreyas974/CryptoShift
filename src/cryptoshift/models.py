@@ -32,6 +32,9 @@ class CryptoFinding:
     snippet_redacted: str = ""  # redacted, truncated source line (never secrets, keys or certificate bodies)
     ambiguity: str = "none"  # "none" | "ambiguous" (several purposes possible) | "unknown" (purpose not determinable)
     in_test_file: bool = False
+    # Member 2 v1.1 service attribution (optional, backward compatible)
+    service_id_basis: str = ""  # documented rule that produced service_id, e.g. "nearest service folder 'svc/payments'"
+    service_id_confidence: str = ""  # "high" | "medium" | "low" | "none"
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)

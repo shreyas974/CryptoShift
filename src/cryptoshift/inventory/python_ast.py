@@ -10,8 +10,12 @@ from __future__ import annotations
 import ast
 from typing import Any, Dict, List, Optional, Tuple
 
+from cryptoshift.inventory.algorithm_ids import classify_identifier
 from cryptoshift.inventory.tls_config import analyse_cipher_string
 
+VERSION = "python_ast/1.1 (adds scoped algorithm-constant rule)"
+ALGORITHM_NAME_KEYWORDS = {"ALG", "ALGO", "ALGORITHM", "ALGORITHMS", "CIPHER", "SCHEME", "KEX", "KEM", "SIGNING",
+                           "SIGNATURE", "SIG", "WRAP", "WRAPPING", "HASH", "DIGEST", "CURVE", "GROUP", "PADDING", "JWS", "JWE"}
 _CRYPTO = "cryptography.hazmat.primitives"
 _ASYM = f"{_CRYPTO}.asymmetric"
 
@@ -277,6 +281,44 @@ class _Visitor(ast.NodeVisitor):
             self._add(node.lineno, fam, purpose, ambiguity, conf, f"set_ciphers('{value}')", why, "ssl")
 
 
+def _constant_assignments(body: List[ast.stmt]) -> List[Tuple[int, str, str]]:
+    """(line, NAME, value) for `NAME = "literal"` at module or class level (recursing into class bodies only)."""
+    out: List[Tuple[int, str, str]] = []
+    for stmt in body:
+        if isinstance(stmt, ast.ClassDef):
+            out += _constant_assignments(stmt.body)
+            continue
+        targets: List[ast.expr] = []
+        value: Optional[ast.expr] = None
+        if isinstance(stmt, ast.Assign):
+            targets, value = stmt.targets, stmt.value
+        elif isinstance(stmt, ast.AnnAssign) and stmt.value is not None:
+            targets, value = [stmt.target], stmt.value
+        if not (isinstance(value, ast.Constant) and isinstance(value.value, str)):
+            continue
+        for t in targets:
+            if isinstance(t, ast.Name):
+                out.append((stmt.lineno, t.id, value.value))
+    return out
+
+
+def _algorithm_constant_hits(tree: ast.Module, lines: List[str]) -> List[Dict[str, Any]]:
+    """Scoped 'algorithm constant' rule (see docs/member2/README.md): UPPER_CASE name with an algorithm keyword AND an
+    exact identifier from the closed vocabulary. Confidence is low: the constant may never be used."""
+    hits: List[Dict[str, Any]] = []
+    for line, name, value in _constant_assignments(tree.body):
+        if name != name.upper() or not (set(name.split("_")) & ALGORITHM_NAME_KEYWORDS):
+            continue
+        for fam, purpose, ambiguity, _conf, why in classify_identifier(value, context=name):
+            hits.append({
+                "line": line, "family": fam, "purpose": purpose, "ambiguity": ambiguity, "confidence": "low",
+                "detected_value": f"{name} = {value!r}"[:200],
+                "reason": f"algorithm constant {name}: {why} (constant rule; usage not traced)",
+                "library_or_protocol": "constant", "snippet": lines[line - 1] if 0 < line <= len(lines) else "",
+            })
+    return hits
+
+
 def scan_python_source(text: str) -> List[Dict[str, Any]]:
     """Return raw detection dicts for one Python source text. Raises SyntaxError for unparsable code."""
     tree = ast.parse(text)
@@ -291,4 +333,6 @@ def scan_python_source(text: str) -> List[Dict[str, Any]]:
         elif isinstance(node, ast.ImportFrom):
             v.visit_ImportFrom(node)
     v.visit(tree)
+    seen = {(h["line"], h["family"]) for h in v.hits}
+    v.hits += [h for h in _algorithm_constant_hits(tree, v.lines) if (h["line"], h["family"]) not in seen]
     return sorted(v.hits, key=lambda h: (h["line"], h["family"]))
