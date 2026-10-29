@@ -22,7 +22,8 @@
         "citations",
         "tools_used",
         "refused",
-        "backend"
+        "backend",
+        "mode"
       ],
       "properties": {
         "answer": {
@@ -45,6 +46,29 @@
         },
         "backend": {
           "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "SARVAM_CLOUD",
+            "TEMPLATE_FALLBACK"
+          ]
+        },
+        "mode_reason": {
+          "type": "string"
+        },
+        "validator": {
+          "type": "string"
+        },
+        "usage": {
+          "type": "object",
+          "properties": {
+            "prompt_tokens": {
+              "type": "integer"
+            },
+            "completion_tokens": {
+              "type": "integer"
+            }
+          }
         }
       }
     }

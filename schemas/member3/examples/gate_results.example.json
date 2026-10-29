@@ -5,14 +5,15 @@
     "purposes": [
       "digital_signature",
       "key_establishment",
-      "message_digest"
+      "message_digest",
+      "unknown"
     ],
     "gates": [
       {
         "gate": "purpose_resolved",
-        "status": "PASS",
+        "status": "FAIL",
         "evidence": "plan#services.auth_gateway",
-        "reason": "all findings have a resolved purpose"
+        "reason": "HOLD findings need human purpose review: ['INV-0002']"
       },
       {
         "gate": "rollback_rehearsal",
@@ -42,7 +43,7 @@
         "gate": "overhead",
         "status": "PASS",
         "evidence": "scratch/derived/member3/verification_evidence.json#overhead",
-        "reason": "median ratio 0.991 (limit 1.5, ASSUMPTION); extra handshake bytes 2264 (limit 4096, ASSUMPTION); loopback only"
+        "reason": "median ratio 0.963 (limit 1.5, ASSUMPTION); extra handshake bytes 2264 (limit 4096, ASSUMPTION); loopback only"
       },
       {
         "gate": "mldsa_sign_verify_selftest",
@@ -51,8 +52,10 @@
         "reason": "2/2 ML-DSA-65 sign/verify self-tests passed (incl. tamper rejection)"
       }
     ],
-    "state": "READY",
-    "blocking_gates": [],
+    "state": "PROPOSED",
+    "blocking_gates": [
+      "purpose_resolved"
+    ],
     "evidence_scope": "Generic loopback lab evidence (OpenSSL 3.5 s_server/s_client, test keys). It does NOT exercise the service's own stack (e.g. KMS key wrapping, JWT libraries, partner peers); READY means 'eligible for human review', not 'verified in production'."
   },
   {
@@ -97,7 +100,7 @@
         "gate": "overhead",
         "status": "PASS",
         "evidence": "scratch/derived/member3/verification_evidence.json#overhead",
-        "reason": "median ratio 0.991 (limit 1.5, ASSUMPTION); extra handshake bytes 2264 (limit 4096, ASSUMPTION); loopback only"
+        "reason": "median ratio 0.963 (limit 1.5, ASSUMPTION); extra handshake bytes 2264 (limit 4096, ASSUMPTION); loopback only"
       }
     ],
     "state": "READY",
@@ -147,7 +150,7 @@
         "gate": "overhead",
         "status": "PASS",
         "evidence": "scratch/derived/member3/verification_evidence.json#overhead",
-        "reason": "median ratio 0.991 (limit 1.5, ASSUMPTION); extra handshake bytes 2264 (limit 4096, ASSUMPTION); loopback only"
+        "reason": "median ratio 0.963 (limit 1.5, ASSUMPTION); extra handshake bytes 2264 (limit 4096, ASSUMPTION); loopback only"
       },
       {
         "gate": "mldsa_sign_verify_selftest",

@@ -11,7 +11,7 @@
     "recovered": true,
     "originals_unchanged": true
   },
-  "recovery_command": "openssl s_client -connect 127.0.0.1:60861 -servername localhost -groups P-256",
+  "recovery_command": "openssl s_client -connect 127.0.0.1:56031 -servername localhost -groups P-256",
   "warnings": [
     "Restored profile still enables 3DES (DES-CBC3-SHA); NIST SP 800-131A disallows it - compensating control or cipher clean-up needed",
     "Never restore SHA-1 or 3DES configurations as a rollback target; fall back to SHA-256 / AES-256-GCM classical baselines."
