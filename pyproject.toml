@@ -20,6 +20,8 @@ mvp = [
     "pyyaml>=6.0.0",
     "tables>=3.9.0",
     "h5py>=3.10.0",
+    "hdf5plugin>=4.0.0",
+    "cryptography>=42.0.0",
     "streamlit>=1.35.0",
     "pytest>=8.0.0",
 ]

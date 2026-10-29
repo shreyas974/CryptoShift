@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0.0",
+  "collected": "2026-10-29",
+  "fetch": "scripts/fetch_public_label_sources.py (clones into data/public/raw/<id>, git-ignored)",
+  "split_policy": "Split by repository. calibration repos may be used during detector development; held_out repos were labelled before the detector was run on them and were never used for tuning.",
+  "sources": [
+    {
+      "id": "pyjwt",
+      "url": "https://github.com/jpadilla/pyjwt",
+      "commit": "16231abfd1d8eab4953e8779b3017b859c88565e",
+      "license": "MIT",
+      "attribution": "Copyright (c) 2015-2022 José Padilla and contributors (PyJWT), MIT License",
+      "split": "calibration",
+      "files": [
+        {
+          "path": "jwt/algorithms.py",
+          "sha256": "975e9b1f1706c63cdfcaae71685959bf063a451fb79bcccdc703c15f5631cd25"
+        },
+        {
+          "path": "jwt/utils.py",
+          "sha256": "15905f0df7366f766351626a8c1af0ca0584f746ca3e9f53621b536106f48bcc"
+        },
+        {
+          "path": "jwt/api_jws.py",
+          "sha256": "b8c62729c4d053108bb7c534147158a84f977140248ef41728363eba7826bdb6"
+        }
+      ]
+    },
+    {
+      "id": "h5bp-nginx",
+      "url": "https://github.com/h5bp/server-configs-nginx",
+      "commit": "d2f2c3e2fac76f429adb738894499b8fb756d2f3",
+      "license": "MIT",
+      "attribution": "H5BP server-configs-nginx contributors, MIT License",
+      "split": "calibration",
+      "files": [
+        {
+          "path": "h5bp/tls/policy_balanced.conf",
+          "sha256": "648cc742f31a15a61dea4b8e490739c8465ae21f8d9aedf2ce26c4f842153500"
+        },
+        {
+          "path": "h5bp/tls/policy_strict.conf",
+          "sha256": "b8c999c7025b8da7179e2c5e15c818b9c8a997d4eae84168eb4de28fb19e71aa"
+        },
+        {
+          "path": "h5bp/tls/certificate_files.conf",
+          "sha256": "4129325932473880fa882fe45ab9dc574ed48e1b76608fb1a6b4daf3c141fdc6"
+        },
+        {
+          "path": "h5bp/tls/ssl_engine.conf",
+          "sha256": "a84ad644941a9e25a13f3ab871492de2470e4b0536dcd1771fa2fb7fb5a9af2b"
+        }
+      ]
+    },
+    {
+      "id": "python-jose",
+      "url": "https://github.com/mpdavis/python-jose",
+      "commit": "018b310ddb8b50dcfd09a0c152117835a21dd656",
+      "license": "MIT",
+      "attribution": "Copyright (c) 2015 Michael Davis (python-jose), MIT License",
+      "split": "held_out",
+      "files": [
+        {
+          "path": "jose/backends/cryptography_backend.py",
+          "sha256": "273b64a0acf62a66737dd2bb4aa504a190e37afd1e0d2f8645f8794519cfbf7f"
+        },
+        {
+          "path": "jose/jwk.py",
+          "sha256": "017554faa72e54c84dc9661d7eb8c41363bf5054cf202e0cd761b284c5c8d4e2"
+        },
+        {
+          "path": "requirements.txt",
+          "sha256": "68b317debefb6b69f31bb61dfa828a56415f456b85e4a941e859e460ad7b9bbb"
+        }
+      ]
+    },
+    {
+      "id": "certbot",
+      "url": "https://github.com/certbot/certbot",
+      "commit": "0a97bd98b853c33e1e31d258006bca0048ba8226",
+      "license": "Apache-2.0",
+      "attribution": "Certbot / ACME contributors (Electronic Frontier Foundation and others), Apache License 2.0",
+      "split": "held_out",
+      "files": [
+        {
+          "path": "acme/src/acme/crypto_util.py",
+          "sha256": "bc58571975cfe662f72cfff426f3f0e44f51857a2a75906ff8fda33c4cfd3408"
+        },
+        {
+          "path": "certbot-ci/src/certbot_integration_tests/assets/sample-config/options-ssl-apache.conf",
+          "sha256": "2396f9ed005afed7aeecb598ace616ce701cb417e6a66672f16e4263a3bb1578"
+        }
+      ]
+    },
+    {
+      "id": "h5bp-apache",
+      "url": "https://github.com/h5bp/server-configs-apache",
+      "commit": "f9feb463fe136620ccde264b4cfbddfd8cd473b5",
+      "license": "MIT",
+      "attribution": "H5BP server-configs-apache contributors, MIT License",
+      "split": "held_out",
+      "files": [
+        {
+          "path": "h5bp/tls/policy_balanced.conf",
+          "sha256": "049a623484fd2bbc1a683dd904b217efa05e8f781ebd8046d5225bf99a4d7acc"
+        },
+        {
+          "path": "h5bp/tls/policy_strict.conf",
+          "sha256": "b027b2c8687c8df5c21f42cef68bfe928942c00bcfb5b48703a886c05e306840"
+        },
+        {
+          "path": "h5bp/tls/certificate_files.conf",
+          "sha256": "b5bbbc5373b30cac6e0fff94d9b27281292e6ccf3f39db46f9ef32e6c01494d0"
+        }
+      ]
+    }
+  ]
+}

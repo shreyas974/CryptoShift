@@ -24,6 +24,14 @@ class CryptoFinding:
     owner: str = "unknown"
     library_or_protocol: str = "unknown"
     human_review_status: str = "requires_human_review"
+    # Stage 1 inventory fields (backward compatible: all optional with defaults)
+    detector: str = "legacy"  # "legacy" | "python_ast" | "tls_config" | "dependency_manifest" | "certificate"
+    algorithm_family: str = ""  # e.g. "RSA", "ECDSA", "ECDH", "DH", "3DES", "SHA-1", "TLS-protocol"
+    detected_value: str = ""  # API name, directive value or dependency spec that triggered the finding
+    location: str = ""  # "line 12" or "directive ssl_ciphers (line 12)"
+    snippet_redacted: str = ""  # redacted, truncated source line (never secrets, keys or certificate bodies)
+    ambiguity: str = "none"  # "none" | "ambiguous" (several purposes possible) | "unknown" (purpose not determinable)
+    in_test_file: bool = False
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
