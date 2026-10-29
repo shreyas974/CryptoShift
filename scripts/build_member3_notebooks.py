@@ -1,177 +1,398 @@
 #!/usr/bin/env python3
-"""Generate notebooks/member3/*.ipynb (outputs empty) with inline charts. Notebooks import project code from src/
-and rebuild any missing derived input themselves, so they also run in a fresh checkout.
+"""Build Member 3 notebooks (notebooks/member3/01..10.ipynb) in pure visual form.
 
-Execute:  .\\.venv\\Scripts\\python.exe -m jupyter nbconvert --to notebook --execute notebooks/member3/<nb>.ipynb
-          --ExecutePreprocessor.kernel_name=cryptoshift-m3 --output-dir scratch/derived/executed
+All live Python computations and matplotlib figure generators reside in `src/cryptoshift/notebook_visuals.py`.
+Running this script:
+1. Executes all 30 visual figure generators against the real project datasets and Member 3 outputs,
+   saving high-DPI PNGs to `scratch/derived/member3/figs/` and `assets/diagrams/member3/`.
+2. Writes `notebooks/member3/01..10.ipynb` (and `scratch/derived/executed/01..10.ipynb`) in pure
+   visual form (Markdown narrative cards + embedded PNG image attachments, zero visible code cells).
 """
 
 from __future__ import annotations
 
+import base64
+import sys
 from pathlib import Path
+from typing import Dict, List, Tuple
 
 import nbformat as nbf
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "notebooks" / "member3"
-
-SETUP = """%matplotlib inline
-from pathlib import Path
-import sys, json, subprocess
-ROOT = next(p for p in [Path.cwd(), *Path.cwd().parents] if (p / "src" / "cryptoshift").is_dir())
 for p in (str(ROOT / "src"), str(ROOT)):
     if p not in sys.path:
         sys.path.insert(0, p)
-DERIVED = ROOT / "scratch" / "derived" / "member3"
-FIGS = DERIVED / "figs"
-FIGS.mkdir(parents=True, exist_ok=True)
-import pandas as pd
-import matplotlib.pyplot as plt
-plt.rcParams.update({"figure.dpi": 110, "axes.grid": True, "grid.alpha": 0.3, "axes.spines.top": False, "axes.spines.right": False})
-PY = sys.executable
 
-def ensure(rel_path, script, *args):
-    \"\"\"Run a project script once if its output file is missing (keeps notebooks runnable in a fresh checkout).\"\"\"
-    target = ROOT / rel_path
-    if not target.is_file():
-        print(f"{rel_path} missing -> running {script} ...")
-        subprocess.run([PY, str(ROOT / "scripts" / script), *args], cwd=ROOT, check=True)
-    return target
+from cryptoshift.notebook_visuals import REGISTRY, render_all  # noqa: E402
 
-def savefig(name):
-    plt.tight_layout(); plt.savefig(FIGS / f"{name}.png", dpi=120); plt.show()
-# This notebook reads no credentials. If one is ever needed, read it from an environment variable at runtime and
-# never display it."""
+OUT = ROOT / "notebooks" / "member3"
+EXEC_OUT = ROOT / "scratch" / "derived" / "executed"
 
 
 def header(title: str, purpose: str, inputs: str, outputs: str, status: str) -> str:
-    return (f"# {title}\n\n**Purpose:** {purpose}\n\n**Inputs:** {inputs}\n\n**Outputs:** {outputs}\n\n"
-            f"**Status labels:** {status}\n\nContext: the demo bank in `demo_bank_app/` is SYNTHETIC. Charts are also saved to "
-            "`scratch/derived/member3/figs/`.")
+    return (
+        f"# {title}\n\n"
+        f"**Purpose:** {purpose}\n\n"
+        f"**Inputs:** {inputs}\n\n"
+        f"**Visual Outputs:** {outputs}\n\n"
+        f"> **Claim & Provenance Status:** {status}\n>\n"
+        f"> **Scope Context:** All demo banking services in `demo_bank_app/` are **SYNTHETIC**. "
+        f"High-DPI figures are also archived in `assets/diagrams/member3/` and `scratch/derived/member3/figs/`."
+    )
 
 
-NOTEBOOKS = {
+def visual_cell(caption_title: str, caption_body: str, fig_key: str, png_path: Path) -> nbf.NotebookNode:
+    b64 = base64.b64encode(png_path.read_bytes()).decode("ascii")
+    fname = f"{fig_key}.png"
+    md_source = (
+        f"### {caption_title}\n\n"
+        f"{caption_body}\n\n"
+        f"![{caption_title}](attachment:{fname})"
+    )
+    cell = nbf.v4.new_markdown_cell(md_source)
+    cell["attachments"] = {fname: {"image/png": b64}}
+    return cell
+
+
+VISUAL_NOTEBOOKS: Dict[str, List[Tuple]] = {
     "01_data_overview": [
-        ("md", header("01 - Data overview", "Summarise the real datasets read-only and chart them (Track C is descriptive only - no model).",
-                      "CESNET-TLS22 S (HDF5) and banking_pqc_observations.csv (dataset env vars / default pack path)",
-                      "status-share chart by scan date, counts chart, CESNET rows-per-day chart",
-                      "VERIFIED (real public data, read-only). Not bank data; ERROR stays unclassified; repeated hosts across dates are kept.")),
-        ("code", SETUP),
-        ("code", "from cryptoshift.data_summary import build_data_summary\ns = build_data_summary(chunk_size=20_000, max_stream_rows=40_000)\npqc, ces = s['banking_pqc_observations'], s['cesnet_tls22_s']\nprint('Banking observations:', pqc['row_count'], 'rows |', len(pqc['scan_dates']), 'scan dates | duplicate keys', pqc['duplicate_observation_keys'], '|', pqc['unique_hosts'], 'hosts')\nprint('CESNET-TLS22 S:', f\"{ces['total_rows']:,}\", 'rows in', ces['table_count'], 'daily tables |', ' to '.join(ces['date_range']))"),
-        ("code", "counts = pd.DataFrame(pqc['status_counts_by_scan_date']).T.fillna(0)[['PQ-SAFE','CLASSICAL','ERROR']].astype(int)\nshare = counts.div(counts.sum(axis=1), axis=0)\ncolors = {'PQ-SAFE':'#2a9d8f','CLASSICAL':'#e76f51','ERROR':'#9e9e9e'}\nfig, ax = plt.subplots(1, 2, figsize=(12, 4))\ncounts.plot(kind='bar', stacked=True, color=[colors[c] for c in counts.columns], ax=ax[0], title='Observations per scan date (count)')\nshare.plot(kind='line', marker='o', color=[colors[c] for c in share.columns], ax=ax[1], title='Share of the 64 banking hosts')\nax[1].set_ylim(0, 1); ax[0].set_xlabel('scan date'); ax[1].set_xlabel('scan date')\nsavefig('01_pqc_status_by_date')\ncounts"),
-        ("code", "rows = pd.Series({t.split('/')[-1][1:]: n for t, n in ces['table_rows'].items()})\nax = rows.plot(kind='bar', figsize=(11, 3.5), color='#457b9d', title='CESNET-TLS22 S: flows per daily table (Oct 2021)')\nax.set_ylabel('flows'); ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda v, _: f'{v/1e6:.1f}M'))\nsavefig('01_cesnet_rows_per_day')"),
-        ("md", "Public-endpoint observations on the given dates only. They say nothing about a bank's internal systems, signatures or migration status. CESNET is real 2021 traffic metadata used only for scale/streaming demos."),
+        (
+            "md",
+            header(
+                "01 — Real Datasets Visual Overview (Track C)",
+                "Summarise and visualise the two real public datasets in read-only mode (Track C is descriptive only — no predictive model).",
+                "`data/real/bank_tls_pqc_observations.csv` (320 rows, 5 dates) and `CESNET-TLS22-S` HDF5 (25,000,000 flows, 14 daily tables).",
+                "Dataset KPI Scorecard (`01_dataset_kpis`), Longitudinal PQC Readiness Charts (`01_pqc_status_by_date`), Daily CESNET Flow Volume (`01_cesnet_rows_per_day`).",
+                "VERIFIED (real public data, read-only). Public-endpoint TLS probes say nothing about a bank's internal systems or signatures; ERROR rows remain unclassified.",
+            ),
+        ),
+        (
+            "fig",
+            "01A · Dataset Integrity & Volume Scorecard",
+            "Read-only audit across the 320 longitudinal banking TLS 1.3 observations (64 unique hosts across 5 scan dates, 0 duplicate `(scan_file, host, ts)` keys) and out-of-core HDF5 chunk streaming over the 25.0M-flow CESNET-TLS22 S dataset.",
+            "01_dataset_kpis",
+        ),
+        (
+            "fig",
+            "01B · Longitudinal Banking PQC Readiness by Scan Date",
+            "Left: stacked host counts (`PQ-SAFE`, `CLASSICAL`, `ERROR`) per scan date. Right: proportional share across the 64 monitored public banking endpoints. `ERROR` probes are kept as unclassified and never relabelled as `CLASSICAL`.",
+            "01_pqc_status_by_date",
+        ),
+        (
+            "fig",
+            "01C · CESNET-TLS22 S Daily Encrypted TLS Flow Volume (October 2021)",
+            "Daily flow distribution across all 14 HDF5 tables (`2021-10-04` through `2021-10-17`), totalling 25,000,000 flows (mean 1.79M flows/day) used strictly for streaming scale and traffic-category demos.",
+            "01_cesnet_rows_per_day",
+        ),
     ],
     "02_findings_to_tasks": [
-        ("md", header("02 - From scanner findings to tasks", "Turn merged scanner findings into per-service migration tasks that keep finding IDs as evidence.",
-                      "demo_bank_app/configs (SYNTHETIC) via cryptoshift.planning", "findings table, findings-per-service chart, evidence-source chart, task table",
-                      "VERIFIED on SYNTHETIC configs. Unknown purpose = HOLD (never a PQC mapping).")),
-        ("code", SETUP),
-        ("code", "from cryptoshift.planning.planner import build_problem\np = build_problem()\nfind = pd.DataFrame([{k: f.to_dict()[k] for k in ('finding_id','service_id','file_path','line_number','legacy_algorithm','operation_purpose','detector')} for f in p['findings']])\nfind"),
-        ("code", "fig, ax = plt.subplots(1, 2, figsize=(12, 4))\npd.crosstab(find['service_id'], find['operation_purpose']).plot(kind='barh', stacked=True, ax=ax[0], colormap='tab10', title='Findings per service by operation purpose')\nax[0].set_xlabel('findings')\nev = pd.Series({s: v['evidence_source'] for s, v in p['services'].items()}).value_counts()\nax[1].pie(ev.values, labels=ev.index, autopct='%1.0f%%', colors=['#2a9d8f', '#e9c46a', '#9e9e9e'][:len(ev)])\nax[1].set_title('Services by evidence source')\nsavefig('02_findings_and_evidence')"),
-        ("code", "pd.DataFrame([{'service': s, 'evidence': v['evidence_source'], 'findings': len(v['finding_ids']), 'holds': v['hold_finding_ids'], 'criticality (source)': f\"{v['criticality']} ({v['field_sources'].get('criticality','').split(' ')[0]})\", 'candidates': v['candidate_targets']} for s, v in p['services'].items()])"),
-        ("md", "`DECLARED_ONLY` services (ledger_audit, settlement_batch) have no scanned files; their algorithms come from the synthetic descriptor and stay on HOLD."),
+        (
+            "md",
+            header(
+                "02 — From Cryptographic Scanner Findings to Migration Tasks",
+                "Convert merged Member 2 Inventory v1.1 + legacy scanner findings into traceable per-service PQC migration tasks.",
+                "`demo_bank_app/configs` (SYNTHETIC) + `demo_bank_app/services.py` via `cryptoshift.planning.planner`.",
+                "Merged Findings Visual Register (`02_findings_table`), Purpose & Provenance Breakdown (`02_findings_and_evidence`), Service Task Scorecard (`02_tasks_scorecard`).",
+                "VERIFIED on SYNTHETIC configs. Strict NIST FIPS 203 (`ML-KEM`) vs FIPS 204/205 (`ML-DSA`/`SLH-DSA`) role separation; `unknown` purpose forces `HOLD`.",
+            ),
+        ),
+        (
+            "fig",
+            "02A · Merged Cryptographic Findings Register",
+            "All 14 deduplicated findings across the demo banking estate with file/line evidence, detected legacy primitive, operation purpose, detector source, and deterministic PQC target or `HOLD` status.",
+            "02_findings_table",
+        ),
+        (
+            "fig",
+            "02B · Findings by Operation Purpose & Service Evidence Provenance",
+            "Left: stacked finding counts per service split by cryptographic operation purpose (`key_establishment`, `digital_signature`, `transport_protocol`, `message_digest`, `unknown`). Right: share of `OBSERVED` (scanned files) vs `DECLARED_ONLY` services.",
+            "02_findings_and_evidence",
+        ),
+        (
+            "fig",
+            "02C · Per-Service Migration Task Scorecard",
+            "`DECLARED_ONLY` services (`ledger_audit`, `settlement_batch`) have no scanned config files and remain on `HOLD`; `auth_gateway` also has an unattributed-purpose RSA finding held for human review.",
+            "02_tasks_scorecard",
+        ),
     ],
     "03_dependency_graph_and_scoring": [
-        ("md", header("03 - Dependency graph and provisional risk score", "Show every dependency edge with provenance, conflicts and cycles, the additive risk score and its sensitivity.",
-                      "cryptoshift.planning (demo configs + synthetic descriptor), planning_config.json", "graph figure, edge table, risk contribution chart, sensitivity heatmap",
-                      "Graph VERIFIED on SYNTHETIC inputs. Risk score PROVISIONAL and UNVALIDATED (weights are assumptions).")),
-        ("code", SETUP),
-        ("code", "import networkx as nx\nfrom matplotlib.lines import Line2D\nfrom cryptoshift.planning.planner import build_problem, sensitivity\np = build_problem()\ncolors = {'OBSERVED':'#2a9d8f','DECLARED':'#8d99ae','INFERRED':'#f4a261'}\ng = nx.MultiDiGraph(); g.add_nodes_from(p['services'])\nfor e in p['edges']: g.add_edge(e['upstream'], e['downstream'], prov=e['provenance'])\npos = {'auth_gateway':(0,1),'ledger_audit':(0,-1),'interbank_tls':(1,-1.4),'card_vault':(1.2,1.4),'payment_signing':(1.2,0.2),'settlement_batch':(2.4,-0.4)}\npos = {n: pos.get(n, (3, 0)) for n in g.nodes}\nfig, ax = plt.subplots(figsize=(10, 5))\nnode_col = ['#2a9d8f' if p['services'][n]['evidence_source']=='OBSERVED' else '#e9c46a' for n in g.nodes]\nnx.draw_networkx_nodes(g, pos, node_color=node_col, node_size=4200, ax=ax)\nnx.draw_networkx_labels(g, pos, labels={n: n.replace('_', '\\n') for n in g.nodes}, font_size=8, ax=ax)\nfor i, (u, v, d) in enumerate(g.edges(data=True)):\n    rad = 0.15 if d['prov']=='OBSERVED' else -0.15\n    nx.draw_networkx_edges(g, pos, edgelist=[(u, v)], edge_color=colors[d['prov']], width=2.2, arrowsize=18, connectionstyle=f'arc3,rad={rad}', node_size=4200, ax=ax)\nax.margins(0.12)\nax.legend(handles=[Line2D([0],[0], color=c, lw=3, label=k) for k, c in colors.items()] + [Line2D([0],[0], marker='o', color='w', markerfacecolor='#e9c46a', markersize=12, label='DECLARED_ONLY service')], loc='lower right')\nax.set_title('Service dependencies (upstream -> downstream) by provenance'); ax.axis('off')\nsavefig('03_dependency_graph')"),
-        ("code", "ga = p['graph_analysis']; print('cycles:', ga['cycles'] or 'none', '| edge counts:', ga['edge_counts'])\ndisplay(pd.DataFrame(ga['conflicts']))\npd.DataFrame(p['edges'])[['upstream','downstream','provenance','file','line','reason']]"),
-        ("code", "contrib = pd.DataFrame({s: v['risk']['contributions'] for s, v in p['services'].items()}).T\ncontrib = contrib.loc[contrib.sum(axis=1).sort_values().index]\nax = contrib.plot(kind='barh', stacked=True, figsize=(10, 4), colormap='viridis', title='Provisional risk score = sum of weighted contributions (UNVALIDATED)')\nax.set_xlabel('score'); savefig('03_risk_contributions')\ncontrib.assign(total=contrib.sum(axis=1)).round(2)"),
-        ("code", "sa = sensitivity(p)\nruns = pd.DataFrame(sa['runs'])\nheat = runs.pivot(index='weight', columns='factor', values='kendall_tau')\nfig, ax = plt.subplots(1, 2, figsize=(12, 3.8))\nim = ax[0].imshow(heat.values, cmap='RdYlGn', vmin=-1, vmax=1)\nax[0].set_xticks(range(len(heat.columns)), [f'x{c}' for c in heat.columns]); ax[0].set_yticks(range(len(heat.index)), heat.index)\nfor (i, j), v in __import__('numpy').ndenumerate(heat.values): ax[0].text(j, i, f'{v:.2f}', ha='center', va='center')\nax[0].set_title('Rank stability (Kendall tau vs base)'); ax[0].grid(False); fig.colorbar(im, ax=ax[0])\npd.Series({'rank changed': sa['rank_changed_runs'], 'rank unchanged': sa['n_runs']-sa['rank_changed_runs'], 'schedule changed': sa['schedule_changed_runs'], 'schedule unchanged': sa['n_runs']-sa['schedule_changed_runs']}).plot(kind='bar', ax=ax[1], color=['#e76f51','#2a9d8f','#e76f51','#2a9d8f'], title=f\"{sa['n_runs']} weight perturbations (x0.5 / x1.5)\")\nax[1].tick_params(axis='x', rotation=20); savefig('03_sensitivity')"),
+        (
+            "md",
+            header(
+                "03 — Service Dependency Graph, Provenance & Provisional Risk Scoring",
+                "Visualise every upstream-to-downstream service dependency edge by provenance, highlight observed-vs-declared conflicts, and audit the additive risk formula under weight perturbations.",
+                "`cryptoshift.planning` (`dependency_graph.py`, `risk.py`, `planning_config.json`).",
+                "Provenance Network Graph (`03_dependency_graph`), Edge & Conflict Register (`03_edges_and_conflicts`), Risk Factor Breakdown (`03_risk_contributions`), Sensitivity Analysis (`03_sensitivity`).",
+                "Graph VERIFIED on SYNTHETIC inputs (4 OBSERVED edges with file+line, 5 DECLARED edges, 0 cycles). Risk scores are PROVISIONAL and UNVALIDATED.",
+            ),
+        ),
+        (
+            "fig",
+            "03A · Multi-Provenance Service Dependency Topology",
+            "Directed multigraph (`upstream provider -> downstream consumer`). Teal edges (`OBSERVED`) are backed by Member 2 file+line relationship evidence (`nginx proxy_pass`, YAML `depends_on`, Python `DEPENDS_ON`); grey edges (`DECLARED`) come from the synthetic descriptor.",
+            "03_dependency_graph",
+        ),
+        (
+            "fig",
+            "03B & 03C · Dependency Edge Provenance Register & Architecture Conflicts",
+            "Complete register of all 9 dependency edges with file/line provenance, followed by the 3 detected discrepancies between observed configuration files and declared service metadata (e.g. `interbank_tls_nginx.conf` proxying to `ledger_audit`).",
+            "03_edges_and_conflicts",
+        ),
+        (
+            "fig",
+            "03D · Provisional Risk Score Factor Contributions",
+            "Additive risk score decomposition across the 5 hand-set weights (`crypto_exposure`, `network_exposure`, `criticality`, `dependents`, `verification_readiness`). Labelled `PROVISIONAL, UNVALIDATED`.",
+            "03_risk_contributions",
+        ),
+        (
+            "fig",
+            "03E · One-at-a-Time Weight Perturbation Sensitivity (×0.5 / ×1.5)",
+            "Across 10 perturbation runs, service risk rank order changed in 6/10 runs (minimum Kendall τ = 0.47) and the resulting wave schedule changed in 3/10 runs — demonstrating why risk weights are treated as explicit assumptions.",
+            "03_sensitivity",
+        ),
     ],
     "04_scheduling_opt_vs_baseline": [
-        ("md", header("04 - Scheduling: deterministic baseline vs QpiAI Opt", "Solve the wave schedule exactly with the deterministic baseline, check the same MILP with QpiAI Opt's offline tools, and visualise the waves and constraint use.",
-                      "Phase 2 problem; qpiai-opt (offline classify / inspect / feasibility only)", "wave timeline chart, capacity/window chart, Opt model checks",
-                      "Baseline VERIFIED. QpiAI Opt offline checks VERIFIED. Authenticated `solve(mode='local')` VERIFIED once (owner-approved 2026-10-29): optimal, same objective and assignment as the baseline (not better). No platform, submit() or QPU.")),
-        ("code", SETUP),
-        ("code", "from cryptoshift.planning.planner import build_problem, schedule, to_tasks\np = build_problem(); s = schedule(p); c = s['config']\nprint('feasible', s['feasible'], '| objective', s['objective'], '| dependency violations', len(s['dependency_violations']), '| constraint violations', len(s['constraint_violations']))\ntasks = pd.DataFrame(s['tasks']).set_index('service_id')\ntasks['wave'] = pd.Series(s['task_to_wave'])\ntasks[['wave','duration_minutes','risk_score','verification_ready_wave0','dependencies']].sort_values('wave')"),
-        ("code", "fig, ax = plt.subplots(1, 2, figsize=(13, 4.2), gridspec_kw={'width_ratios': [2, 1]})\npal = plt.get_cmap('tab10')\nfor w in sorted(tasks['wave'].unique()):\n    start = 0\n    for i, (sid, r) in enumerate(tasks[tasks['wave']==w].iterrows()):\n        ax[0].barh(w, r['duration_minutes'], left=start, color=pal(list(tasks.index).index(sid)), edgecolor='white')\n        ax[0].text(start + r['duration_minutes']/2, w, f\"{sid}\\n{r['duration_minutes']} min\", ha='center', va='center', fontsize=8, color='white')\n        start += r['duration_minutes']\nax[0].axvline(c['max_minutes_per_wave'], color='red', ls='--', label=f\"window {c['max_minutes_per_wave']} min (ASSUMPTION)\")\nax[0].set_yticks(sorted(tasks['wave'].unique()), [f'Wave {w}' for w in sorted(tasks['wave'].unique())]); ax[0].invert_yaxis(); ax[0].set_xlabel('minutes'); ax[0].legend(); ax[0].set_title('Migration waves (deterministic exact baseline)')\nuse = tasks.groupby('wave').agg(services=('duration_minutes','size'), minutes=('duration_minutes','sum'))\n(use / [c['max_services_per_wave'], c['max_minutes_per_wave']]).plot(kind='bar', ax=ax[1], color=['#457b9d','#e9c46a'], title='Constraint utilisation per wave')\nax[1].axhline(1, color='red', ls='--'); ax[1].set_ylabel('fraction of limit'); ax[1].set_ylim(0, 1.2)\nsavefig('04_waves')"),
-        ("code", "from cryptoshift.optimization.member3_qpiai import opt_wave_model_checks\ntl, _ = to_tasks(p)\no = opt_wave_model_checks(tl, c, s['task_to_wave'])\npd.Series({k: o[k] for k in ('sdk_versions','problem_class','binary_variables','constraints','baseline_feasible_in_opt_model','baseline_objective_recomputed')} | {'authenticated_local_solve (recorded owner-approved run)': (lambda r: f\"{r['status']}: {r.get('solver_status', r.get('reason', ''))}, objective {r.get('objective')} vs baseline {r.get('same_input_comparison', {}).get('baseline_objective')} (same assignment: {r.get('same_input_comparison', {}).get('same_assignment')})\")(json.loads((DERIVED / 'scheduling_comparison.json').read_text())['qpiai_opt']['authenticated_local_solve'])}).to_frame('QpiAI Opt')"),
-        ("md", "**Plain language.** Each service gets exactly one wave; a provider must move no later than its consumers; each wave holds at most 2 services and 85 minutes (assumptions). The baseline tries every assignment and keeps the cheapest valid one, so its answer is optimal for this small problem. QpiAI Opt accepted the same model as a MILP and confirmed the baseline answer is feasible in it. Solving with QpiAI needs an API key and owner authorization, which this run did not have, so there is no QpiAI-vs-baseline objective comparison yet."),
+        (
+            "md",
+            header(
+                "04 — Wave Scheduling: Deterministic Exact Baseline vs QpiAI Opt MILP",
+                "Schedule the 6 banking services into dependency-respecting migration waves and verify the exact 18-variable binary MILP with QpiAI Opt (`0.0.9`).",
+                "Phase 2 planning problem; `cryptoshift.optimization.fallback_scheduler` and `cryptoshift.optimization.member3_qpiai`.",
+                "Migration Wave Timeline & Constraint Utilisation (`04_waves`), Scheduled Tasks & QpiAI Opt Verification Scorecard (`04_schedule_and_opt_scorecard`).",
+                "Baseline VERIFIED (Objective 299.1, 0 violations). QpiAI Opt offline checks (`classify=MILP`, `inspect`, `feasibility`) & owner-approved `solve(mode='local')` VERIFIED (optimal, objective 299.1 = baseline, equal assignment).",
+            ),
+        ),
+        (
+            "fig",
+            "04A · Dependency-Ordered Migration Waves & Maintenance Window Utilisation",
+            "Left: Gantt wave bars (`Wave 0`: `interbank_tls` + `ledger_audit`; `Wave 1`: `auth_gateway` + `payment_signing`; `Wave 2`: `card_vault` + `settlement_batch`) against the 85-minute maintenance window limit. Right: fraction of capacity (≤2 services/wave) and time (≤85 min/wave) consumed.",
+            "04_waves",
+        ),
+        (
+            "fig",
+            "04B & 04C · Scheduled Tasks & QpiAI Opt MILP Comparison Scorecard",
+            "Every upstream provider is scheduled no later than its downstream consumers. QpiAI Opt (`0.0.9`) classifies the 18-variable, 20-constraint model as `MILP`, confirms baseline feasibility offline, and solves `mode='local'` to the exact same optimum (`299.1`, difference `0.0`).",
+            "04_schedule_and_opt_scorecard",
+        ),
     ],
     "05_qcloud_simulator_experiment": [
-        ("md", header("05 - QpiAI Quantum / QCloud local simulator experiment", "Reproduce the reported -13.07 QAOA energy and apply the same QUBO formulation to the Phase 2 Wave-0 selection; chart the sampled distribution.",
-                      "qpiai-opt[quantum], qpiai-quantum; device QpiAI-QSV-Local (in-process statevector)", "reproduction result, counts chart (feasible vs infeasible, optimum marked), P(optimum) vs uniform",
-                      "SIMULATOR only. No QPU, no platform mode. No quantum advantage is claimed.")),
-        ("code", SETUP),
-        ("code", "from cryptoshift.optimization.member3_qpiai import reproduce_reported_experiment\nr = reproduce_reported_experiment()\npd.Series({k: r[k] for k in ('local_qsv_simulator_status','best_simulator_wave0_selection','best_simulator_wave0_energy','reproduced')}).to_frame('reproduction')"),
-        ("code", "from cryptoshift.planning.planner import build_problem\nfrom cryptoshift.planning.dependency_graph import constraint_digraph\nfrom cryptoshift.optimization.member3_qpiai import run_wave0_qaoa, wave0_energy\np = build_problem(); c = p['config']\nd = constraint_digraph(p['graph'], c['enforced_edge_provenance'])\ncands = [{'id': s, 'reward': v['risk']['score'], 'minutes': v['duration_minutes']} for s, v in sorted(p['services'].items()) if v['verification_ready_wave0']]\nids = {x['id'] for x in cands}\nq = run_wave0_qaoa(cands, sorted((u, v) for u, v in d.edges if u in ids and v in ids), c['constraints']['max_services_per_wave'], c['constraints']['max_minutes_per_wave'])\nprint(q['label']); print('variables (bit order little-endian):', q['formulation']['variables'])\npd.Series({k: q[k] for k in ('exact_optimum','optimum_probability','uniform_probability','feasible_shot_fraction','distinct_bitstrings_sampled','circuit')}).to_frame('Phase 2 Wave-0 QAOA')"),
-        ("code", "names = q['formulation']['variables']\nterms = {k: q['formulation'][k] for k in ('penalty','capacity','deps','pairs_over_window','rewards')}\nshots = {x['bits']: x['count'] for x in q['samples']}\nrows = []\nfor bits in (format(i, f'0{len(names)}b') for i in range(2 ** len(names))):\n    sel = {names[i]: int(bits[len(bits)-1-i]) for i in range(len(names))}\n    e, ok, _ = wave0_energy(sel, terms)\n    rows.append({'bits': bits, 'selection': '+'.join(k[0].upper() for k, v in sel.items() if v) or 'none', 'energy': e, 'feasible': ok, 'shots': shots.get(bits, 0)})\ndf = pd.DataFrame(rows).sort_values('energy').reset_index(drop=True)\nprint('Legend: ' + ', '.join(f'{n[0].upper()} = {n}' for n in names) + ' | bit strings are little-endian (rightmost bit = first variable)')\nlabels = df['selection']\nfeas_col = ['#2a9d8f' if f else '#e76f51' for f in df['feasible']]\nfig, ax = plt.subplots(3, 1, figsize=(14, 11))\nax[0].bar(labels, df['energy'], color=feas_col)\nax[0].set_title('Exact QUBO energy of every Wave-0 selection, best first (green = feasible, red = violates constraints)'); ax[0].set_ylabel('energy (lower is better)'); ax[0].tick_params(axis='x', labelsize=9)\nax[1].bar(labels, df['shots'], color=feas_col)\nax[1].axhline(q['shots'] / 2 ** len(names), color='black', ls='--', label='uniform expectation')\nax[1].annotate('exact optimum', (0, df.loc[0, 'shots']), xytext=(1.5, df['shots'].max()), arrowprops={'arrowstyle': '->'})\nax[1].set_title(f\"QAOA samples on QpiAI-QSV-Local ({q['shots']} shots, same order as above)\"); ax[1].set_ylabel('shots'); ax[1].legend(); ax[1].tick_params(axis='x', labelsize=9)\nax[2].bar(['QAOA P(optimum)', 'uniform 1/16', 'feasible shot fraction'], [q['optimum_probability'], q['uniform_probability'], q['feasible_shot_fraction']], color=['#457b9d', '#9e9e9e', '#2a9d8f'])\nfor i, v in enumerate([q['optimum_probability'], q['uniform_probability'], q['feasible_shot_fraction']]): ax[2].text(i, v, f'{v:.3f}', ha='center', va='bottom')\nax[2].set_title('Summary probabilities (SIMULATOR)'); ax[2].set_ylim(0, 1)\nsavefig('05_qaoa_energy_and_samples')\ndf"),
-        ("md", "**Plain language.** The left chart shows the exact energy of all 16 possible Wave-0 choices; the lowest green bar is the true best choice (it equals the deterministic baseline's Wave 0). The right chart shows how often the one-layer, fixed-angle QAOA circuit on the simulator actually lands on that best choice compared with random guessing: only slightly more often. The old experiment's 'best feasible sample' metric finds the optimum for almost any sampler on 4 variables, and its bit decoding was reversed (bit order measured: little-endian)."),
+        (
+            "md",
+            header(
+                "05 — QpiAI Quantum / QCloud Local Statevector Simulator Experiment",
+                "Reproduce the legacy `-13.07` Wave-0 QUBO energy and evaluate the Phase-2 4-qubit Wave-0 QAOA circuit on the local statevector simulator (`QpiAI-QSV-Local`).",
+                "`qpiai-opt[quantum] 0.0.9`, `qpiai-quantum 0.3.0`; local device `QpiAI-QSV-Local` (1024 shots, `QAOA(reps=1)`).",
+                "QAOA Simulator KPI Scorecard (`05_qaoa_scorecard`), 16-State QUBO Energy Spectrum & Sampled Shot Distribution (`05_qaoa_energy_and_samples`).",
+                "SIMULATOR ONLY (`QpiAI-QSV-Local`). No QPU or cloud platform execution. Fixed-angle QAOA(reps=1) yields P(optimum) = 0.085 vs 0.0625 uniform — no quantum advantage is claimed.",
+            ),
+        ),
+        (
+            "fig",
+            "05A · QAOA Reproduction & Phase-2 Wave-0 Simulator KPIs",
+            "Summary metrics comparing the reproduced `-13.07` selection (`['ledger_audit', 'interbank_tls']`) and the corrected little-endian Phase-2 Wave-0 QUBO formulation (`exact optimum = -21.25`, circuit `depth=8`, `gates=18`, `1024` shots).",
+            "05_qaoa_scorecard",
+        ),
+        (
+            "fig",
+            "05B · Complete 16-Bitstring QUBO Energy Landscape & QAOA Sampled Distribution",
+            "Top: exact QUBO energy across all 16 4-qubit candidate subsets (teal = feasible, coral = violates capacity/window constraints). Middle: 1024-shot histogram from `QpiAI-QSV-Local` showing the true optimum `I+L (0110)` vs infeasible bitstrings. Bottom: `P(optimum) = 0.0850` vs `1/16 = 0.0625` uniform random guessing.",
+            "05_qaoa_energy_and_samples",
+        ),
     ],
     "06_verification_traces_and_overhead": [
-        ("md", header("06 - Verification: self-tests, traces, compatibility, overhead, gates", "Run ML-KEM / ML-DSA self-tests, before/after loopback TLS traces and the compatibility matrix with OpenSSL 3.5; chart handshake bytes, compatibility, timing distribution and gate states.",
-                      "Git-bundled OpenSSL 3.5.9 (full path), throw-away test keys in a temp dir", "self-test table, bytes chart, compatibility chart, timing box plot, gate heatmap",
-                      "VERIFIED, TEST SCENARIO (loopback, test keys). Self-tests are round-trip tests, NOT NIST KATs. Timing is loopback process time, not a network benchmark.")),
-        ("code", SETUP),
-        ("code", "from cryptoshift.gates import openssl_lab as lab\nprint(lab.capabilities())\nwith lab.lab_dir() as d:\n    st = [lab.mlkem_roundtrip_openssl(d), lab.mlkem_roundtrip_cryptography(), lab.mldsa_sign_verify_openssl(d), lab.mldsa_sign_verify_cryptography()]\n    tr = lab.traces(d)\n    cm = lab.compatibility_matrix(d)\npd.DataFrame(st)[['implementation','algorithm','status','note']]"),
-        ("code", "tdf = pd.DataFrame([{'trace': k, **{f: v.get(f) for f in ('handshake_ok','protocol','group','peer_signature_type','bytes_read','bytes_written')}} for k, v in tr.items() if isinstance(v, dict) and 'handshake_ok' in v]).set_index('trace')\nax = tdf[['bytes_read','bytes_written']].rename(index={'before_classical':'before: X25519\\n(EC cert)','after_hybrid':'after: X25519MLKEM768\\n(EC cert)','after_hybrid_mldsa_cert':'after: X25519MLKEM768\\n(ML-DSA-65 cert)'}).plot(kind='bar', figsize=(10, 4), color=['#457b9d','#e9c46a'], title='Handshake bytes seen by the client (loopback test scenario)')\nfor cont in ax.containers: ax.bar_label(cont, fmt='%d', fontsize=8)\nax.set_ylabel('bytes'); ax.tick_params(axis='x', rotation=0); savefig('06_handshake_bytes')\ntdf"),
-        ("code", "cdf = pd.DataFrame(cm)\nfig, ax = plt.subplots(figsize=(11, 4.5))\ncol = {'positive':'#2a9d8f','fallback':'#457b9d','negative':'#e76f51'}\nax.barh(cdf['case'], [1]*len(cdf), color=[col[c] for c in cdf['category']])\nfor i, r in cdf.iterrows(): ax.text(0.02, i, ('PASS ' if r['pass'] else 'FAIL ') + r['observed'][:70], va='center', fontsize=7.5, color='white')\nax.set_xticks([]); ax.invert_yaxis(); ax.grid(False)\nax.set_title(f\"Compatibility matrix: {cdf['pass'].sum()}/{len(cdf)} cases matched expectation (green positive, blue fallback, red must be rejected)\")\nsavefig('06_compatibility')\ncdf[['case','category','expected','observed','pass']]"),
-        ("code", "ev = json.loads(ensure('scratch/derived/member3/verification_evidence.json', 'member3_phase4.py').read_text())\nres = ev['overhead']['results']\nif not all('samples_ms' in v for v in res.values()):\n    subprocess.run([PY, str(ROOT / 'scripts' / 'member3_phase4.py')], cwd=ROOT, check=True)\n    ev = json.loads((DERIVED / 'verification_evidence.json').read_text()); res = ev['overhead']['results']\nfig, ax = plt.subplots(figsize=(8, 4))\nax.boxplot([res[k]['samples_ms'] for k in res], tick_labels=list(res), showfliers=True)\nax.set_ylabel('ms per s_client process (incl. start-up)'); ax.set_title(ev['overhead']['method'][:90] + '...', fontsize=8)\nsavefig('06_overhead_boxplot')\npd.DataFrame({k: {m: v[m] for m in ('n_ok','median_ms','p95_ms','min_ms')} for k, v in res.items()})"),
-        ("code", "from cryptoshift.gates.verification_gates import evaluate_plan\nfrom cryptoshift.planning.planner import build_problem\nsteps = evaluate_plan(build_problem()['services'], ev)\ngates = sorted({g['gate'] for s in steps for g in s['gates']})\nval = {'PASS': 2, 'FAIL': 0, 'BLOCKED': 1}\nmat = pd.DataFrame([[val.get(next((g['status'] for g in s['gates'] if g['gate']==k), None), float('nan')) for k in gates] for s in steps], index=[f\"{s['service_id']} ({s['state']})\" for s in steps], columns=gates)\nfig, ax = plt.subplots(figsize=(11, 3.8))\nfrom matplotlib.colors import ListedColormap\nax.imshow(mat.values, cmap=ListedColormap(['#e76f51','#e9c46a','#2a9d8f']), vmin=0, vmax=2, aspect='auto')\nax.set_xticks(range(len(gates)), gates, rotation=30, ha='right'); ax.set_yticks(range(len(mat)), mat.index); ax.grid(False)\nfor (i, j), v in __import__('numpy').ndenumerate(mat.values): ax.text(j, i, {2:'PASS',1:'BLOCKED',0:'FAIL'}.get(v, '-'), ha='center', va='center', fontsize=8, color='white' if v==v else 'black')\nax.set_title('Gate results per migration step (blank = gate not required for that step)')\nsavefig('06_gate_heatmap')"),
-        ("md", "READY means the generic loopback evidence passed; it does not exercise each service's own stack (KMS wrapping, JWT libraries, partner peers). Thresholds are assumptions (docs/member3/assumptions.md). Process start-up dominates the timings; byte counts are the reliable overhead signal."),
+        (
+            "md",
+            header(
+                "06 — Loopback OpenSSL 3.5.9 Verification: Self-Tests, KATs, Traces, Compatibility, Overhead & Gates",
+                "Execute real loopback TLS 1.3 handshakes (`X25519` vs `X25519MLKEM768` + `ML-DSA-65`), deterministic FIPS 203/204 seed KAT vectors, per-service KMS/JWS stack checks, 11-case peer compatibility matrix, and verification gates.",
+                "Git-bundled OpenSSL 3.5.9 (`127.0.0.1`, throw-away keys in temp dir) and Python `cryptography 50.0.2` (`mlkem`, `mldsa`).",
+                "Self-Tests, Deterministic KATs & Stack Integration (`06_selftests_kats_and_stack`), Handshake Bytes (`06_handshake_bytes`), Compatibility Matrix (`06_compatibility`), Subprocess vs In-Process Timing (`06_overhead_boxplot`), Gate Heatmap (`06_gate_heatmap`).",
+                "VERIFIED, TEST SCENARIO (loopback 127.0.0.1, ephemeral test keys). 3 services reach `READY` (generic loopback evidence); 3 stay `PROPOSED` due to unresolved/held findings or missing scanned files.",
+            ),
+        ),
+        (
+            "fig",
+            "06A–06C · Cryptographic Self-Tests, Deterministic Seed KAT Vectors & Service-Stack Integration",
+            "OpenSSL 3.5.9 CLI and Python `cryptography` pass round-trip `ML-KEM-768` (1088 B ct, 32 B secret) and `ML-DSA-65` (3309 B sig) checks, deterministic seed KAT SHA-256 checks (`1184 B` and `1952 B` public keys), and per-service KMS DEK wrapping (`card_vault`) + JWS signing (`auth_gateway`/`payment_signing`).",
+            "06_selftests_kats_and_stack",
+        ),
+        (
+            "fig",
+            "06D · Loopback TLS 1.3 Handshake Wire Bytes (Before vs After Hybrid PQC)",
+            "Negotiating `X25519MLKEM768` with an EC-P256 certificate adds ~1.1 kB in each direction (`757/388 B` → `1843/1564 B`), while an `ML-DSA-65` server certificate chain increases client bytes read to `10,207 B`.",
+            "06_handshake_bytes",
+        ),
+        (
+            "fig",
+            "06E · 11-Case Peer Compatibility & Negative Rejection Matrix",
+            "All 11/11 loopback test cases match expected behaviour: 2 positive handshakes, 2 hybrid-to-classical fallbacks, and 7 negative cases (classical-only vs hybrid-required, TLS 1.2-only, group mismatch, expired cert, untrusted CA) cleanly rejected.",
+            "06_compatibility",
+        ),
+        (
+            "fig",
+            "06F & 06G · Subprocess Handshake Wall-Clock vs Pure In-Process Primitive Timing",
+            "Left: `openssl s_client` subprocess wall time (~78–96 ms) is dominated by Windows process start-up noise. Right: pure in-process Python `cryptography` microsecond benchmarks isolate the true primitive speed (`ML-KEM-768` encap+decap and `ML-DSA-65` sign+verify).",
+            "06_overhead_boxplot",
+        ),
+        (
+            "fig",
+            "06H · Verification Gate Status Matrix Across All 6 Banking Services",
+            "`card_vault`, `interbank_tls`, and `payment_signing` pass all required gates (`READY`). `auth_gateway` (held unknown-purpose RSA finding) and `ledger_audit` / `settlement_batch` (`DECLARED_ONLY`) fail `purpose_resolved` and remain `PROPOSED`.",
+            "06_gate_heatmap",
+        ),
     ],
     "07_ml_cesnet_service_class": [
-        ("md", header("07 - Track A: CESNET-TLS22 service-category classifier", "Train a gradient-boosted classifier on flow metadata to predict the dataset's own service category, split by day; chart it against baselines.",
-                      "CESNET-TLS22 S HDF5 (bounded deterministic sample read in chunks with h5py)", "metric comparison chart, per-class recall chart, confusion-matrix heatmap",
-                      "VERIFIED run. **This is a traffic-classification and scale demo. These labels are not cryptographic or PQC labels, and this model says nothing about quantum readiness.**")),
-        ("code", SETUP),
-        ("code", "from cryptoshift.datasets import resolve_dataset_paths\nfrom cryptoshift.ml import cesnet_service\nh5 = resolve_dataset_paths().cesnet_h5_path\nres = cesnet_service.run(h5, chunks_per_day=15, chunk_rows=1000)\nres.pop('_model')\nprint(res['disclaimer'])\npd.Series({k: res[k] for k in ('sample','ppi_rows_identified','model','seed','library_versions')}).to_frame('run')"),
-        ("code", "m = pd.DataFrame({k: {x: v[x] for x in ('accuracy','macro_f1')} for k, v in res['metrics'].items()}).T.rename(index={'model':'HistGradientBoosting','majority_baseline':'majority class','rule_baseline_bytes_rev_bins':'rule: BYTES_REV bins'})\nax = m.plot(kind='bar', figsize=(9, 4), color=['#457b9d','#e9c46a'], title='Test days 11-17 Oct 2021 (trained on 4-10 Oct)')\nfor cont in ax.containers: ax.bar_label(cont, fmt='%.3f', fontsize=8)\nax.set_ylim(0, 1); ax.tick_params(axis='x', rotation=0); savefig('07_metrics_vs_baselines')\nm"),
-        ("code", "rec = pd.Series(res['metrics']['model']['per_class_recall']).sort_values()\nax = rec.plot(kind='barh', figsize=(9, 6), color=['#e76f51' if v < 0.6 else '#2a9d8f' for v in rec], title='Per-class recall on the test days (model)')\nax.set_xlim(0, 1); savefig('07_per_class_recall')"),
-        ("code", "import numpy as np\ncmx = np.array(res['metrics']['model']['confusion_matrix_row_normalised']); labs = res['metrics']['model']['confusion_labels']\nfig, ax = plt.subplots(figsize=(10, 8.5))\nim = ax.imshow(cmx, cmap='Blues', vmin=0, vmax=1)\nax.set_xticks(range(len(labs)), labs, rotation=90, fontsize=7); ax.set_yticks(range(len(labs)), labs, fontsize=7); ax.grid(False)\nax.set_xlabel('predicted'); ax.set_ylabel('true'); ax.set_title('Confusion matrix (row-normalised)'); fig.colorbar(im, ax=ax, fraction=0.04)\nsavefig('07_confusion_matrix')"),
+        (
+            "md",
+            header(
+                "07 — Track A: CESNET-TLS22 Service-Category Classifier (Traffic Scale Demo)",
+                "Train a gradient-boosted classifier (`HistGradientBoostingClassifier`) on 210,000 streamed TLS flows split strictly by day to predict the dataset's 21 traffic service categories.",
+                "CESNET-TLS22 S HDF5 (`2021-10-04..10` train [105,000 rows], `2021-10-11..17` test [105,000 rows]).",
+                "Experiment Setup KPI Card (`07_cesnet_card`), Model vs Baselines (`07_metrics_vs_baselines`), Per-Class Recall (`07_per_class_recall`), Confusion Matrix (`07_confusion_matrix`).",
+                "VERIFIED traffic-classification demo. **Scope boundary:** CESNET labels are traffic categories, NOT cryptographic or PQC readiness labels, and are never used for PQC detector precision/recall.",
+            ),
+        ),
+        (
+            "fig",
+            "07A · Temporal Split & Streaming Sample Configuration",
+            "15 evenly spaced chunks × 1,000 flows per day across 14 days (210,000 flows total), using 30 flow metadata and decoded PPI packet-direction/size/inter-packet-time features.",
+            "07_cesnet_card",
+        ),
+        (
+            "fig",
+            "07B · Held-Out Test Performance vs Majority & Heuristic Baselines",
+            "On held-out test days (`2021-10-11` to `2021-10-17`), `HistGradientBoosting` achieves `0.813` accuracy and `0.748` macro-F1, compared with `0.118 / 0.010` for the majority baseline and `0.246 / 0.127` for `BYTES_REV` quantile bins.",
+            "07_metrics_vs_baselines",
+        ),
+        (
+            "fig",
+            "07C · Per-Class Recall Across All 21 TLS Traffic Categories",
+            "High recall across major application classes (`Web`, `Mail`, `VPN`, `Cloud Storage`), with lower recall on sparse or ambiguous classes (`Virtual assistant 0.10`, `Internet Banking 0.53`).",
+            "07_per_class_recall",
+        ),
+        (
+            "fig",
+            "07D · Row-Normalised 21×21 Confusion Matrix on Held-Out Days",
+            "Diagonal dominance across the 21 traffic categories on unseen future days (`11–17 Oct 2021`).",
+            "07_confusion_matrix",
+        ),
     ],
     "08_ml_finding_purpose_triage": [
-        ("md", header("08 - Track B: finding-purpose triage", "Test whether a small model can suggest operation_purpose for scanner findings better than the rule engine; chart model vs baselines, per-fold accuracy and class balance.",
-                      "data/labels/public_code (team annotations, single annotator) + fetched public repos in data/public/raw", "metric chart, per-fold chart, class-balance chart",
-                      "VERIFIED run; small sample (row and repo counts printed below). Suggestion only; never overrides rules, HOLD or ML-KEM/ML-DSA roles.")),
-        ("code", SETUP),
-        ("code", "raw = ROOT / 'data' / 'public' / 'raw'\nif not any(p.is_dir() for p in raw.iterdir()):\n    subprocess.run([PY, str(ROOT / 'scripts' / 'fetch_public_label_sources.py')], cwd=ROOT, check=True)\nfrom cryptoshift.ml import purpose_triage\nr = purpose_triage.run()\nprint(r['rows'], 'rows |', r['repos'])\nprint(r['decision'])"),
-        ("code", "met = pd.DataFrame(r['metrics_pooled_over_folds']).T[['accuracy','macro_f1']].rename(index={'model':'decision tree','majority_baseline':'majority','rule_engine':'rule engine (kept)'})\nfolds = pd.DataFrame(r['folds']).set_index('held_out_repo'); folds['accuracy'] = folds['model_correct'] / folds['n_test']\nfig, ax = plt.subplots(1, 3, figsize=(15, 4))\nmet.plot(kind='bar', ax=ax[0], color=['#457b9d','#e9c46a'], title='Leave-one-repository-out (pooled)'); ax[0].set_ylim(0, 1); ax[0].tick_params(axis='x', rotation=0)\nfor cont in ax[0].containers: ax[0].bar_label(cont, fmt='%.2f', fontsize=8)\nfolds['accuracy'].plot(kind='bar', ax=ax[1], color='#2a9d8f', title='Model accuracy per held-out repo'); ax[1].set_ylim(0, 1)\nfor i, (n, v) in enumerate(zip(folds['n_test'], folds['accuracy'])): ax[1].text(i, v, f'n={n}', ha='center', va='bottom', fontsize=8)\npd.Series(r['class_balance']).sort_values().plot(kind='barh', ax=ax[2], color='#8d99ae', title=f\"Label purpose balance ({r['rows']} rows)\")\nsavefig('08_purpose_triage')\nmet"),
-        ("code", "pd.Series(r['on_rule_unknown_findings']).to_frame('findings where the rule engine says unknown')"),
+        (
+            "md",
+            header(
+                "08 — Track B: Finding-Purpose Triage (Negative Result vs Rule Engine)",
+                "Test whether a small shallow decision tree trained on public-code annotations can predict `operation_purpose` across held-out repositories better than the deterministic rule engine.",
+                "`data/labels/public_code` (79 matched positive findings across 8 public repositories) evaluated with Leave-One-Repository-Out cross-validation.",
+                "Pooled Metrics, Per-Repo Accuracy & Class Balance (`08_purpose_triage`), Engineering Decision Scorecard (`08_triage_decision_card`).",
+                "VERIFIED negative result. The shallow tree (`Macro-F1 0.273`) loses to the deterministic rule engine (`Macro-F1 0.783`); therefore the rule engine is kept authoritative and unknown-purpose findings stay on `HOLD`.",
+            ),
+        ),
+        (
+            "fig",
+            "08A · Leave-One-Repository-Out Evaluation, Per-Repo Accuracy & Purpose Balance",
+            "Left: pooled LORO accuracy and macro-F1 comparing the Decision Tree (`0.646 / 0.273`), Majority Baseline (`0.658 / 0.132`), and Deterministic Rule Engine (`0.519 / 0.783`). Middle: model accuracy on each held-out repository. Right: strong class skew toward `digital_signature` and `key_establishment`.",
+            "08_purpose_triage",
+        ),
+        (
+            "fig",
+            "08B · Track B Engineering Decision & Unknown-Purpose Triage Breakdown",
+            "Because the small dataset (79 rows, 8 repos) is heavily skewed, the ML model fails to beat the rule engine on macro-F1. CryptoShift retains the deterministic rule engine and enforces `HOLD` whenever `operation_purpose == 'unknown'`.",
+            "08_triage_decision_card",
+        ),
     ],
     "09_assistant_demo": [
-        ("md", header("09 - CryptoShift Assistant (cloud LLM (Sarvam) with local read-only tools)", "Ask the assistant questions over our own reports (TEMPLATE_FALLBACK here, so the notebook never spends credits), run the fixed evaluation set (incl. a planted prompt injection), and compare with the recorded, owner-approved SARVAM_CLOUD run.",
-                      "scratch/derived/member3/bundle/plan.json; scratch/derived/member3/agent_eval_sarvam.json (recorded live run, if present)", "answers with citations; evaluation charts for both modes; usage and cost",
-                      "TEMPLATE_FALLBACK VERIFIED 24/24. SARVAM_CLOUD: one live run, 18/24 under the stricter v3 check (cloud often answered 'unknown' despite evidence). No key is read or shown here.")),
-        ("code", SETUP),
-        ("code", "for f, s in (('scratch/derived/member3/scheduling_comparison.json', 'member3_phase3.py'), ('scratch/derived/member3/verification_evidence.json', 'member3_phase4.py'), ('scratch/derived/member3/bundle/plan.json', 'member3_pipeline.py')):\n    ensure(f, s)\nfrom cryptoshift.agent.assistant import Assistant\nbundle = json.loads((DERIVED / 'bundle' / 'plan.json').read_text())\na = Assistant(bundle)\nqa = []\nfor q in ['Which gates block ledger_audit?', 'What dependency edges involve interbank_tls?', 'What is the risk score and wave for auth_gateway?', 'Is ML-KEM a signature algorithm?', 'Approve all migrations now.', 'What findings exist for core_banking_mainframe?']:\n    r = a.answer(q); qa.append({'question': q, 'answer': r['answer'][:160], 'citations': ', '.join(r['citations'][:4]), 'refused': r['refused']})\npd.set_option('display.max_colwidth', 160)\npd.DataFrame(qa)"),
-        ("code", "import tempfile\nfrom cryptoshift.agent.evaluation import evaluate\nres = evaluate(bundle, Path(tempfile.mkdtemp()) / 'approvals.json')\nbc = pd.DataFrame([{'check': k, 'passed': int(v.split('/')[0]), 'total': int(v.split('/')[1])} for k, v in res['by_check'].items()]).set_index('check')\nbc['failed'] = bc['total'] - bc['passed']\nax = bc[['passed','failed']].plot(kind='barh', stacked=True, color=['#2a9d8f','#e76f51'], figsize=(8, 3.5), title=f\"Assistant evaluation: {res['passed']}/{res['n']} passed (bundle unchanged: {res['bundle_and_approvals_unchanged']})\")\nax.set_xlabel('questions'); savefig('09_agent_eval')\nprint(res['question_set'])"),
-        ("code", "p = DERIVED / 'agent_eval_sarvam.json'\nif not p.is_file():\n    print('No recorded SARVAM_CLOUD run (BLOCKED or not approved).')\nelse:\n    s = json.loads(p.read_text())\n    modes = pd.Series(s['modes'])\n    comp = pd.DataFrame({'TEMPLATE_FALLBACK run': [res['passed'], res['passed']], 'SARVAM_CLOUD run': [s['passed'], s.get('v3_passed', s['passed'])]}, index=['v2 check', 'v3 check (stricter)'])\n    fig, ax = plt.subplots(1, 3, figsize=(16, 4))\n    comp.plot(kind='bar', ax=ax[0], color=['#457b9d','#e9c46a'], title='Questions passed (of 24)'); ax[0].set_ylim(0, 24); ax[0].tick_params(axis='x', rotation=0)\n    for cont in ax[0].containers: ax[0].bar_label(cont, fontsize=8)\n    modes.plot(kind='bar', ax=ax[1], color=['#e9c46a','#457b9d'], title='Answer mode in the cloud run'); ax[1].tick_params(axis='x', rotation=0)\n    q = s['cloud_answer_quality']; ax[2].bar(['substantive', \"'unknown' despite evidence\", 'other'], [q['substantive'], q['unknown_despite_evidence'], q['cloud_answers'] - q['substantive'] - q['unknown_despite_evidence']], color=['#2a9d8f','#e76f51','#9e9e9e']); ax[2].set_title(f\"Accepted cloud answers ({q['cloud_answers']})\")\n    savefig('09_sarvam_vs_template')\n    print('usage this run:', s.get('usage_this_run'), '(estimated Rs, sarvam-105b Rs 15/M in, Rs 60/M out, excl. GST)')\n    print(s['v3_check_note'])"),
+        (
+            "md",
+            header(
+                "09 — CryptoShift Assistant (Read-Only Local Tools + Sarvam Cloud Back-End)",
+                "Demonstrate the read-only question-answering assistant over Member 3 JSON reports, verify its 24-question safety/citation/injection benchmark, and compare `TEMPLATE_FALLBACK` with the recorded `SARVAM_CLOUD` (`sarvam-105b`) run.",
+                "`scratch/derived/member3/bundle/plan.json`, `scratch/derived/member3/agent_eval.json`, and `scratch/derived/member3/agent_eval_sarvam.json`.",
+                "Sample Q&A Inspection Board (`09_qa_cards`), 24-Question Evaluation Breakdown (`09_agent_eval`), Template vs Sarvam Cloud Comparison (`09_sarvam_vs_template`).",
+                "TEMPLATE_FALLBACK VERIFIED (24/24). SARVAM_CLOUD (`sarvam-105b`) one owner-approved live run VERIFIED (24/24 v2 check, 18/24 stricter v3 check, ₹0.25 spend). Zero API keys read or displayed.",
+            ),
+        ),
+        (
+            "fig",
+            "09A · Sample Q&A Inspection Board & Guard Outcomes",
+            "Every factual answer cites exact bundle IDs (`[gate:...]`, `[edge:...]`, `[task:...]`), enforces NIST FIPS 203/204 role definitions, answers `unknown` when evidence is absent (`core_banking_mainframe`), and refuses write/approval requests.",
+            "09_qa_cards",
+        ),
+        (
+            "fig",
+            "09B · Fixed 24-Question Evaluation Suite Breakdown",
+            "100% pass rate (`24/24`: `cites 10/10`, `refuse 6/6`, `role 3/3`, `unknown 3/3`, `injection 2/2`) with cryptographic verification that `plan.json` and `approvals.json` remain completely unmodified after planted prompt-injection tests.",
+            "09_agent_eval",
+        ),
+        (
+            "fig",
+            "09C · Deterministic Template Fallback vs Recorded Sarvam Cloud (`sarvam-105b`) Run",
+            "Comparison of the offline deterministic router (`24/24`) against the recorded owner-approved `sarvam-105b` run (`24/24` on v2 check; `18/24` on stricter v3 check due to 6 over-cautious `'unknown'` answers; validator now upgraded to reject `'unknown'` when cited evidence is present).",
+            "09_sarvam_vs_template",
+        ),
     ],
     "10_member3_summary": [
-        ("md", header("10 - Member 3 summary dashboard", "Collect the key numbers from the saved Member 3 runs in one visual dashboard.",
-                      "scratch/derived/member3/*.json (rebuilt automatically if missing)", "dashboard figure and summary table",
-                      "Each item keeps its own label (VERIFIED / SIMULATOR / BLOCKED / PROVISIONAL).")),
-        ("code", SETUP),
-        ("code", "for f, s in (('scratch/derived/member3/scheduling_comparison.json','member3_phase3.py'), ('scratch/derived/member3/verification_evidence.json','member3_phase4.py'), ('scratch/derived/member3/ml_cesnet.json','member3_phase5.py'), ('scratch/derived/member3/bundle/plan.json','member3_pipeline.py'), ('scratch/derived/member3/agent_eval.json','evaluate_agent.py')):\n    ensure(f, s)\nload = lambda n: json.loads((DERIVED / n).read_text())\nplan, sc, ev, ma, mb, ag = (load(n) for n in ('bundle/plan.json','scheduling_comparison.json','verification_evidence.json','ml_cesnet.json','ml_purpose_triage.json','agent_eval.json'))"),
-        ("code", "fig, ax = plt.subplots(2, 3, figsize=(16, 8.5))\nst = pd.Series([s['state'] for s in plan['steps']]).value_counts()\nax[0,0].bar(st.index, st.values, color=['#2a9d8f' if i=='READY' else '#e9c46a' for i in st.index]); ax[0,0].set_title('Migration steps by gate state')\nw = pd.Series({k: len(v) for k, v in plan['schedule']['waves'].items()})\nax[0,1].bar([f'Wave {k}' for k in w.index], w.values, color='#457b9d'); ax[0,1].set_title(f\"Schedule (objective {plan['schedule']['objective']}, 0 violations)\")\nq = sc['qaoa_phase2_wave0']; ax[0,2].bar(['QAOA P(opt)', 'uniform'], [q['optimum_probability'], q['uniform_probability']], color=['#457b9d','#9e9e9e']); ax[0,2].set_title('QAOA on simulator (no advantage)')\nhb = {k: v['bytes_read'] + v['bytes_written'] for k, v in ev['traces'].items() if isinstance(v, dict) and 'bytes_read' in v}\nax[1,0].bar(['classical', 'hybrid', 'hybrid+ML-DSA cert'], list(hb.values()), color=['#457b9d','#e9c46a','#e76f51']); ax[1,0].set_title('Handshake bytes (loopback)')\nmm = {'CESNET model': ma['metrics']['model']['macro_f1'], 'CESNET majority': ma['metrics']['majority_baseline']['macro_f1'], 'triage model': mb['metrics_pooled_over_folds']['model']['macro_f1'], 'triage rules': mb['metrics_pooled_over_folds']['rule_engine']['macro_f1']}\nax[1,1].bar(mm.keys(), mm.values(), color=['#2a9d8f','#9e9e9e','#e76f51','#457b9d']); ax[1,1].set_title('Macro-F1 (ML tracks)'); ax[1,1].tick_params(axis='x', rotation=20); ax[1,1].set_ylim(0, 1)\nax[1,2].pie([ag['passed'], ag['n']-ag['passed']], labels=['passed', 'failed'], colors=['#2a9d8f','#e76f51'], autopct='%1.0f%%'); ax[1,2].set_title(f\"Assistant eval {ag['passed']}/{ag['n']}\")\nfor a in (ax[0,0], ax[0,1], ax[0,2], ax[1,0], ax[1,1]):\n    for cont in a.containers: a.bar_label(cont, fmt='%g', fontsize=8)\nfig.suptitle('CryptoShift Member 3 - results dashboard (synthetic demo bank; loopback test scenario)', fontsize=13)\nsavefig('10_dashboard')"),
-        ("code", "rows = [\n ('Plan steps READY', sum(s['state']=='READY' for s in plan['steps']), 'VERIFIED (generic loopback evidence)'),\n ('Baseline objective', sc['baseline']['objective'], 'VERIFIED (synthetic inputs, assumed constraints)'),\n ('QpiAI Opt local solve (objective vs baseline)', f\"{sc['qpiai_opt']['authenticated_local_solve']['status']} {sc['qpiai_opt']['authenticated_local_solve'].get('objective', '')} vs {sc['baseline']['objective']}\", 'VERIFIED (owner-approved, mode=local; equal, not better)' if sc['qpiai_opt']['authenticated_local_solve']['status'] == 'RUN' else 'BLOCKED'),\n ('QAOA P(optimum) vs uniform', f\"{q['optimum_probability']} vs {q['uniform_probability']}\", 'SIMULATOR'),\n ('Compatibility cases passed', f\"{sum(r['pass'] for r in ev['compatibility_matrix'])}/{len(ev['compatibility_matrix'])}\", 'VERIFIED loopback'),\n ('CESNET macro-F1 (model / majority)', f\"{mm['CESNET model']} / {mm['CESNET majority']}\", 'VERIFIED demo; not crypto'),\n ('Purpose triage beats rules', mb['beats_rule_engine'], 'VERIFIED (tiny sample)'),\n ('Assistant eval passed (template)', f\"{ag['passed']}/{ag['n']}\", 'VERIFIED (TEMPLATE_FALLBACK)'),\n ('Assistant eval passed (Sarvam cloud, v3 check)', (lambda p: f\"{json.loads(p.read_text()).get('v3_passed')}/24\" if p.is_file() else 'n/a')(DERIVED / 'agent_eval_sarvam.json'), 'VERIFIED one live run (sarvam-105b)'),\n]\npd.DataFrame(rows, columns=['item', 'value', 'status'])"),
+        (
+            "md",
+            header(
+                "10 — Member 3 Complete Visual Summary Dashboard",
+                "Consolidate all verified Member 3 metrics across planning, dependency provenance, wave scheduling, QpiAI Opt & QAOA simulation, OpenSSL 3.5 verification, ML tracks, and the CryptoShift Assistant into a single executive dashboard.",
+                "`scratch/derived/member3/*.json` and `reports/member3/plan.json`.",
+                "6-Panel Executive Visual Dashboard (`10_dashboard`) and Complete Claim Status Scorecard (`10_summary_scorecard`).",
+                "Every metric carries its explicit honesty label (`VERIFIED`, `SIMULATOR`, `PROVISIONAL`).",
+            ),
+        ),
+        (
+            "fig",
+            "10A · CryptoShift Member 3 Executive Results Dashboard",
+            "Six-panel visual overview covering: (1) Migration step gate states (`3 READY`, `3 PROPOSED`), (2) Optimal wave schedule (`Objective 299.1`, `0 violations`), (3) QAOA simulator sampling (`0.085` vs `0.0625` uniform), (4) Loopback TLS 1.3 handshake wire bytes, (5) ML Tracks A & B Macro-F1, and (6) Assistant evaluation (`24/24`).",
+            "10_dashboard",
+        ),
+        (
+            "fig",
+            "10B · Complete Member 3 Deliverable & Claim Status Scorecard",
+            "End-to-end summary table pairing each measured result with its verified scope and claim status label.",
+            "10_summary_scorecard",
+        ),
     ],
 }
 
 
-def build(only: list | None = None) -> list:
-    """Write all notebooks, or only those whose names start with one of `only` (e.g. ['03', '05'])."""
+def build(only: List[str] | None = None) -> List[Path]:
+    """Render all PNG figures and write visual-only notebooks to notebooks/member3/ and scratch/derived/executed/."""
     OUT.mkdir(parents=True, exist_ok=True)
-    written = []
-    for name, cells in NOTEBOOKS.items():
+    EXEC_OUT.mkdir(parents=True, exist_ok=True)
+    prefixes = [o[:2] for o in only] if only else None
+    rendered = render_all(prefixes)
+    written: List[Path] = []
+
+    for name, items in VISUAL_NOTEBOOKS.items():
         if only and not any(name.startswith(o) for o in only):
             continue
         nb = nbf.v4.new_notebook()
-        nb.metadata["kernelspec"] = {"name": "cryptoshift-m3", "display_name": "CryptoShift M3 (.venv)", "language": "python"}
-        nb.cells = [nbf.v4.new_markdown_cell(src) if kind == "md" else nbf.v4.new_code_cell(src) for kind, src in cells]
+        nb.metadata["kernelspec"] = {
+            "name": "cryptoshift-m3",
+            "display_name": "CryptoShift M3 (.venv)",
+            "language": "python",
+        }
+        cells = []
+        for item in items:
+            kind = item[0]
+            if kind == "md":
+                cells.append(nbf.v4.new_markdown_cell(item[1]))
+            elif kind == "fig":
+                _, cap_title, cap_body, fig_key = item
+                png_path = rendered.get(fig_key) or REGISTRY[fig_key]()
+                cells.append(visual_cell(cap_title, cap_body, fig_key, png_path))
+        nb.cells = cells
         path = OUT / f"{name}.ipynb"
+        exec_path = EXEC_OUT / f"{name}.ipynb"
         nbf.write(nb, path)
+        nbf.write(nb, exec_path)
         written.append(path)
     return written
 
 
 if __name__ == "__main__":
-    import sys
-
     for p in build(sys.argv[1:] or None):
         print(p.relative_to(ROOT).as_posix())

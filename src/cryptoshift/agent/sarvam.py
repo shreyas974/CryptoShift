@@ -144,7 +144,7 @@ class SarvamClient:
 CITE_RE = re.compile(r"\b(?:INV-\d{4,}|SCAN-[A-Za-z0-9_\-]+|YML-[A-Za-z0-9_\-]+|NGX-[A-Za-z0-9_\-]+|task:[a-z0-9_]+|"
                      r"migrate:[a-z0-9_]+|gate:[a-z0-9_:]+|edge:[a-z0-9_]+->[a-z0-9_]+:[A-Z]+|rollback:[0-9a-f]{12}|"
                      r"scheduler:[a-z_]+)")
-SECRETISH_RE = re.compile(r"-----BEGIN|sk-[A-Za-z0-9]{16,}|\b[A-Za-z0-9+/_\-]{40,}\b|api[_-]?key\s*[:=]\s*\S{8,}", re.I)
+SECRETISH_RE = re.compile(r"-----BEGIN|sk-[A-Za-z0-9]{16,}|\b[A-Za-z0-9+_\-]{40,}\b|api[_-]?key\s*[:=]\s*\S{8,}", re.I)
 
 
 def validate_answer(text: str, evidence: Dict[str, Any], gate_states: Dict[str, str]) -> List[str]:
@@ -154,9 +154,12 @@ def validate_answer(text: str, evidence: Dict[str, Any], gate_states: Dict[str, 
     bad = sorted({c for c in CITE_RE.findall(text) if c not in allowed})
     if bad:
         problems.append(f"cites IDs not in the evidence: {bad[:5]}")
-    low = text.lower()
-    for sent in re.split(r"(?<=[.!?])\s+|\n", text):
-        s = sent.lower()
+    low = text.strip().lower()
+    facts = str(evidence.get("facts", "")).strip()
+    if allowed and facts and not facts.lower().startswith("unknown") and re.match(r"^unknown\b", low):
+        problems.append("answers 'unknown' despite non-empty cited evidence")
+    for clause in re.split(r"(?<=[.!?;])\s+|\n|,\s+(?:while|whereas|and)\s+", text):
+        s = clause.lower()
         if "ml-kem" in s and re.search(r"\bsignatures?\b|\bsigning\b", s) and not re.search(r"\bnot\b|\bonly\b.*key establishment", s):
             problems.append("ML-KEM described as a signature algorithm")
         if re.search(r"ml-dsa|slh-dsa", s) and re.search(r"key establishment|encapsulat|key exchange", s) and not re.search(r"\bnot\b|\bnever\b", s):

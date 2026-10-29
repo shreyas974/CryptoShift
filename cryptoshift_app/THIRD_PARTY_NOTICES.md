@@ -1,0 +1,42 @@
+# Third-party notices
+
+## Anatomy
+
+Source: https://github.com/wheresryan22/anatomy
+
+Adapted files in this project:
+
+- `frontend/src/anatomy/kit/iso-kit.ts`
+- `frontend/src/anatomy/kit/iso.css`
+- `frontend/src/anatomy/kit/react/draw.tsx`
+- `frontend/src/anatomy/kit/react/live.tsx`
+
+The files are copied unmodified apart from an attribution header. The figures, part builders (`frontend/src/anatomy/parts.tsx`) and interactive frame are original to CryptoShift and use the kit as a library.
+
+```
+MIT License
+
+Copyright (c) 2026 Ryan
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+## npm dependencies
+
+The frontend depends on React, React DOM, React Router, Vite and TypeScript (all MIT or Apache-2.0); see `frontend/package.json` and their package licenses in `frontend/node_modules` after install. The backend has no dependencies.

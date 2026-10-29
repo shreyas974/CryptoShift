@@ -33,16 +33,17 @@ Status labels: **VERIFIED** (implemented and run, evidence below) · **PARTIAL**
 
 ## Member 3 update (2026-10-29, additive)
 
-Evidence: `docs/evidence/member3-log.md`, `reports/member3/summary.md`, `reports/member3/plan.json`.
+Evidence: `docs/evidence/member3-log.md`, `docs/evidence/final-log.md`, `reports/member3/summary.md`, `reports/member3/plan.json`.
 
 | # | Requirement | Previous | Now | Evidence | Remaining gap |
 |---|---|---|---|---|---|
-| D2 | Migration sequence | PARTIAL | **VERIFIED on synthetic inputs** | `planning.planner` + deterministic scheduler: tasks from findings, provenance edges, objective 292.8, 0 violations | Constraint values are assumptions; 2 services have only declared data |
+| D2 | Migration sequence | PARTIAL | **VERIFIED on synthetic inputs** | `planning.planner` + deterministic scheduler: 14 merged findings → 6 tasks, provenance edges, objective 299.1, 0 violations | Constraint values are assumptions; 2 services have only declared data |
 | D3 | Before-and-after protocol traces | MOCKED | **VERIFIED (TEST SCENARIO, loopback)** | `gates.openssl_lab.traces`: X25519 vs X25519MLKEM768; ML-DSA-65 certificate handshake | Not real bank peers or networks |
-| D4 | Compatibility tests | MOCKED | **VERIFIED (loopback)** | 11/11 matrix cases incl. 7 negative | Service-specific stacks (KMS, JWT libs) untested |
+| D4 | Compatibility tests | MOCKED | **VERIFIED (loopback + stack checks)** | 11/11 peer matrix cases incl. 7 negative + KMS DEK wrapping (`card_vault`) & JWS token signing (`auth_gateway`/`payment_signing`) | Live external bank partner stacks untested |
 | D5 | Rollback plan | PARTIAL | **VERIFIED rehearsal on a copy** | `gates.rollback_rehearsal`: failure → restore → hash → classical recovery | No real service deployment |
-| E2 | Protocol correctness | PLANNED | **PARTIAL** | handshakes negotiate the expected group; ML-KEM/ML-DSA round-trip self-tests | No NIST KAT vectors; no transcript-level conformance testing |
-| E3 | Overhead | MOCKED | **PARTIAL** | handshake bytes measured (+~1.1 kB each way); timings recorded | Timing dominated by process start-up; no network measurement |
-| E4 | Feasible migration dependencies | PARTIAL | **VERIFIED on synthetic inputs** | 0 dependency violations; cycles detected and reported (tested) | Graph from synthetic configs |
-| — | QpiAI Opt solve | REPORTED | **BLOCKED** | offline MILP checks only | Owner authorization + key needed |
-| — | QAOA −13.07 | REPORTED | **REPRODUCED (SIMULATOR)** with documented caveats | `optimization.member3_qpiai` | Fixed-angle QAOA barely above uniform |
+| E2 | Protocol correctness | PLANNED | **VERIFIED (loopback + deterministic seed KATs)** | handshakes negotiate the expected group; ML-KEM/ML-DSA round-trip self-tests + deterministic `from_seed_bytes` SHA-256 KAT vectors | Full external ACVP file suite not bundled |
+| E3 | Overhead | MOCKED | **VERIFIED (wire bytes + in-process µs)** | handshake bytes measured (+~1.1 kB each way) + pure in-process Python `cryptography` microsecond benchmarks | Subprocess `s_client` wall time dominated by OS start-up |
+| E4 | Feasible migration dependencies | PARTIAL | **VERIFIED on synthetic inputs** | 0 dependency violations; 4 OBSERVED edges from Member 2 relationships + 5 DECLARED; cycles detected and reported (tested) | Graph from synthetic configs |
+| — | QpiAI Opt solve | REPORTED | **VERIFIED (`solve(mode="local")`)** | offline MILP checks + owner-approved local solve: optimal, objective 299.1 = baseline (difference 0.0, same assignment) | Equal to baseline; no platform/QPU |
+| — | QAOA −13.07 | REPORTED | **REPRODUCED (SIMULATOR)** with documented caveats | `optimization.member3_qpiai` (`P(opt) = 0.085` vs `0.0625` uniform) | Fixed-angle QAOA barely above uniform |
+| — | CryptoShift Assistant | PLANNED | **VERIFIED** | `TEMPLATE_FALLBACK` 24/24; `SARVAM_CLOUD` (`sarvam-105b`) live run 24/24 (v2) / 18/24 (v3); validator upgraded against `'unknown' despite evidence` | — |

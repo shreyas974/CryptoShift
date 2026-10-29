@@ -123,5 +123,29 @@ class LoopbackTests(unittest.TestCase):
         self.assertTrue(r["originals_unchanged"])
 
 
+class DeterministicKatAndStackTests(unittest.TestCase):
+    def test_deterministic_seed_kat_vectors_pass(self) -> None:
+        kats = lab.deterministic_kat_vectors()
+        self.assertEqual(len(kats), 2)
+        for k in kats:
+            self.assertEqual(k["status"], "PASS", k)
+            self.assertEqual(k["expected_pubkey_sha256"], k["observed_pubkey_sha256"])
+
+    def test_service_stack_kms_and_jws_integration_pass(self) -> None:
+        checks = lab.service_stack_integration_checks()
+        self.assertEqual(len(checks), 2)
+        for c in checks:
+            self.assertEqual(c["status"], "PASS", c)
+            self.assertTrue(c["roundtrip_ok"])
+            self.assertTrue(c["tamper_rejected"])
+
+    def test_in_process_crypto_timing_measures_all_primitives(self) -> None:
+        res = lab.in_process_crypto_timing(iterations=10)
+        self.assertIn("ML-KEM-768_encap+decap", res["operations"])
+        self.assertIn("ML-DSA-65_sign+verify", res["operations"])
+        for op, stats in res["operations"].items():
+            self.assertGreater(stats["median_us"], 0.0, op)
+
+
 if __name__ == "__main__":
     unittest.main()

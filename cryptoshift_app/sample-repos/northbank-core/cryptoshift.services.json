@@ -1,0 +1,37 @@
+{
+  "repository": "northbank-core",
+  "description": "Sample retail-banking monorepo bundled with CryptoShift for demonstration. Service ownership and declared dependencies come from this manifest; import-level dependencies are inferred by the scanner.",
+  "services": [
+    { "id": "tls", "name": "TLS / configuration layer", "kind": "config", "path": "shared/bankcrypto/tls_config.py", "exposure": "internet", "dataLifetimeYears": null, "owner": "platform-security" },
+    { "id": "crypto-provider", "name": "Crypto provider facade", "kind": "library", "path": "shared/bankcrypto/primitives.py", "exposure": "internal", "dataLifetimeYears": null, "owner": "platform-security" },
+    { "id": "pki", "name": "Internal certificate authority", "kind": "pki", "path": "shared/pki/", "exposure": "internal", "dataLifetimeYears": 3, "owner": "platform-security" },
+    { "id": "hsm-client", "name": "legacyhsm client 2.4.1", "kind": "third-party", "path": "vendor/legacy_hsm_client/", "exposure": "internal", "dataLifetimeYears": null, "owner": "vendor" },
+    { "id": "auth", "name": "Authentication service", "kind": "service", "path": "services/auth/", "exposure": "internet", "dataLifetimeYears": 1, "owner": "identity" },
+    { "id": "payments", "name": "Payment service", "kind": "service", "path": "services/payments/", "exposure": "partner", "dataLifetimeYears": 10, "owner": "payments" },
+    { "id": "ledger", "name": "Ledger database", "kind": "database", "path": "services/ledger/", "exposure": "internal", "dataLifetimeYears": 25, "owner": "core-banking" },
+    { "id": "gateway", "name": "Internal API gateway", "kind": "api", "path": "services/api_gateway/", "exposure": "internet", "dataLifetimeYears": null, "owner": "platform" },
+    { "id": "portal", "name": "Customer web portal", "kind": "client", "path": "services/customer_portal/", "exposure": "internet", "dataLifetimeYears": null, "owner": "digital" },
+    { "id": "mobile", "name": "Mobile backend", "kind": "client", "path": "services/mobile_backend/", "exposure": "internet", "dataLifetimeYears": null, "owner": "digital" }
+  ],
+  "dependencies": [
+    { "from": "pki", "to": "crypto-provider" },
+    { "from": "pki", "to": "hsm-client" },
+    { "from": "hsm-client", "to": "crypto-provider" },
+    { "from": "auth", "to": "crypto-provider" },
+    { "from": "auth", "to": "pki" },
+    { "from": "payments", "to": "crypto-provider" },
+    { "from": "payments", "to": "auth" },
+    { "from": "payments", "to": "ledger" },
+    { "from": "payments", "to": "tls" },
+    { "from": "ledger", "to": "crypto-provider" },
+    { "from": "gateway", "to": "tls" },
+    { "from": "gateway", "to": "auth" },
+    { "from": "gateway", "to": "payments" },
+    { "from": "portal", "to": "gateway" },
+    { "from": "mobile", "to": "gateway" }
+  ],
+  "verification": {
+    "tests": "python -m unittest discover -s tests -t .",
+    "protocolPeers": "tools/peers.json"
+  }
+}

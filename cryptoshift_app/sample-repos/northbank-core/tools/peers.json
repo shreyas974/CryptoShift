@@ -1,0 +1,9 @@
+{
+  "note": "Peer capability profiles used by tools/negotiate.py. These model client capabilities; they are not captures of live traffic.",
+  "peers": [
+    { "id": "legacy-android", "name": "Legacy Android app (TLS 1.2)", "max_version": "TLSv1.2", "groups": ["ECDH-P256"], "cert_signatures": ["RSA-2048", "RSA-3072", "ECDSA-P256"] },
+    { "id": "modern-browser", "name": "Modern browser", "max_version": "TLSv1.3", "groups": ["X25519MLKEM768", "X25519", "ECDH-P256"], "cert_signatures": ["RSA-2048", "RSA-3072", "ECDSA-P256"] },
+    { "id": "settlement-network", "name": "Settlement network gateway", "max_version": "TLSv1.3", "groups": ["X25519", "ECDH-P256"], "cert_signatures": ["RSA-3072", "ECDSA-P256"] },
+    { "id": "pq-pilot-client", "name": "PQC pilot client", "max_version": "TLSv1.3", "groups": ["X25519MLKEM768", "X25519"], "cert_signatures": ["RSA-3072", "ML-DSA-65"] }
+  ]
+}

@@ -40,8 +40,8 @@
 - **Recorded SHA-256:** `36e3240b144bf8902e874e8fd875b6e7ac3e40b0706eb5f8d3f40720ff5a2e06`
 - **Total Daily Tables:** `14` tables (`/flows/D20211004` .. `/flows/D20211017`)
 - **Total Flow Rows:** `25,000,000` (`0` duplicate flow IDs in 25M full audit)
-- **Incremental Streaming Benchmark:** Streamed `100,000` rows in `4` chunks (`chunk_size=25,000`) in `0.3188s` (`313,690.9` rows/sec; `0` duplicate IDs in streamed window)
-- **Top Categories in Streamed Window:** `{"Other services and APIs": 15666, "Streaming media": 9396, "Social": 9104, "Analytics & Telemetry": 8449, "Antivirus": 7855, "File sharing": 6900, "Software updates": 6687, "Advertising": 5758, "Videoconferencing": 5724, "Music": 4873}`
+- **Incremental Streaming Benchmark:** Streamed `50,000` rows in `2` chunks (`chunk_size=25,000`) in `0.3399s` (`147,115.2` rows/sec; `0` duplicate IDs in streamed window)
+- **Top Categories in Streamed Window:** `{"Other services and APIs": 7691, "Social": 5330, "Streaming media": 4996, "Analytics & Telemetry": 3912, "Antivirus": 3459, "Advertising": 3268, "File sharing": 3109, "Software updates": 3037, "Music": 2685, "Videoconferencing": 2538}`
 
 ### Prohibited Interpretations (CESNET-TLS22-S)
 
@@ -54,4 +54,4 @@
 
 ## 3. Detector Evaluation Separation Policy
 
-- Real public TLS endpoint observations (320 banking rows across 5 dates) and real encrypted TLS flow metadata (CESNET-TLS22-S, 25M rows) are kept strictly separate from code/config scanner precision/recall. Code/config detector precision and recall are reported only on separately labelled code/configuration fixtures (and any future verified real code corpus with defensible ground truth), never from CESNET service labels.
+- CESNET service labels are never used for PQC detector precision/recall.
