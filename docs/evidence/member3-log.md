@@ -299,3 +299,22 @@ Files inspected : 200 | Scan result : PASS (0 secret patterns, 0 forbidden files
 ```
 
 JupyterLab remains running on 127.0.0.1:8899 (token auth; PID in scratch/derived/jupyter/lab.pid).
+
+## Cleanup (2026-10-29, owner request "remove unnecessary files")
+
+Stopped JupyterLab (127.0.0.1:8899, parent + child process) and confirmed the agent was not running.
+Removed local, git-ignored, regenerable items: 10 `__pycache__` folders, `src/cryptoshift.egg-info` (the editable
+install uses `__editable__.cryptoshift-0.1.0.pth`, so it is not needed), `scratch/` (derived evidence, models,
+executed notebooks, logs), and the fetched public repos in `data/public/raw/` (the tracked `.gitkeep` stays).
+Removed tracked files: the legacy `member3/` folder (older copy of the dataset loader + planning script; nothing
+referenced it) and `src/cryptoshift/{inventory,planning}/.gitkeep` (folders now hold real files).
+Kept: the owner's DOCX deletions and `notebooks/member3/README.md`, other members' placeholder folders, `.venv`.
+
+```text
+python -c "import cryptoshift, cryptoshift.planning.planner, cryptoshift.gates.openssl_lab, cryptoshift.agent.assistant" -> imports ok
+python -m unittest discover -s tests -> Ran 53 tests ... OK
+scripts/verify_repo.py -> PASS
+```
+
+To regenerate local data: `scripts/fetch_public_label_sources.py`, then `scripts/member3_phase3.py`,
+`member3_phase4.py`, `member3_phase5.py`, `member3_pipeline.py`, `evaluate_agent.py`.
