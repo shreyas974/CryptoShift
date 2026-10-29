@@ -448,6 +448,43 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/demo-repos": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Demo Repos */
+    get: operations["demo_repos_api_v1_demo_repos_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/runs/demo": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create Demo Run
+     * @description Run a pipeline on a built-in SYNTHETIC repository (no upload). Files are copied into the run folder first.
+     */
+    post: operations["create_demo_run_api_v1_runs_demo_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/runs/{run_id}": {
     parameters: {
       query?: never;
@@ -685,6 +722,15 @@ export interface components {
     Body_scan_upload_api_v1_scans_upload_post: {
       /** File */
       file: string;
+      /** Authorized */
+      authorized: boolean;
+    };
+    /** DemoRunIn */
+    DemoRunIn: {
+      /** Repo Id */
+      repo_id: string;
+      /** Pipeline */
+      pipeline: string;
       /** Authorized */
       authorized: boolean;
     };
@@ -1483,6 +1529,63 @@ export interface operations {
     requestBody: {
       content: {
         "multipart/form-data": components["schemas"]["Body_create_run_api_v1_runs_post"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  demo_repos_api_v1_demo_repos_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          }[];
+        };
+      };
+    };
+  };
+  create_demo_run_api_v1_runs_demo_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DemoRunIn"];
       };
     };
     responses: {

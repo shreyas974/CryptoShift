@@ -96,16 +96,54 @@ class UserPatch(BaseModel):
     password: str | None = Field(default=None, min_length=12, max_length=256)
 
 
+class DemoRunIn(BaseModel):
+    repo_id: str = Field(min_length=1, max_length=64)
+    pipeline: str = Field(min_length=1, max_length=32)
+    authorized: bool
+
+
 class SettingsIn(BaseModel):
     data_mode: Literal["LIVE", "DEMO"] | None = None
     cloud_for_custom_scans: bool | None = None
     theme_default: Literal["dark", "light"] | None = None
 
 
-ACTIVITY = {"login": "signed in", "logout": "signed out", "approval": "approved a migration step", "job.start": "started a job",
+ACTIVITY = {"login": "signed in", "logout": "signed out", "approve": "approved a migration step", "job.start": "started a job",
             "scan": "scanned a folder", "scan.upload": "scanned an uploaded file", "dataset.run": "ran a pipeline on a dataset",
             "settings.update": "changed settings", "assistant.ask": "asked the assistant", "user.create": "added a user",
             "user.update": "changed a user", "run.delete": "deleted a dataset run"}
+
+
+# Member 3 risk weights: hand-set ASSUMPTIONS (docs/member3/assumptions.md), read from the planner's own config
+RISK_WEIGHTS = json.loads((Path(__file__).resolve().parents[1] / "planning" / "planning_config.json").read_text(encoding="utf-8"))["risk_weights"]
+RISK_FACTOR_TEXT = {
+    "crypto_exposure": "Quantum-vulnerable cryptography found (points per algorithm class and purpose, capped)",
+    "network_exposure": "Network exposure: 1 = TLS listener observed, 0 = none observed, 0.5 = no scanned files (unknown)",
+    "criticality": "Business criticality from the service config or descriptor",
+    "dependents": "Share of other services that depend on this one (0 to 1)",
+    "verification_readiness": "Can be verified in Wave 0 (raises priority slightly)",
+}
+
+
+def role_certainty(f: dict[str, Any]) -> str:
+    """The algorithm value is read literally from the file; its cryptographic ROLE is a rule-based inference."""
+    if f.get("operation_purpose") == "unknown" or f.get("ambiguity") == "ambiguous":
+        return "UNKNOWN / MANUAL REVIEW"
+    return "INFERRED"
+
+
+def risk_factors(risk: dict[str, Any], weights: dict[str, float]) -> list[dict[str, Any]]:
+    reason = str(risk.get("reason", ""))
+    crit = reason.split("criticality=")[-1].split(" |")[0].strip() if "| criticality=" in reason else ""
+    expo = reason.split("exposure=")[-1].strip() if "| exposure=" in reason else ""
+    out = []
+    for k, text in RISK_FACTOR_TEXT.items():
+        val = (risk.get("inputs") or {}).get(k)
+        pts = (risk.get("contributions") or {}).get(k)
+        missing = (k == "criticality" and crit.lower() == "unknown") or (k == "network_exposure" and expo.lower() == "unknown")
+        out.append({"factor": k, "meaning": text, "input": val, "weight": weights.get(k), "points": pts, "unknown": missing,
+                    "label": crit if k == "criticality" else expo if k == "network_exposure" else None})
+    return out
 
 
 def norm(value: Any) -> str:
@@ -282,7 +320,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                          "family": S.clean(f.get("algorithm_family") or f["legacy_algorithm"], 60), "purpose": f["operation_purpose"],
                          "confidence": f["confidence"], "ambiguity": f.get("ambiguity", "none"), "detector": f.get("detector", "legacy"),
                          "candidate": S.clean(f["target_pqc_algorithm"], S.TEXT_MAX), "snippet": S.clean(f.get("snippet_redacted", "")),
-                         "rationale": S.clean(f.get("rationale", ""), S.TEXT_MAX), "hold": f["operation_purpose"] == "unknown"})
+                         "rationale": S.clean(f.get("rationale", ""), S.TEXT_MAX), "hold": f["operation_purpose"] == "unknown",
+                         "detected_value": S.clean(f.get("detected_value") or "", 200), "where": S.clean(f.get("location") or "", 200),
+                         "threat": S.clean(f.get("quantum_threat") or "", 300), "severity": S.clean(f.get("severity") or "", 20),
+                         "review": S.clean(f.get("human_review_status") or "", 60), "in_test_file": bool(f.get("in_test_file")),
+                         "role_certainty": role_certainty(f)})
         return {"status": p["status"], "source": p["source"], "rows": rows, "notice": "Candidates are for human review. Unknown purpose = HOLD."}
 
     @app.get("/api/v1/graph", tags=["reports"])
@@ -303,6 +345,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         d = p["data"] or {}
         sched = d.get("schedule", {})
         tasks = [{"service": s, "wave": sched.get("task_to_wave", {}).get(s), "risk": v["risk"]["score"],
+                  "risk_factors": risk_factors(v["risk"], RISK_WEIGHTS),
                   "risk_label": "provisional, not validated", "risk_reason": S.clean(v["risk"]["reason"], S.TEXT_MAX),
                   "evidence_source": v["evidence_source"], "finding_ids": v["finding_ids"], "hold_finding_ids": v["hold_finding_ids"],
                   "duration_minutes": v["duration_minutes"], "candidates": [S.clean(c, 300) for c in v["candidate_targets"]]}
@@ -576,6 +619,33 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 raise ApiError("payload_too_large", f"upload over {st.max_dataset_bytes} bytes", 413)
             items.append((f.filename or "", data))
         name = S.clean(dataset_name.strip() or (items[0][0].replace("\\", "/").split("/")[0] if items else "dataset"), 128)
+        return start_run(request, user, items, name, pipeline)
+
+    @app.get("/api/v1/demo-repos", tags=["runs"])
+    def demo_repos(user: dict[str, Any] = Depends(need("viewer"))) -> list[dict[str, Any]]:
+        out = []
+        for k, v in S.DEMO_REPOS.items():
+            base = st.root / v["path"]
+            files = [f for f in base.rglob("*") if f.is_file()] if base.is_dir() else []
+            out.append({"id": k, "label": v["label"], "path": v["path"], "note": v["note"], "files": len(files), "available": bool(files)})
+        return out
+
+    @app.post("/api/v1/runs/demo", tags=["runs"])
+    def create_demo_run(body: DemoRunIn, request: Request, user: dict[str, Any] = Depends(need("analyst"))) -> dict[str, Any]:
+        """Run a pipeline on a built-in SYNTHETIC repository (no upload). Files are copied into the run folder first."""
+        limit("scans", request, user)
+        if body.pipeline not in S.PIPELINES or body.repo_id not in S.DEMO_REPOS:
+            raise ApiError("validation_error", "unknown pipeline or demo repository", 422)
+        if not body.authorized:
+            raise ApiError("validation_error", "tick 'I am authorized to analyse this dataset' first", 422)
+        if mode() == "DEMO":
+            raise ApiError("not_ready", "pipeline runs are disabled in DEMO mode", 409)
+        base = (st.root / S.DEMO_REPOS[body.repo_id]["path"]).resolve()
+        items = [(f.relative_to(base.parent).as_posix(), f.read_bytes()) for f in sorted(base.rglob("*"))
+                 if f.is_file() and not f.is_symlink() and base in f.resolve().parents]
+        return start_run(request, user, items, S.DEMO_REPOS[body.repo_id]["label"], body.pipeline)
+
+    def start_run(request: Request, user: dict[str, Any], items: list[tuple[str, bytes]], name: str, pipeline: str) -> dict[str, Any]:
         with engine.begin() as conn:
             run_id = conn.execute(dataset_runs.insert().values(pipeline=pipeline, dataset_name=name, dataset_sha256="", file_count=0,
                                                                skipped_count=0, total_bytes=0, created_by=user["username"],

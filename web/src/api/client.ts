@@ -101,6 +101,13 @@ export const FindingRow = z.object({
   snippet: z.string(),
   rationale: z.string(),
   hold: z.boolean(),
+  detected_value: z.string().default(""),
+  where: z.string().default(""),
+  threat: z.string().default(""),
+  severity: z.string().default(""),
+  review: z.string().default(""),
+  in_test_file: z.boolean().default(false),
+  role_certainty: z.string().default("UNKNOWN / MANUAL REVIEW"),
 });
 export type FindingRow = z.infer<typeof FindingRow>;
 export const Findings = z.object({ status: z.string(), source: Source, rows: z.array(FindingRow), notice: z.string() });
@@ -185,6 +192,20 @@ export const api = {
       method: "POST",
       body: form,
     }),
+  demoRepos: () =>
+    call<{ id: string; label: string; path: string; note: string; files: number; available: boolean }[]>(
+      "/api/v1/demo-repos",
+      null,
+    ),
+  createDemoRun: (repo_id: string, pipeline: string) =>
+    call<{ run_id: number; job_id: number; files: number; skipped: string[]; sha256: string }>(
+      "/api/v1/runs/demo",
+      null,
+      {
+        method: "POST",
+        body: JSON.stringify({ repo_id, pipeline, authorized: true }),
+      },
+    ),
   deleteRun: (id: number) => call<Loose>(`/api/v1/runs/${id}`, null, { method: "DELETE" }),
   // users (approver)
   users: () => call<UserRow[]>("/api/v1/users", null),

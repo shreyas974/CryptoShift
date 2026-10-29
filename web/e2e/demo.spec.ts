@@ -270,3 +270,67 @@ test("approver manages users; viewer cannot; report and activity bell work", asy
   await page.goto("/#/users");
   await expect(page.getByText("Only approvers can manage users.")).toBeVisible();
 });
+
+// ---------------------------------------------------------------- final acceptance journey (user audit)
+test("first-time user journey: demo repo scan, finding, risk, plan export, gates, approval, report, refresh", async ({
+  page,
+}) => {
+  test.setTimeout(240_000);
+  await login(page, "e2e-approver");
+  // workflow strip explains the process and links to each step
+  await expect(page.getByRole("heading", { name: /The tool proposes/ })).toBeVisible();
+  await expect(page.getByText("Text candidates only; no code patches")).toBeVisible();
+  // 1. scan a built-in demo repository, no upload
+  await page.goto("/#/runs");
+  await page.getByRole("button", { name: "Scan and plan this repository" }).click();
+  await expect(page.getByRole("tab", { name: /Migration steps \(\d+\)/ })).toBeVisible({ timeout: 120_000 });
+  await expect(page.getByText("succeeded").first()).toBeVisible();
+  expect(page.url()).toMatch(/#\/runs\?run=\d+$/);
+  await page.reload(); // refresh keeps the open run
+  await expect(page.getByRole("tab", { name: /Migration steps \(\d+\)/ })).toBeVisible();
+  // 2. a HOLD finding says its role is unknown, with file and line evidence
+  await page.goto("/#/inventory");
+  await page.getByLabel("Only HOLD (unknown purpose)").check();
+  await page.locator("tbody tr").first().click();
+  const detail = page.locator("#finding-detail").locator("..");
+  await expect(detail.getByText("UNKNOWN / MANUAL REVIEW").first()).toBeVisible();
+  await expect(detail.getByText(/\.yaml:\d+|\.conf:\d+|\.py:\d+/).first()).toBeVisible();
+  await expect(detail.getByText(/A person decides the role first/)).toBeVisible();
+  // 3. risk breakdown adds up and flags missing information; plan export is a real JSON file
+  await page.goto("/#/plan");
+  await page.locator("summary").first().click();
+  await expect(page.getByText(/= \d+(\.\d+)?$/).first()).toBeVisible();
+  const [dl] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("link", { name: "⤓ Plan (JSON)" }).click(),
+  ]);
+  const { readFileSync } = await import("node:fs");
+  const exported = JSON.parse(readFileSync((await dl.path()) ?? "", "utf8"));
+  expect(exported.page).toBe("plan");
+  expect(exported.data.tasks.length).toBeGreaterThan(0);
+  // 4. gates never show UNKNOWN; not-evaluated gates say so
+  await page.goto("/#/verification");
+  const matrix = page.locator("table").first();
+  await expect(matrix.getByText("NOT APPLICABLE").first()).toBeVisible();
+  await expect(matrix.getByText("UNKNOWN")).toHaveCount(0);
+  // 5. record a human approval on this isolated test server (temp approvals store)
+  await page.goto("/#/approval");
+  const ready = page.locator("tbody tr").filter({ hasText: "READY" }).first();
+  await ready.getByRole("button", { name: "Review…" }).click();
+  await page.getByLabel("Approver name").fill("E2E TEST APPROVER");
+  const hashText =
+    (await page
+      .getByText(/^Steps \(plan hash/)
+      .first()
+      .textContent()) ?? "";
+  await page.getByLabel("Plan hash (first 12+ characters)").fill(/plan hash ([0-9a-f]{12})/.exec(hashText)?.[1] ?? "");
+  await page.getByLabel("I understand this records my approval").check();
+  await page.getByRole("button", { name: "Approve this step" }).click();
+  await expect(page.locator("tbody tr").filter({ hasText: "APPROVED" }).first()).toBeVisible({ timeout: 15_000 });
+  // 6. report reflects it; audit chain still valid
+  await page.goto("/#/reports");
+  await expect(page.getByText(/[1-9]\d* approved of \d+ steps/)).toBeVisible();
+  await expect(page.getByText(/audit chain valid/)).toBeVisible();
+  await page.goto("/#/activity");
+  await expect(page.getByText(/e2e-approver approved a migration step/).first()).toBeVisible();
+});
