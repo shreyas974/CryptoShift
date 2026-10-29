@@ -1,0 +1,12 @@
+# CryptoShift console: local only, no telemetry, one accent colour (light/dark chosen in the app's Settings menu).
+[server]
+address = "127.0.0.1"
+headless = true
+runOnSave = false
+
+[browser]
+gatherUsageStats = false
+serverAddress = "127.0.0.1"
+
+[theme]
+primaryColor = "#1f6feb"
