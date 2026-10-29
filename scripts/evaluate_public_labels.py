@@ -39,6 +39,8 @@ FAMILY_GROUP = {
     "TLS-protocol": "TLS_PROTOCOL", "TLS-cipher-policy": "CIPHER_POLICY", "X.509-unknown-key": "CERT_UNKNOWN",
     "crypto-library": "DEPENDENCY", "JWT": "DEPENDENCY", "SSH": "DEPENDENCY", "X25519/Ed25519": "DEPENDENCY",
     "TLS-library": "DEPENDENCY", "XMLDSig": "DEPENDENCY",
+    # round 2 (labelling-guidelines-v2.md)
+    "MD4": "WEAK_HASH", "MD2": "WEAK_HASH", "RC2": "LEGACY_SYM", "AES-ECB": "ECB_MODE", "KeyStore": "KEYSTORE",
 }
 
 
@@ -140,7 +142,9 @@ def evaluate(split: str) -> Dict[str, Any]:
     defensible = n_pos >= DEFENSIBLE_MIN_POSITIVES and len(repos) >= DEFENSIBLE_MIN_REPOS
     return {
         "split": split,
-        "data_classification": "REAL public open-source code; TEAM ANNOTATIONS (single annotator, review pending); not ground truth",
+        "data_classification": "REAL public open-source code; AI-assisted draft labels (single annotator, human review pending); not ground truth",
+        "annotators": sorted({l.get("annotator", "?") for l in labels}),
+        "reviewers": sorted({l.get("reviewer", "?") for l in labels}),
         "repositories": repos,
         "files": len(by_file),
         "labels": dict(Counter(l["label"] for l in labels)),
@@ -157,19 +161,55 @@ def evaluate(split: str) -> Dict[str, Any]:
     }
 
 
+FREEZE_FILE = LABEL_DIR / "detector_freeze_round2.json"
+
+
+def frozen_sources() -> List[Path]:
+    return sorted((ROOT / "src" / "cryptoshift" / "inventory").glob("*.py")) + [
+        ROOT / "src" / "cryptoshift" / "rules.py", ROOT / "scripts" / "evaluate_public_labels.py"]
+
+
+def source_hashes() -> Dict[str, str]:
+    # newline-normalised so a Windows/Linux checkout of the same commit gives the same hash
+    return {p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+            for p in frozen_sources()}
+
+
+def freeze_status() -> Dict[str, Any]:
+    if not FREEZE_FILE.is_file():
+        return {"status": "NO FREEZE RECORDED"}
+    rec = json.loads(FREEZE_FILE.read_text(encoding="utf-8"))
+    now = source_hashes()
+    changed = sorted(k for k in set(rec["sha256"]) | set(now) if rec["sha256"].get(k) != now.get(k))
+    return {"status": "MATCH" if not changed else "MISMATCH", "frozen_utc": rec["frozen_utc"], "changed": changed}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
+    ap.add_argument("--freeze", action="store_true", help="record detector/scoring source hashes (round 2)")
     ap.add_argument("--fill", action="store_true")
-    ap.add_argument("--split", choices=["calibration", "held_out", "all"], default="held_out")
+    ap.add_argument("--split", choices=["calibration", "calibration-2", "held_out", "all"], default="held_out")
     args = ap.parse_args()
     if args.fill:
         fill()
         return 0
+    if args.freeze:
+        from datetime import datetime, timezone
+        rec = {"frozen_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+               "purpose": "detector + scoring sources frozen before round-2 held-out labels were written",
+               "sha256": source_hashes()}
+        FREEZE_FILE.write_text(json.dumps(rec, indent=1) + "\n", encoding="utf-8")
+        print(f"frozen {len(rec['sha256'])} files at {rec['frozen_utc']}")
+        return 0
     res = evaluate(args.split)
+    res["detector_freeze"] = freeze_status()
+    if args.split == "held_out" and res["detector_freeze"]["status"] != "MATCH":
+        res["status"] = f"INVALID HELD-OUT RUN: detector freeze {res['detector_freeze']['status']} {res['detector_freeze'].get('changed', '')}"
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / f"eval_{args.split}.json").write_text(json.dumps(res, indent=2), encoding="utf-8")
     print(f"=== Public-code label evaluation: split={res['split']} ===")
     print(f"Status       : {res['status']}")
+    print(f"Freeze       : {res['detector_freeze']}")
     print(f"Repos/files  : {res['repositories']} / {res['files']} | labels {res['labels']}")
     print(f"Counts       : TP={res['counts']['TP']} FP={res['counts']['FP']} FN={res['counts']['FN']}")
     print(f"P / R / F1   : {res['precision']} / {res['recall']} / {res['f1']}")
