@@ -1,0 +1,33 @@
+/* Scoped tokens and motion for Fig. 1 (anatomy kit). Lives in the bundled stylesheet: CSP-safe (no inline <style>). */
+.pl-figure {
+  background: transparent;
+}
+.pl-figure .iso-plate {
+  background: var(--glass-strong, rgba(16, 24, 40, 0.78));
+}
+.pl-stage:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+.pl-crate {
+  cursor: pointer;
+}
+.pl-boom {
+  transition: transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.pl-stage[data-still] .pl-boom {
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pl-boom {
+    transition: none;
+  }
+}
+
+/* WCAG AA: the kit's grey corner and legend text measured 2.98-3.92:1 (axe); use our muted token (>= 7:1, design.md §2). */
+.pl-figure .iso-plate-corner,
+.pl-figure .iso-key,
+.pl-figure .iso-caption {
+  color: var(--muted);
+}
