@@ -5,11 +5,13 @@ from __future__ import annotations
 import argparse
 import shutil
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
+from cryptoshift.datasets import build_combined_real_data_summary
 from cryptoshift.dependencies import validate_dependency_order
 from cryptoshift.metrics import compute_migration_metrics, evaluate_labelled_dataset
 from cryptoshift.models import WaveScheduleConfig
+from cryptoshift.mvp_slice import DEFAULT_CONFIGS_DIR, run_mvp_vertical_slice
 from cryptoshift.optimization.auth_check import (
     PROJECT_ROOT,
     check_credentials_status,
@@ -20,9 +22,14 @@ from cryptoshift.optimization.qcloud_experiment import run_qcloud_wave0_qubo_exp
 from cryptoshift.optimization.qpiai_opt_adapter import solve_with_qpiai_opt
 from cryptoshift.proposals import generate_migration_proposals
 from cryptoshift.protocol_demo import run_hybrid_protocol_demo
-from cryptoshift.reporting import write_evaluation_reports, write_qpiai_evidence_reports
+from cryptoshift.reporting import (
+    write_evaluation_reports,
+    write_mvp_vertical_slice_reports,
+    write_qpiai_evidence_reports,
+    write_real_dataset_summary_reports,
+)
 from cryptoshift.rollback import evaluate_rollbacks
-from cryptoshift.scanner import scan_banking_services
+from cryptoshift.scanner import scan_banking_services, scan_repository_path
 from cryptoshift.scoring import build_migration_tasks
 from cryptoshift.verification import run_verification_gates
 
@@ -196,6 +203,90 @@ def cmd_evaluate() -> int:
     return 0
 
 
+def cmd_data_summary(chunk_size: int = 25_000, max_stream_rows: int = 100_000) -> int:
+    """Summarize both real datasets (320 banking PQC observations + CESNET-TLS22-S streaming) and write reports."""
+    summary = build_combined_real_data_summary(chunk_size=chunk_size, max_stream_rows=max_stream_rows)
+    out_paths = write_real_dataset_summary_reports(summary, PROJECT_ROOT / "reports" / "datasets")
+
+    pqc = summary.get("banking_pqc_observations", {})
+    ces = summary.get("cesnet_tls22_s", {})
+    audit = pqc.get("audit", {})
+    stream = ces.get("incremental_streaming_benchmark", {})
+
+    print("=== CryptoShift: Real Dataset Summary & Streaming Audit ===")
+    print("1. PQ Readiness Index — Banking Longitudinal TLS 1.3 Observations:")
+    print(f"   - Status               : {pqc.get('status')}")
+    print(f"   - Total Observations   : {audit.get('row_count')} across {len(pqc.get('scan_dates', []))} scan dates ({', '.join(pqc.get('scan_dates', []))})")
+    print(f"   - Duplicate Keys       : {audit.get('duplicate_observation_keys')} (key = {audit.get('duplicate_key_definition')}; {audit.get('unique_hosts')} unique hosts)")
+    print(f"   - Status Counts        : {pqc.get('overall_status_counts')} (ERROR kept unclassified: {pqc.get('unclassified_error_count')})")
+    print("")
+    print("2. CESNET-TLS22 Provider-Defined 'S' Subset (Read-Only HDF5 Streaming):")
+    print(f"   - Status               : {ces.get('status')}")
+    print(f"   - File Size & SHA-256  : {ces.get('file_size_bytes', 0):,} bytes | {ces.get('recorded_sha256')}")
+    print(f"   - Total Daily Tables   : {ces.get('table_count')} tables | {ces.get('total_table_rows', 0):,} total flows")
+    print(
+        f"   - Streamed Window      : {stream.get('streamed_rows', 0):,} rows in {stream.get('chunks_processed', 0)} chunks "
+        f"({stream.get('elapsed_seconds', 0.0)}s, {stream.get('throughput_rows_per_sec', 0.0):,} rows/sec, "
+        f"duplicate IDs={stream.get('streamed_duplicate_flow_ids', 0)})"
+    )
+    print(f"   - Top Categories       : {stream.get('top_categories_in_stream', {})}")
+    print("")
+    print("Real dataset summary reports written to:")
+    print(f"  - JSON     : {Path(out_paths['json']).relative_to(PROJECT_ROOT)}")
+    print(f"  - Markdown : {Path(out_paths['markdown']).relative_to(PROJECT_ROOT)}")
+    return 0
+
+
+def cmd_scan(target_path: Optional[str] = None) -> int:
+    """Scan a directory or file of source code and TLS configurations with line/directive evidence."""
+    resolved = Path(target_path) if target_path else DEFAULT_CONFIGS_DIR
+    findings, meta = scan_repository_path(resolved)
+    print(f"=== CryptoShift: Traceable File & Config Scanner ({resolved}) ===")
+    print(f"Services Discovered : {len(meta)} ({', '.join(meta.keys())})")
+    print(f"Findings Detected   : {len(findings)}")
+    for f in findings:
+        print(
+            f"  - [{f.finding_id}] {f.service_id} | {f.file_path}:{f.line_number} | "
+            f"{f.legacy_algorithm} ({f.operation_purpose}) -> {f.target_pqc_algorithm} [{f.nist_standard}]"
+        )
+    return 0
+
+
+def cmd_mvp_slice(
+    target_path: Optional[str] = None,
+    approve_all: bool = False,
+    approver: Optional[str] = None,
+    simulate_failure_service: Optional[str] = None,
+) -> int:
+    """Run the end-to-end operator vertical slice (scan -> risk -> patch preview -> human approval -> verify -> report)."""
+    res = run_mvp_vertical_slice(
+        target_path=target_path,
+        approve_all=approve_all,
+        approver=approver,
+        simulate_failure_service=simulate_failure_service,
+    )
+    out_paths = write_mvp_vertical_slice_reports(res, PROJECT_ROOT / "reports" / "runs")
+
+    print("=== CryptoShift: Operator MVP Vertical Slice ===")
+    print(f"Run ID                 : {res['run_id']}")
+    print(f"Target Path            : {res['target_path']}")
+    print(f"Pre-Patch File Findings: {res['scanned_file_findings_count']}")
+    print(f"Approval Status        : {res['approval_status']} (Approver: {res['approver'] or 'None — Preview Only'})")
+    print(f"Original Files Intact  : {res['original_source_files_unmodified']}")
+    if res["post_patch_staged_findings_count"] is not None:
+        print(f"Post-Patch Findings    : {res['post_patch_staged_findings_count']} (in isolated staging workspace)")
+    print(f"Wave Schedule          : {res['wave_schedule']['waves']} (objective={res['wave_schedule']['objective_value']})")
+    passed_g = sum(1 for g in res["verification_gates"] if g["overall_passed"])
+    total_g = len(res["verification_gates"])
+    trig_rb = sum(1 for r in res["rollback_events"] if r["triggered"])
+    print(f"Verification Gates     : {passed_g}/{total_g} passed | Rollbacks Triggered: {trig_rb}")
+    print(f"SQLite Audit DB        : {res['sqlite_db_path']}")
+    print("MVP vertical slice reports written to:")
+    print(f"  - JSON     : {Path(out_paths['json']).relative_to(PROJECT_ROOT)}")
+    print(f"  - Markdown : {Path(out_paths['markdown']).relative_to(PROJECT_ROOT)}")
+    return 0
+
+
 def cmd_demo(allow_online_auth: bool = False) -> int:
     """Run the full CryptoShift PQC-01 migration, QpiAI scheduling, and dataset evaluation workflow."""
     init_local_env_file()
@@ -264,7 +355,39 @@ def main(argv: List[str] | None = None) -> int:
     p_sched = sub.add_parser("schedule", help="Run migration-wave scheduling comparison and write reports/qpiai/")
     p_sched.add_argument("--online-auth", action="store_true", help="Authorize online key validation check")
 
-    sub.add_parser("evaluate", help="Run detection evaluation on labelled synthetic fixtures and write reports/evaluation/")
+    sub.add_parser(
+        "evaluate",
+        help="Run detection evaluation on labelled synthetic fixtures and write reports/evaluation/",
+    )
+
+    p_data = sub.add_parser(
+        "data-summary",
+        help="Summarize real datasets (320 banking PQC observations + CESNET-TLS22-S streaming) and write reports/datasets/",
+    )
+    p_data.add_argument("--chunk-size", type=int, default=25_000, help="HDF5 streaming chunk size (default: 25000)")
+    p_data.add_argument(
+        "--max-stream-rows",
+        type=int,
+        default=100_000,
+        help="Max rows to stream for interactive summary benchmark (default: 100000)",
+    )
+
+    p_scan = sub.add_parser("scan", help="Scan a file or directory for traceable cryptographic evidence")
+    p_scan.add_argument("--path", type=str, default=None, help="File or directory path to scan (default: demo_bank_app/configs)")
+
+    p_slice = sub.add_parser(
+        "mvp-slice",
+        help="Run end-to-end operator vertical slice (scan -> risk -> patch preview -> human approval -> verify -> report)",
+    )
+    p_slice.add_argument("--path", type=str, default=None, help="Target file or directory (default: demo_bank_app/configs)")
+    p_slice.add_argument("--approve-all", action="store_true", help="Approve applying patches to isolated staging copy")
+    p_slice.add_argument("--approver", type=str, default=None, help="Human operator name required when --approve-all is used")
+    p_slice.add_argument(
+        "--simulate-failure",
+        type=str,
+        default=None,
+        help="Service ID to simulate a verification gate failure and automatic rollback",
+    )
 
     p_demo = sub.add_parser(
         "demo",
@@ -283,6 +406,17 @@ def main(argv: List[str] | None = None) -> int:
         return 0
     if args.command == "evaluate":
         return cmd_evaluate()
+    if args.command == "data-summary":
+        return cmd_data_summary(chunk_size=args.chunk_size, max_stream_rows=args.max_stream_rows)
+    if args.command == "scan":
+        return cmd_scan(target_path=args.path)
+    if args.command == "mvp-slice":
+        return cmd_mvp_slice(
+            target_path=args.path,
+            approve_all=bool(args.approve_all),
+            approver=args.approver,
+            simulate_failure_service=args.simulate_failure,
+        )
     if args.command in ("schedule", "demo", None):
         return cmd_demo(allow_online_auth=online_flag)
     return 0
@@ -290,4 +424,3 @@ def main(argv: List[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
