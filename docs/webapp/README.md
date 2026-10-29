@@ -48,12 +48,12 @@ shows the plan stage as FAIL with that message.
 
 ```powershell
 .\.venv\Scripts\python.exe -m unittest discover -s tests          # existing suites (100)
-.\.venv\Scripts\python.exe -m pytest tests/test_webapp_api.py -q   # backend API (20 + 1 skipped)
+.\.venv\Scripts\python.exe -m pytest tests/test_webapp_api.py -q   # backend API (24 + 1 skipped)
 .\.venv\Scripts\python.exe -m ruff check --config ruff-api.toml src/cryptoshift/api tests/test_webapp_api.py
 cd web
 npx tsc -b --noEmit; npx eslint . --max-warnings 0; npx prettier --check "src/**/*.{ts,tsx,css}"
-npx vitest run           # components + figure + automated contrast test (30)
-npx playwright test      # E2E + axe on 16 pages x 2 themes, upload, users (9); uses the installed Chrome, no browser download
+npx vitest run           # components, figure, contrast, audit regressions (34)
+npx playwright test      # E2E + axe on 16 pages x 2 themes, upload, users, full first-time-user journey (10); uses the installed Chrome, no browser download
 ```
 
 Regenerate the API types after changing the backend:
