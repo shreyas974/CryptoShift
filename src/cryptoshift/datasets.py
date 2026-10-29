@@ -3,7 +3,7 @@
 Datasets supported:
 1. CESNET-TLS22 S (`CESNET-TLS22-S.h5`):
    - 25,000,000 real encrypted TLS traffic flows collected on the CESNET2 network (4–17 Oct 2021).
-   - 3,231,649,088 bytes; SHA-256: `36e3240b144bf8902e874e8fd875b6e7ac3e40b0706eb5f8d3f40b720ff5a2e06`
+   - 3,231,649,088 bytes; SHA-256: `36e3240b144bf8902e874e8fd875b6e7ac3e40b0706eb5f8d3f40720ff5a2e06`
      (verified in `verification.json` as `36e3240b144bf8902e874e8fd875b6e7ac3e40b0706eb5f8d3f40720ff5a2e06`).
    - Streamed incrementally via PyTables (`tables`) or `h5py` in read-only mode so all 25M rows are never
      loaded into RAM at once.
