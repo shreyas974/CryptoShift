@@ -1,0 +1,366 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CryptoShift Member 3 migration plan",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at_utc",
+    "status_labels",
+    "target",
+    "findings",
+    "services",
+    "edges",
+    "graph_analysis",
+    "schedule",
+    "steps",
+    "rollback",
+    "plan_hash",
+    "approval"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "member3-plan/1.0"
+    },
+    "generated_at_utc": {
+      "type": "string"
+    },
+    "status_labels": {
+      "type": "object"
+    },
+    "target": {
+      "type": "string"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "finding_id",
+          "service_id",
+          "file_path",
+          "line_number",
+          "operation_purpose"
+        ]
+      }
+    },
+    "services": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "service_id",
+          "evidence_source",
+          "finding_ids",
+          "hold_finding_ids",
+          "candidate_targets",
+          "duration_minutes",
+          "verification_ready_wave0",
+          "field_sources",
+          "risk"
+        ],
+        "properties": {
+          "service_id": {
+            "type": "string"
+          },
+          "evidence_source": {
+            "enum": [
+              "OBSERVED",
+              "DECLARED_ONLY",
+              "NONE"
+            ]
+          },
+          "finding_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "hold_finding_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "candidate_targets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "duration_minutes": {
+            "type": "integer"
+          },
+          "verification_ready_wave0": {
+            "type": "boolean"
+          },
+          "field_sources": {
+            "type": "object"
+          },
+          "risk": {
+            "type": "object",
+            "required": [
+              "score",
+              "contributions",
+              "reason",
+              "label"
+            ],
+            "properties": {
+              "score": {
+                "type": "number"
+              },
+              "reason": {
+                "type": "string"
+              },
+              "label": {
+                "const": "PROVISIONAL, UNVALIDATED"
+              }
+            }
+          }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "upstream",
+          "downstream",
+          "provenance",
+          "file",
+          "line",
+          "reason"
+        ],
+        "properties": {
+          "upstream": {
+            "type": "string"
+          },
+          "downstream": {
+            "type": "string"
+          },
+          "provenance": {
+            "enum": [
+              "OBSERVED",
+              "DECLARED",
+              "INFERRED"
+            ]
+          },
+          "file": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "line": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "graph_analysis": {
+      "type": "object",
+      "required": [
+        "cycles",
+        "conflicts",
+        "edge_counts"
+      ]
+    },
+    "schedule": {
+      "type": "object",
+      "required": [
+        "feasible",
+        "objective",
+        "task_to_wave",
+        "waves",
+        "dependency_violations"
+      ]
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "step_id",
+          "service_id",
+          "purposes",
+          "gates",
+          "state",
+          "blocking_gates",
+          "evidence_scope"
+        ],
+        "properties": {
+          "step_id": {
+            "type": "string",
+            "pattern": "^migrate:"
+          },
+          "service_id": {
+            "type": "string"
+          },
+          "purposes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "gates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "gate",
+                "status",
+                "evidence",
+                "reason"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "gate": {
+                  "type": "string"
+                },
+                "status": {
+                  "enum": [
+                    "PASS",
+                    "FAIL",
+                    "BLOCKED"
+                  ]
+                },
+                "evidence": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "state": {
+            "enum": [
+              "PROPOSED",
+              "READY",
+              "APPROVED"
+            ]
+          },
+          "blocking_gates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "evidence_scope": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "rollback": {
+      "type": "object",
+      "required": [
+        "label",
+        "restore",
+        "snapshot_sha256",
+        "trigger",
+        "recovery_check",
+        "rehearsal_result",
+        "warnings"
+      ],
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "profile": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "restore": {
+          "type": "string"
+        },
+        "snapshot_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "trigger": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "recovery_check": {
+          "type": "string"
+        },
+        "recovery_command": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "rehearsal_result": {
+          "type": "object",
+          "properties": {
+            "forced_failure_detected": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "restored_hash_matches_snapshot": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "recovered": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "originals_unchanged": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            }
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "applies_to_steps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "plan_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "approval": {
+      "type": "object",
+      "required": [
+        "plan_hash",
+        "approved_steps",
+        "invalidated_approvals"
+      ]
+    }
+  }
+}

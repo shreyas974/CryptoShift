@@ -23,3 +23,26 @@ its label (e.g. "mocked", "synthetic smoke test") or do not say it. Evidence:
 
 The top-level README's Key Capabilities section states these numbers; the README now links here and states that
 statuses in this register take precedence.
+
+## Member 3 additions (2026-10-29) — evidence: `docs/evidence/member3-log.md`, `reports/member3/summary.md`
+
+| Claim | Status | What was checked | How to say it |
+|---|---|---|---|
+| Migration tasks are derived from scanner findings | **VERIFIED (synthetic inputs)** | `planning.planner`: 12 findings → 6 tasks with finding IDs; 2 services DECLARED_ONLY | "Tasks come from scanned evidence; two demo services have only declared data." |
+| Dependency edges carry provenance | **VERIFIED** | 4 OBSERVED (file+line), 5 DECLARED, 0 INFERRED; 3 conflicts reported; cycle handling tested | — |
+| Risk score | **PROVISIONAL, UNVALIDATED** | documented formula; sensitivity: rank changed 5/10, schedule 0/10 | Never "scientific" or "calibrated". |
+| Deterministic schedule on the findings-derived problem | **VERIFIED** | objective 292.8, 0 dependency violations (constraints are assumptions) | — |
+| QpiAI Opt solves the schedule | **BLOCKED** | offline classify/inspect/feasibility only (MILP, 18 vars, 20 constraints) | "Model validated offline; solve not run." |
+| QAOA energy −13.07 | **REPRODUCED (SIMULATOR), with caveats** | existing module re-run; its bit decoding is reversed and its metric is weak | Prefer: "fixed-angle QAOA put 8.0% probability on the optimum vs 6.25% uniform." |
+| Working before/after protocol traces | **VERIFIED, TEST SCENARIO (loopback, test keys)** | X25519 vs X25519MLKEM768 handshakes with OpenSSL 3.5.9; ML-DSA-65 certificate handshake also negotiated | Never "production traffic". |
+| "544 B vs 7661 B" | still **MOCKED/ANALYTICAL** | superseded by measured loopback bytes: 757/388 B → 1843/1564 B (EC cert); 10,207 B read with ML-DSA-65 cert | Use the measured loopback numbers. |
+| Compatibility tests | **VERIFIED (loopback)** | 11/11 cases incl. 7 negative cases | — |
+| ML-KEM / ML-DSA self-tests | **VERIFIED as round-trip self-tests** | OpenSSL and `cryptography` both PASS | Not "NIST KAT validated". |
+| Overhead | **PARTIAL** | bytes measured; timing dominated by process start-up (two runs disagree in direction) | Do not quote latency overhead. |
+| Verification gates (Member 3 pipeline) | **VERIFIED (generic lab evidence)** | 4 steps READY, 2 PROPOSED; READY ≠ service-stack verified | "Eligible for human review." |
+| "6/6 gates pass" (old prototype) | still **MOCKED** | old `verification.py` unchanged | Use the Member 3 gates instead. |
+| Rollback rehearsal | **VERIFIED (on a copy, loopback)** | forced failure → restore → hash match → classical recovery | — |
+| Human approval gate | **VERIFIED (tests only)** | approval bound to plan hash; change invalidates; no real approval recorded | — |
+| CESNET classifier | **VERIFIED demo — not crypto** | macro-F1 0.748 vs 0.010 majority, split by day | "Traffic classification demo; says nothing about quantum readiness." |
+| ML purpose triage | **VERIFIED negative result** | does not beat the rule engine (macro-F1 0.40 vs 0.81) | "Rules kept." |
+| Local AI agent | **PARTIAL** | template back-end 24/24 (after a logged fix; first run 21/24 true); LLM BLOCKED | Never "AI model answers" — it is a deterministic template. |
