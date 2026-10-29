@@ -46,3 +46,10 @@ Evidence: `docs/evidence/member3-log.md`, `reports/member3/summary.md`, `reports
 | E4 | Feasible migration dependencies | PARTIAL | **VERIFIED on synthetic inputs** | 0 dependency violations; cycles detected and reported (tested) | Graph from synthetic configs |
 | — | QpiAI Opt solve | REPORTED | **BLOCKED** | offline MILP checks only | Owner authorization + key needed |
 | — | QAOA −13.07 | REPORTED | **REPRODUCED (SIMULATOR)** with documented caveats | `optimization.member3_qpiai` | Fixed-angle QAOA barely above uniform |
+
+## Additions: web app v2
+
+| # | Requirement | Previous | Now | Evidence | Remaining gap |
+|---|---|---|---|---|---|
+| — | Operator UI with evidence provenance | PARTIAL (Streamlit) | **VERIFIED (local)** | web app v2; `docs/webapp/parity.md`; E2E 7 passed | Folder-scan form PARTIAL; no deployment |
+| — | Human approval in the UI | VERIFIED (tests only) | **VERIFIED (tests only), with auth + audit** | approver role, typed hash, CSRF, audit chain | No real approval recorded |
