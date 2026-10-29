@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 from cryptoshift.inventory import scan_inventory
+from cryptoshift.inventory.services import COMPOSE_NAMES
 from cryptoshift.models import CryptoFinding
 from cryptoshift.optimization.auth_check import PROJECT_ROOT
 from cryptoshift.scanner import scan_repository_path
@@ -45,33 +46,59 @@ def rel_to_root(path_str: str, root: Path = PROJECT_ROOT) -> str:
         return p.name
 
 
-def collect_findings(target: Path) -> Tuple[List[CryptoFinding], Dict[str, Dict[str, Any]]]:
-    """Return merged findings (service-attributed, repo-relative paths) and per-service file metadata."""
+def collect_findings(target: Path, extra_known_services: List[str] | None = None) -> Tuple[List[CryptoFinding], Dict[str, Dict[str, Any]]]:
+    """Return merged findings (service-attributed, repo-relative paths) and per-service file metadata.
+
+    Service attribution: Member 2's documented rules (inventory/services.py) first; only where they give "unknown"
+    is the legacy scanner's descriptor-file map used, and the basis says so."""
     target = Path(target)
+    base = target.parent if target.is_file() else target
     legacy, meta = scan_repository_path(target)
-    file_to_service: Dict[str, str] = {}
-    for svc, m in meta.items():
-        for fp in m.get("files", []):
-            file_to_service[rel_to_root(fp)] = svc
+    legacy_service = {rel_to_root(fp): svc for svc, m in meta.items() for fp in m.get("files", [])}
+    inv, stats = scan_inventory(target, extra_known_services=extra_known_services)
+    catalog = stats["_catalog"]
+
+    abs_of: Dict[str, Path] = {}  # repo-relative path -> real path (internal; never serialised)
+    attribution: Dict[str, Tuple[str, str, str]] = {}
+
+    def attribute(real: Path) -> Tuple[str, str, str]:
+        rel = rel_to_root(str(real))
+        abs_of.setdefault(rel, real)
+        if rel not in attribution:
+            try:
+                a = catalog.attribute(real.resolve().relative_to(base.resolve()).as_posix())
+                attribution[rel] = (a.service_id, a.basis, a.confidence)
+            except ValueError:
+                attribution[rel] = ("unknown", "outside scan root", "none")
+            # A compose file describes the whole system, never one service: no legacy fallback for it.
+            if attribution[rel][0] == "unknown" and rel in legacy_service and real.name not in COMPOSE_NAMES:
+                attribution[rel] = (legacy_service[rel], "legacy scanner file map (scanner.py); Member 2 rules gave unknown", "low")
+        return attribution[rel]
 
     merged: Dict[Tuple[str, int, str], CryptoFinding] = {}
-    base = target.parent if target.is_file() else target
-    inv, _ = scan_inventory(target)
     for f in inv:
-        f.file_path = rel_to_root(str(base / f.file_path))
-        f.service_id = file_to_service.get(f.file_path, f.service_id)
+        real = base / f.file_path
+        f.file_path = rel_to_root(str(real))
+        f.service_id, f.service_id_basis, f.service_id_confidence = attribute(real)
         merged[(f.file_path, f.line_number, family_group(f))] = f
     for f in legacy:
+        real = Path(f.file_path)
         f.file_path = rel_to_root(f.file_path)
+        f.service_id, f.service_id_basis, f.service_id_confidence = attribute(real)
         f.detector = f.detector or "legacy"
         f.algorithm_family = f.algorithm_family or f.legacy_algorithm
         merged.setdefault((f.file_path, f.line_number, family_group(f)), f)
+    for svc, m in meta.items():  # files the legacy scanner read without findings still belong to a service
+        for fp in m.get("files", []):
+            attribute(Path(fp))
 
     findings = sorted(merged.values(), key=lambda f: (f.service_id, f.file_path, f.line_number, f.finding_id))
+    names = ({s for s, _, _ in attribution.values()} | set(catalog.known)) - {"unknown"}
     services = {
-        svc: {"service_id": svc, "owner": m.get("owner", "unknown"),
-              "files": sorted(rel_to_root(fp) for fp in m.get("files", [])),
-              "_abs": {rel_to_root(fp): Path(fp) for fp in m.get("files", [])}}  # internal; never serialised
-        for svc, m in meta.items()
+        svc: {"service_id": svc,
+              "owner": next((m.get("owner", "unknown") for s, m in meta.items() if s == svc), "unknown"),
+              "files": sorted(r for r, a in attribution.items() if a[0] == svc),
+              "_abs": {r: abs_of[r] for r, a in attribution.items() if a[0] == svc}}  # internal; never serialised
+        for svc in sorted(names)
     }
     return findings, services

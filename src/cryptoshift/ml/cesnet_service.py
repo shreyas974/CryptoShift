@@ -83,13 +83,16 @@ def load_sample(h5_path: Path, chunks_per_day: int = 15, chunk_rows: int = 1000)
 
 
 def _metrics(y_true: np.ndarray, y_pred: np.ndarray, names: Dict[int, str]) -> Dict[str, Any]:
-    from sklearn.metrics import accuracy_score, f1_score, recall_score
+    from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, recall_score
 
     labels = sorted(set(y_true.tolist()))
     rec = recall_score(y_true, y_pred, labels=labels, average=None, zero_division=0)
+    cm = confusion_matrix(y_true, y_pred, labels=labels, normalize="true")
     return {"accuracy": round(float(accuracy_score(y_true, y_pred)), 4),
             "macro_f1": round(float(f1_score(y_true, y_pred, labels=labels, average="macro", zero_division=0)), 4),
-            "per_class_recall": {names.get(l, str(l)): round(float(r), 4) for l, r in zip(labels, rec)}}
+            "per_class_recall": {names.get(l, str(l)): round(float(r), 4) for l, r in zip(labels, rec)},
+            "confusion_labels": [names.get(l, str(l)) for l in labels],
+            "confusion_matrix_row_normalised": [[round(float(v), 4) for v in row] for row in cm]}
 
 
 def run(h5_path: Path, chunks_per_day: int = 15, chunk_rows: int = 1000, train_days: int = 7, seed: int = 0) -> Dict[str, Any]:

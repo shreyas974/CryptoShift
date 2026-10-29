@@ -79,9 +79,19 @@ def opt_wave_model_checks(tasks: List[Any], constraints: Dict[str, Any], baselin
             sol = dict(getattr(res, "solution", {}) or {})
             assign = {t.service_id: next((w for w in range(cfg.num_waves) if float(sol.get(f"x_{t.service_id}_w{w}", 0)) >= 0.5), None)
                       for t in tasks}
+            obj = float(getattr(res, "objective", float("nan")))
+            base_obj = compute_schedule_objective(tasks, baseline_assignment, cfg)
             solve_status = {"status": "RUN", "solver_status": str(getattr(res, "status", "")),
-                            "objective": float(getattr(res, "objective", float("nan"))), "assignment": assign,
-                            "runtime_seconds": round(time.perf_counter() - s0, 4)}
+                            "execution_mode": str(getattr(res, "execution_mode", "")),
+                            "problem_class": str(getattr(res, "problem_class", "")),
+                            "objective": obj, "assignment": assign,
+                            "solver_time_s": getattr(res, "solver_time_s", None),
+                            "runtime_seconds": round(time.perf_counter() - s0, 4),
+                            "same_input_comparison": {
+                                "baseline_objective": base_obj, "qpiai_opt_objective": obj,
+                                "difference": None if base_obj is None else round(obj - base_obj, 6),
+                                "same_assignment": assign == {t.service_id: baseline_assignment.get(t.service_id) for t in tasks},
+                                "note": "Lower is better. 'Better' is claimed only if the difference is negative."}}
         except Exception as exc:
             solve_status = {"status": "BLOCKED", "reason": redact_secrets(str(exc))[:300]}
 
@@ -193,6 +203,7 @@ def run_wave0_qaoa(candidates: List[Dict[str, Any]], deps: List[Tuple[str, str]]
         "circuit": {"depth": int(circ.depth()), "size": int(circ.size())},
         "inspect": info if isinstance(info, dict) else str(info),
         "exact_optimum": {"selection": opt_sel, "energy": opt_e, "bits": opt_bits},
+        "samples": sampled,
         "most_frequent_sample": sampled[0] if sampled else None,
         "best_feasible_sample": best,
         "optimum_probability": round(counts.get(opt_bits, 0) / total_shots, 4) if total_shots else 0.0,

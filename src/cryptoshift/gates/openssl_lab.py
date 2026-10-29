@@ -312,7 +312,8 @@ def overhead(d: Path, n: int = 30, warmup: int = 5) -> Dict[str, Any]:
     def summary(rs: List[Dict[str, Any]]) -> Dict[str, Any]:
         t = sorted(x["elapsed_seconds"] * 1000 for x in rs if x["handshake_ok"])
         p95 = t[min(len(t) - 1, int(round(0.95 * (len(t) - 1))))] if t else None
-        return {"n_ok": len(t), "n_total": len(rs), "median_ms": round(statistics.median(t), 3) if t else None,
+        return {"n_ok": len(t), "n_total": len(rs), "samples_ms": [round(x, 3) for x in t],
+                "median_ms": round(statistics.median(t), 3) if t else None,
                 "p95_ms": round(p95, 3) if p95 else None, "min_ms": round(t[0], 3) if t else None,
                 "bytes_read": sorted({x["bytes_read"] for x in rs}), "bytes_written": sorted({x["bytes_written"] for x in rs}),
                 "groups": sorted({str(x["group"]) for x in rs})}

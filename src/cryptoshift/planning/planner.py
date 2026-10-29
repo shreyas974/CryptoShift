@@ -20,7 +20,7 @@ from cryptoshift.optimization.auth_check import PROJECT_ROOT
 from cryptoshift.optimization.fallback_scheduler import is_schedule_feasible, solve_with_fallback_scheduler
 from cryptoshift.dependencies import validate_dependency_order
 from cryptoshift.planning.dependency_graph import (
-    analyse_graph, build_graph, constraint_digraph, declared_edges, observed_edges,
+    analyse_graph, build_graph, constraint_digraph, declared_edges, member2_observed_edges, observed_edges,
 )
 from cryptoshift.planning.findings import collect_findings, family_group, load_config
 from cryptoshift.planning.risk import rank, score_service
@@ -61,15 +61,17 @@ def build_problem(target: Optional[Path] = None, include_declared: bool = True,
     """Build services, findings, graph and scored tasks (no scheduling)."""
     cfg = cfg or load_config()
     target = Path(target or DEFAULT_TARGET)
-    findings, scanned = collect_findings(target)
     descriptor = _descriptor() if include_declared else {}
+    findings, scanned = collect_findings(target, extra_known_services=sorted(descriptor))
     known = set(scanned) | set(descriptor)
 
     abs_paths = {rel: ap for m in scanned.values() for rel, ap in m["_abs"].items()}
     file_service = {f: s for s, m in scanned.items() for f in m["files"]}
     files = [abs_paths[f] for f in file_service]
-    obs = observed_edges(files, file_service, known)
-    edges = obs["edges"] + declared_edges({k: v for k, v in descriptor.items()})
+    # OBSERVED: Member 2 relationship evidence. INFERRED: Member 3's value-mention rule (direction is an assumption).
+    obs = member2_observed_edges(target, known)
+    inferred = [e for e in observed_edges(files, file_service, known)["edges"] if e["provenance"] == "INFERRED"]
+    edges = obs["edges"] + inferred + declared_edges({k: v for k, v in descriptor.items()})
     graph = build_graph(sorted(known), edges)
     analysis = analyse_graph(graph, cfg["enforced_edge_provenance"])
     max_dep = max(analysis["dependents"].values() or [1]) or 1
@@ -151,6 +153,8 @@ def build_problem(target: Optional[Path] = None, include_declared: bool = True,
         "services": services,
         "edges": edges,
         "unknown_endpoints": obs["unknown_endpoints"],
+        "unattributed_finding_ids": sorted(f.finding_id for f in findings
+                                           if f.service_id == "unknown" and f.severity != "INFO"),
         "graph": graph,
         "graph_analysis": analysis,
     }

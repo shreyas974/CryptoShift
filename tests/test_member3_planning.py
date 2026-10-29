@@ -82,8 +82,24 @@ class GraphEdgeCaseTests(unittest.TestCase):
         inferred = [e for e in p["edges"] if e["provenance"] == "INFERRED"]
         self.assertEqual([(e["upstream"], e["downstream"]) for e in inferred], [("auth_gateway", "svc_x")])
         self.assertIn("direction assumed", inferred[0]["reason"])
+        # Unknown endpoints now come from Member 2's relationship evidence, which keeps the full unresolved host.
         endpoints = {u["endpoint"] for u in p["unknown_endpoints"]}
-        self.assertEqual(endpoints, {"external_thing", "partner-bank"})
+        self.assertEqual(endpoints, {"external_thing", "partner-bank.example"})
+        self.assertTrue(all(u["file"] and u["line"] for u in p["unknown_endpoints"]))
+
+
+class Member2RelationshipTests(unittest.TestCase):
+    def test_multiservice_fixture_edges_are_observed_with_file_and_line(self) -> None:
+        fixture = Path(__file__).resolve().parent / "fixtures" / "multiservice_bank"
+        p = build_problem(fixture, include_declared=False)
+        observed = {(e["upstream"], e["downstream"]) for e in p["edges"] if e["provenance"] == "OBSERVED"}
+        self.assertIn(("ledger", "payments"), observed)   # payments consumes ledger
+        self.assertIn(("payments", "gateway"), observed)  # gateway proxies to payments
+        self.assertTrue(all(e["file"] and e["line"] for e in p["edges"] if e["provenance"] == "OBSERVED"))
+        self.assertIn("fraud-scoring.partner.example", {u["endpoint"] for u in p["unknown_endpoints"]})
+        self.assertFalse(p["graph_analysis"]["has_cycles"])
+        self.assertEqual(sorted(p["services"]), ["edge", "gateway", "ledger", "payments"])  # compose file is not a service
+        self.assertTrue(p["unattributed_finding_ids"])  # scripts/rotate_keys.sh stays unknown and is reported
 
 
 class HoldTests(unittest.TestCase):
