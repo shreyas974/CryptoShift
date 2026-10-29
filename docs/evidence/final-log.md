@@ -39,3 +39,22 @@ printed; `.env` / `qcloud.env` were only checked for existence and git-ignore st
 | B7 source | `git clone --filter=blob:none` CryptoAPI-Bench @ `e6b6b50` | MIT (LICENSE read); 203 java files; labels in `CryptoAPI-Bench_details.xlsx` (182 rows; 18 line cells corrupted into dates by Excel) |
 | B7 run 1 | `scripts/evaluate_cryptoapi_bench.py` | 57 cases; TP 21 FP 9 FN 24 (harness bug: names without `.java` and multi-file cells not resolved) |
 | B7 run 2 | same, after the name-resolution fix only | 65 cases; TP 22 FP 9 FN 29 TN 4; P 0.7097 R 0.4314 |
+
+## Phase C: Member 3 (base worktree, branch `feature/member-3-planning-verification`)
+
+| Step | Command | Result |
+|---|---|---|
+| C0 merge | `git merge --no-ff feature/member-2-discovery` (local) | merge commit `c8340fa`; no conflicts; uncommitted Member 3 work untouched; 79 tests OK (1 skipped) |
+| C2 graph | `planning.dependency_graph.member2_observed_edges` + `findings.collect_findings` on Member 2 attribution | demo bank: 4 OBSERVED (file+line), 5 DECLARED, 0 cycles, 0 unknown; fixture: 9 OBSERVED, 3 unknown. Defect found by a new test and fixed: legacy file-stem service names (`nginx`, `docker-compose`) had hidden Member 2 edges |
+| C2 test change | `tests/test_member3_planning.py` | unknown endpoint now keeps the full host (`partner-bank.example`); expectation updated, reason recorded in the test |
+| C4 plan | `scripts/member3_pipeline.py` | objective 299.1 (was 292.8, more findings from Member 2 detectors); auth_gateway now PROPOSED (unknown-purpose RSA finding) |
+| C8 docs read | WebFetch docs.sarvam.ai (llms.txt, authentication, pricing, rate limits, chat-completions v1) | endpoint `/v1/chat/completions`, header `api-subscription-key`; models only `sarvam-105b`, `sarvam-105b-conversations` (sarvam-30b not accepted); Rs 15/M in, Rs 60/M out excl. GST; 60 rpm; 402 = credits exhausted |
+| C8 tests | `tests/test_member3_sarvam.py` (fake HTTP transport) | validator rejects forced bad answers (fake approval, wrong ID, role swap, secret); fallback on no key / no budget / policy / 429 / 402; key only in header |
+| C8 preview | `scripts/evaluate_agent.py --preview` | 11 of 24 questions would reach the cloud; estimate Rs 0.20 typical, Rs 0.73 worst case |
+| `.env` | created by Claude from `.env.example` (blank) at the owner's request; owner filled keys | Claude never opened it; only booleans checked (SARVAM, QPIAI_OPT, QPIAI_QCLOUD set) |
+| C8 live run (owner-approved) | `scripts/evaluate_agent.py --mode sarvam --max-spend-inr 0.75` (no balance stated, hard cap used) | 17 requests, 8,701 prompt + 2,013 completion tokens, est. Rs 0.251; 8 SARVAM_CLOUD / 16 TEMPLATE_FALLBACK; v2 24/24; v3 (added after the run, applied offline to the same answers) 18/24; 6 cloud answers "unknown" despite evidence; 3 validator double-rejections (false alarms that failed safe) |
+| C4 QpiAI (owner-approved) | `scripts/member3_phase3.py --authorize-local-solve` | `solve(mode="local")`: optimal, execution_mode local, objective 299.1 = baseline 299.1, same assignment, solver 0.044 s; QAOA P(opt) 0.085 vs 0.0625 |
+| key leak check | scan of 285 output/report/code files for any `.env` value (count only) | 0 files |
+| C7 triage | `scripts/member3_phase5.py` | 79 rows / 8 repos; model macro-F1 0.273 vs rules 0.783: rules kept |
+| C1 notebooks | rename 09 -> `09_assistant_demo`; `build_member3_notebooks.py`; `jupyter nbconvert --execute` x10 to `scratch/derived/executed/` | first pass: 08 failed (round-2 label sources not fetched) -> fetched (9 sources, 0 failures) -> all 10 exit 0, 0 errors, 19 charts; tracked copies outputs cleared |
+| C9 contract | `scripts/build_member3_contract.py` | 4/4 examples validate (agent API now requires `mode`) |

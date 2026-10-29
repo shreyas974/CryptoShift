@@ -31,5 +31,10 @@ Regenerate: `.\.venv\Scripts\python.exe scripts/member3_pipeline.py` then `scrip
 2. Never offer an "approve" button that bypasses `scripts/approve_plan.py`; approvals need a named human and are
    bound to `plan_hash`. A changed plan invalidates earlier approvals.
 3. Do not present `READY` as "verified in production" or "secure".
-4. `scheduler_comparison.qaoa_simulator` is a SIMULATOR result; `qpiai_opt.authenticated_local_solve.status` is
-   currently `BLOCKED`.
+4. `scheduler_comparison.qaoa_simulator` is a SIMULATOR result. `qpiai_opt.authenticated_local_solve` is `RUN`
+   (owner-approved local solve; objective equal to the baseline, `same_input_comparison.difference` = 0.0) or
+   `BLOCKED` with a reason; show "equal, not better" honestly.
+5. Assistant responses (`schemas/member3/agent_api.schema.json`) carry `mode` = `SARVAM_CLOUD` or
+   `TEMPLATE_FALLBACK`; show it as a visible "Cloud AI: ON/OFF" badge. Edges in `plan.edges` with
+   `producer = inventory.relationships (Member 2)` are OBSERVED with file and line; `unknown_endpoints` must stay
+   visible as UNKNOWN.

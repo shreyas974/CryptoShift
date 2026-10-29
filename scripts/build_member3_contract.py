@@ -60,8 +60,12 @@ ROLLBACK_DOC = {"$schema": "https://json-schema.org/draft/2020-12/schema", "titl
 AGENT = {"$schema": "https://json-schema.org/draft/2020-12/schema", "title": "CryptoShift Assistant API (POST /ask)",
          "type": "object", "properties": {
              "request": {"type": "object", "required": ["question"], "properties": {"question": STR}, "additionalProperties": False},
-             "response": {"type": "object", "required": ["answer", "citations", "tools_used", "refused", "backend"],
-                          "properties": {"answer": STR, "citations": ARR_STR, "tools_used": ARR_STR, "refused": BOOL, "backend": STR}}},
+             "response": {"type": "object", "required": ["answer", "citations", "tools_used", "refused", "backend", "mode"],
+                          "properties": {"answer": STR, "citations": ARR_STR, "tools_used": ARR_STR, "refused": BOOL, "backend": STR,
+                                         "mode": {"enum": ["SARVAM_CLOUD", "TEMPLATE_FALLBACK"]},
+                                         "mode_reason": STR, "validator": STR,
+                                         "usage": {"type": "object", "properties": {"prompt_tokens": {"type": "integer"},
+                                                                                    "completion_tokens": {"type": "integer"}}}}}},
          "required": ["request", "response"]}
 
 

@@ -12,6 +12,8 @@
       "get_gate_results"
     ],
     "refused": false,
-    "backend": "template-deterministic-v1"
+    "backend": "template-deterministic-v1",
+    "mode": "TEMPLATE_FALLBACK",
+    "mode_reason": "template mode requested"
   }
 }

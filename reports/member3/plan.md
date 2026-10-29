@@ -1,12 +1,12 @@
 # Member 3 migration plan (generated)
 
-Generated 2026-10-29T07:03:38+00:00 from `demo_bank_app/configs` (SYNTHETIC demo bank). Plan hash `f2cf91922a3307bf`.
+Generated 2026-10-29T11:17:58+00:00 from `demo_bank_app/configs` (SYNTHETIC demo bank). Plan hash `ac4ea7e56f24a867`.
 
 ## Services
 
 | Service | Evidence | Findings | Risk (provisional) | Wave | Gate state | Blocking |
 |---|---|---|---|---|---|---|
-| auth_gateway | OBSERVED | 3 | 11.5 | 1 | READY | - |
+| auth_gateway | OBSERVED | 4 | 13.3 | 1 | PROPOSED | purpose_resolved |
 | card_vault | OBSERVED | 2 | 5.9 | 2 | READY | - |
 | interbank_tls | OBSERVED | 5 | 13.5 | 0 | READY | - |
 | ledger_audit | DECLARED_ONLY | 0 | 7.75 | 0 | PROPOSED | purpose_resolved |
@@ -15,8 +15,8 @@ Generated 2026-10-29T07:03:38+00:00 from `demo_bank_app/configs` (SYNTHETIC demo
 
 ## Schedule
 
-Objective 292.8; waves {'0': ['interbank_tls', 'ledger_audit'], '1': ['auth_gateway', 'payment_signing'], '2': ['card_vault', 'settlement_batch']}; dependency violations 0.
-Sensitivity: rank changed in 5/10 weight perturbations, schedule changed in 0/10.
+Objective 299.1; waves {'0': ['interbank_tls', 'ledger_audit'], '1': ['auth_gateway', 'payment_signing'], '2': ['card_vault', 'settlement_batch']}; dependency violations 0.
+Sensitivity: rank changed in 6/10 weight perturbations, schedule changed in 3/10.
 
 ## Dependency graph
 
