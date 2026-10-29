@@ -46,3 +46,14 @@ statuses in this register take precedence.
 | CESNET classifier | **VERIFIED demo — not crypto** | macro-F1 0.748 vs 0.010 majority, split by day | "Traffic classification demo; says nothing about quantum readiness." |
 | ML purpose triage | **VERIFIED negative result** | does not beat the rule engine (macro-F1 0.40 vs 0.81) | "Rules kept." |
 | Local AI agent | **PARTIAL** | template back-end 24/24 (after a logged fix; first run 21/24 true); LLM BLOCKED | Never "AI model answers" — it is a deterministic template. |
+
+## Additions: web app v2 (feature/webapp-v2)
+
+| Claim | Status | Evidence | Safe wording |
+|---|---|---|---|
+| Local web console (FastAPI + React) shows Member 2/3 outputs with provenance | **VERIFIED (local, 127.0.0.1)** | pytest 16 passed; Playwright 7 passed; `docs/evidence/webapp-log.md` | "Local prototype console." Never "production ready" or "bank-grade". |
+| Login, roles, CSRF, rate limits, CSP, hash-chained audit | **VERIFIED (tests)** | `tests/test_webapp_api.py`; CSP 0 violations in E2E | "Prototype security controls, tested locally." Not "compliant" or "certified". |
+| Accessibility | **VERIFIED for automated axe rules** | 0 violations, 12 pages × 2 themes | Not "WCAG compliant": human review still needed. |
+| Fig. 1 "Sorting line" | **VERIFIED as an explanation** | driven by the real plan/approval data | It illustrates; it is not evidence. |
+| Folder scan from the UI | **PARTIAL** | API + tests only | — |
+| Docker / CI | **PLANNED** | — | — |
