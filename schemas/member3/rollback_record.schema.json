@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Rollback record",
+  "type": "object",
+  "required": [
+    "label",
+    "restore",
+    "snapshot_sha256",
+    "trigger",
+    "recovery_check",
+    "rehearsal_result",
+    "warnings"
+  ],
+  "properties": {
+    "label": {
+      "type": "string"
+    },
+    "profile": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "restore": {
+      "type": "string"
+    },
+    "snapshot_sha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "trigger": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "recovery_check": {
+      "type": "string"
+    },
+    "recovery_command": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "rehearsal_result": {
+      "type": "object",
+      "properties": {
+        "forced_failure_detected": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "restored_hash_matches_snapshot": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "recovered": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "originals_unchanged": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "applies_to_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

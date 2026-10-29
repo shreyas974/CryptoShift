@@ -1,0 +1,19 @@
+{
+  "request": {
+    "question": "Which gates block ledger_audit?"
+  },
+  "response": {
+    "answer": "migrate:ledger_audit is PROPOSED (blocked by ['purpose_resolved']). Scope: generic loopback evidence, not the service's own stack.",
+    "citations": [
+      "gate:migrate:ledger_audit:purpose_resolved",
+      "migrate:ledger_audit"
+    ],
+    "tools_used": [
+      "get_gate_results"
+    ],
+    "refused": false,
+    "backend": "template-deterministic-v1",
+    "mode": "TEMPLATE_FALLBACK",
+    "mode_reason": "template mode requested"
+  }
+}

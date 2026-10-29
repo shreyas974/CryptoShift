@@ -1,0 +1,14 @@
+# SYNTHETIC fixture
+ledger:
+  audit:
+    signature-algorithm: SHA1withRSA
+    digest: SHA-256
+  tls:
+    enabled-protocols:
+      - TLSv1.2
+      - TLSv1.3
+    named-groups: [secp256r1, X25519MLKEM768]
+    disabled-ciphers:
+      - DES-CBC3-SHA
+  feature_flags:
+    LEGACY_RSA_2048_CONFIG: false

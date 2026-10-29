@@ -1,0 +1,248 @@
+[
+  {
+    "step_id": "migrate:auth_gateway",
+    "service_id": "auth_gateway",
+    "purposes": [
+      "digital_signature",
+      "key_establishment",
+      "message_digest",
+      "unknown"
+    ],
+    "gates": [
+      {
+        "gate": "purpose_resolved",
+        "status": "FAIL",
+        "evidence": "plan#services.auth_gateway",
+        "reason": "HOLD findings need human purpose review: ['INV-0002']"
+      },
+      {
+        "gate": "rollback_rehearsal",
+        "status": "PASS",
+        "evidence": "scratch/derived/member3/verification_evidence.json#rollback_rehearsal",
+        "reason": "forced failure detected=True, restored hash matches=True, classical recovery handshake ok=True, originals unchanged=True"
+      },
+      {
+        "gate": "mlkem_roundtrip_selftest",
+        "status": "PASS",
+        "evidence": "scratch/derived/member3/verification_evidence.json#selftests",
+        "reason": "2/2 ML-KEM-768 round-trip self-tests passed (not NIST KATs)"
+      },
+      {
+        "gate": "hybrid_handshake",
+        "status": "PASS",
+        "evidence": "scratch/derived/member3/verification_evidence.json#traces.after_hybrid",
+        "reason": "loopback handshake ok=True, protocol=TLSv1.3, group=X25519MLKEM768"
+      },
+      {
+        "gate": "compatibility_matrix",
+        "status": "PASS",
+        "evidence": "scratch/derived/member3/verification_evidence.json#compatibility_matrix",
+        "reason": "11/11 cases matched expectation"
+      },
+      {
+        "gate": "overhead",
+        "status": "PASS",
+        "evidence": "scratch/derived/member3/verification_evidence.json#overhead",
+        "reason": "median ratio 0.963 (limit 1.5, ASSUMPTION); extra handshake bytes 2264 (limit 4096, ASSUMPTION); loopback only"
+      },
+      {
+        "gate": "mldsa_sign_verify_selftest",
+        "status": "PASS",
+        "evidence": "scratch/derived/member3/verification_evidence.json#selftests",
+        "reason": "2/2 ML-DSA-65 sign/verify self-tests passed (incl. tamper rejection)"
+      }
+    ],
+    "state": "PROPOSED",
+    "blocking_gates": [
+      "purpose_resolved"
+    ],
+    "evidence_scope": "Generic loopback lab evidence (OpenSSL 3.5 s_server/s_client, test keys). It does NOT exercise the service's own stack (e.g. KMS key wrapping, JWT libraries, partner peers); READY means 'eligible for human review', not 'verified in production'."
+  },
+  {
+    "step_id": "migrate:card_vault",
+    "service_id": "card_vault",
+    "purposes": [
+      "key_establishment",
+      "symmetric_encryption"
+    ],
+    "gates": [
+      {
+        "gate": "purpose_resolved",
+        "status": "PASS",
+        "evidence": "plan#services.card_vault",
+        "reason": "all findings have a resolved purpose"
+      },
+      {
+        "gate": "rollback_rehearsal",
+        "status": "PASS",
+        "evidence": "scratch/derived/member3/verification_evidence.json#rollback_rehearsal",
+        "reason": "forced failure detected=True, restored hash matches=True, classical recovery handshake ok=True, originals unchanged=True"
+      },
+      {
+        "gate": "mlkem_roundtrip_selftest",
+        "status": "PASS",
+        "evidence": "scratch/derived/member3/verification_evidence.json#selftests",
+        "reason": "2/2 ML-KEM-768 round-trip self-tests passed (not NIST KATs)"
+      },
+      {
+        "gate": "hybrid_handshake",
+        "status": "PASS",
+        "evidence": "scratch/derived/member3/verification_evidence.json#traces.after_hybrid",
+        "reason": "loopback handshake ok=True, protocol=TLSv1.3, group=X25519MLKEM768"
+      },
+      {
+        "gate": "compatibility_matrix",
+        "status": "PASS",
+        "evidence": "scratch/derived/member3/verification_evidence.json#compatibility_matrix",
+        "reason": "11/11 cases matched expectation"
+      },
+      {
+        "gate": "overhead",
+        "status": "PASS",
+        "evidence": "scratch/derived/member3/verification_evidence.json#overhead",
+        "reason": "median ratio 0.963 (limit 1.5, ASSUMPTION); extra handshake bytes 2264 (limit 4096, ASSUMPTION); loopback only"
+      }
+    ],
+    "state": "READY",
+    "blocking_gates": [],
+    "evidence_scope": "Generic loopback lab evidence (OpenSSL 3.5 s_server/s_client, test keys). It does NOT exercise the service's own stack (e.g. KMS key wrapping, JWT libraries, partner peers); READY means 'eligible for human review', not 'verified in production'."
+  },
+  {
+    "step_id": "migrate:interbank_tls",
+    "service_id": "interbank_tls",
+    "purposes": [
+      "digital_signature",
+      "key_establishment",
+      "symmetric_encryption"
+    ],
+    "gates": [
+      {
+        "gate": "purpose_resolved",
+        "status": "PASS",
+        "evidence": "plan#services.interbank_tls",
+        "reason": "all findings have a resolved purpose"
+      },
+      {
+        "gate": "rollback_rehearsal",
+        "status": "PASS",
+        "evidence": "scratch/derived/member3/verification_evidence.json#rollback_rehearsal",
+        "reason": "forced failure detected=True, restored hash matches=True, classical recovery handshake ok=True, originals unchanged=True"
+      },
+      {
+        "gate": "mlkem_roundtrip_selftest",
+        "status": "PASS",
+        "evidence": "scratch/derived/member3/verification_evidence.json#selftests",
+        "reason": "2/2 ML-KEM-768 round-trip self-tests passed (not NIST KATs)"
+      },
+      {
+        "gate": "hybrid_handshake",
+        "status": "PASS",
+        "evidence": "scratch/derived/member3/verification_evidence.json#traces.after_hybrid",
+        "reason": "loopback handshake ok=True, protocol=TLSv1.3, group=X25519MLKEM768"
+      },
+      {
+        "gate": "compatibility_matrix",
+        "status": "PASS",
+        "evidence": "scratch/derived/member3/verification_evidence.json#compatibility_matrix",
+        "reason": "11/11 cases matched expectation"
+      },
+      {
+        "gate": "overhead",
+        "status": "PASS",
+        "evidence": "scratch/derived/member3/verification_evidence.json#overhead",
+        "reason": "median ratio 0.963 (limit 1.5, ASSUMPTION); extra handshake bytes 2264 (limit 4096, ASSUMPTION); loopback only"
+      },
+      {
+        "gate": "mldsa_sign_verify_selftest",
+        "status": "PASS",
+        "evidence": "scratch/derived/member3/verification_evidence.json#selftests",
+        "reason": "2/2 ML-DSA-65 sign/verify self-tests passed (incl. tamper rejection)"
+      }
+    ],
+    "state": "READY",
+    "blocking_gates": [],
+    "evidence_scope": "Generic loopback lab evidence (OpenSSL 3.5 s_server/s_client, test keys). It does NOT exercise the service's own stack (e.g. KMS key wrapping, JWT libraries, partner peers); READY means 'eligible for human review', not 'verified in production'."
+  },
+  {
+    "step_id": "migrate:ledger_audit",
+    "service_id": "ledger_audit",
+    "purposes": [
+      "unknown"
+    ],
+    "gates": [
+      {
+        "gate": "purpose_resolved",
+        "status": "FAIL",
+        "evidence": "plan#services.ledger_audit",
+        "reason": "no scanned evidence (DECLARED_ONLY): operation purposes unverified -> HOLD"
+      },
+      {
+        "gate": "rollback_rehearsal",
+        "status": "PASS",
+        "evidence": "scratch/derived/member3/verification_evidence.json#rollback_rehearsal",
+        "reason": "forced failure detected=True, restored hash matches=True, classical recovery handshake ok=True, originals unchanged=True"
+      }
+    ],
+    "state": "PROPOSED",
+    "blocking_gates": [
+      "purpose_resolved"
+    ],
+    "evidence_scope": "Generic loopback lab evidence (OpenSSL 3.5 s_server/s_client, test keys). It does NOT exercise the service's own stack (e.g. KMS key wrapping, JWT libraries, partner peers); READY means 'eligible for human review', not 'verified in production'."
+  },
+  {
+    "step_id": "migrate:payment_signing",
+    "service_id": "payment_signing",
+    "purposes": [
+      "digital_signature"
+    ],
+    "gates": [
+      {
+        "gate": "purpose_resolved",
+        "status": "PASS",
+        "evidence": "plan#services.payment_signing",
+        "reason": "all findings have a resolved purpose"
+      },
+      {
+        "gate": "rollback_rehearsal",
+        "status": "PASS",
+        "evidence": "scratch/derived/member3/verification_evidence.json#rollback_rehearsal",
+        "reason": "forced failure detected=True, restored hash matches=True, classical recovery handshake ok=True, originals unchanged=True"
+      },
+      {
+        "gate": "mldsa_sign_verify_selftest",
+        "status": "PASS",
+        "evidence": "scratch/derived/member3/verification_evidence.json#selftests",
+        "reason": "2/2 ML-DSA-65 sign/verify self-tests passed (incl. tamper rejection)"
+      }
+    ],
+    "state": "READY",
+    "blocking_gates": [],
+    "evidence_scope": "Generic loopback lab evidence (OpenSSL 3.5 s_server/s_client, test keys). It does NOT exercise the service's own stack (e.g. KMS key wrapping, JWT libraries, partner peers); READY means 'eligible for human review', not 'verified in production'."
+  },
+  {
+    "step_id": "migrate:settlement_batch",
+    "service_id": "settlement_batch",
+    "purposes": [
+      "unknown"
+    ],
+    "gates": [
+      {
+        "gate": "purpose_resolved",
+        "status": "FAIL",
+        "evidence": "plan#services.settlement_batch",
+        "reason": "no scanned evidence (DECLARED_ONLY): operation purposes unverified -> HOLD"
+      },
+      {
+        "gate": "rollback_rehearsal",
+        "status": "PASS",
+        "evidence": "scratch/derived/member3/verification_evidence.json#rollback_rehearsal",
+        "reason": "forced failure detected=True, restored hash matches=True, classical recovery handshake ok=True, originals unchanged=True"
+      }
+    ],
+    "state": "PROPOSED",
+    "blocking_gates": [
+      "purpose_resolved"
+    ],
+    "evidence_scope": "Generic loopback lab evidence (OpenSSL 3.5 s_server/s_client, test keys). It does NOT exercise the service's own stack (e.g. KMS key wrapping, JWT libraries, partner peers); READY means 'eligible for human review', not 'verified in production'."
+  }
+]

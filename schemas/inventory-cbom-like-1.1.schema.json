@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cryptoshift.local/schemas/inventory-cbom-like-1.1.schema.json",
+  "title": "CryptoShift CBOM-like inventory v1.1 (NOT CycloneDX)",
+  "description": "Produced by src/cryptoshift/inventory/report.py build_cbom_like(). Static analysis of supported file types only; never complete.",
+  "type": "object",
+  "required": ["format", "generated_at_utc", "scan", "target", "review_policy", "summary", "services", "findings", "relationships"],
+  "properties": {
+    "format": {"const": "cryptoshift-cbom-like/1.1"},
+    "format_note": {"type": "string"},
+    "generated_at_utc": {"type": "string"},
+    "scan": {
+      "type": "object",
+      "required": ["started_utc", "finished_utc", "detector_versions", "input_sha256", "input_set_sha256"],
+      "properties": {
+        "detector_versions": {"type": "object", "additionalProperties": {"type": "string"}},
+        "input_files_parsed": {"type": "integer"},
+        "input_sha256": {"type": "object", "additionalProperties": {"type": "string", "pattern": "^[0-9a-f]{64}$"}},
+        "input_set_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "target": {"type": "string"},
+    "review_policy": {"type": "string"},
+    "summary": {"type": "object", "required": ["findings_total", "by_purpose", "by_service"]},
+    "services": {"type": "object"},
+    "parse_errors": {"type": "array"},
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["finding_id", "service_id", "service_id_basis", "service_id_confidence", "file_path", "line_number",
+                     "algorithm_family", "operation_purpose", "confidence", "ambiguity", "detector", "target_pqc_algorithm",
+                     "snippet_redacted", "human_review_status"],
+        "properties": {
+          "finding_id": {"type": "string", "pattern": "^INV-[0-9]{4,}$"},
+          "service_id": {"type": "string"},
+          "service_id_basis": {"type": "string", "minLength": 1},
+          "service_id_confidence": {"enum": ["high", "medium", "low", "none"]},
+          "file_path": {"type": "string", "not": {"pattern": "^([A-Za-z]:|/)"}},
+          "line_number": {"type": "integer", "minimum": 0},
+          "operation_purpose": {"enum": ["key_establishment", "digital_signature", "symmetric_encryption", "message_digest", "transport_protocol", "unknown"]},
+          "confidence": {"enum": ["high", "medium", "low"]},
+          "ambiguity": {"enum": ["none", "ambiguous", "unknown"]},
+          "detector": {"enum": ["python_ast", "tls_config", "dependency_manifest", "certificate", "structured_config", "haproxy", "shell_script", "java_source"]},
+          "snippet_redacted": {"type": "string", "maxLength": 160},
+          "human_review_status": {"const": "requires_human_review"}
+        }
+      }
+    },
+    "relationships": {
+      "type": "object",
+      "required": ["edges", "unknown_references"],
+      "properties": {
+        "edges": {"type": "array", "items": {"$ref": "relationships.schema.json#/properties/edges/items"}},
+        "unknown_references": {"type": "array"}
+      }
+    }
+  }
+}

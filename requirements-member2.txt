@@ -1,0 +1,7 @@
+# Member 2 (discovery and inventory) extras, pinned after install on 2026-10-29. Install inside .venv only:
+#   .\.venv\Scripts\python.exe -m pip install -r requirements.txt -r requirements-member2.txt
+# PyYAML is already required by requirements.txt (yaml compose marks for YAML line numbers).
+jsonschema==4.26.0           # schema validation (relationships, inventory v1.1, CycloneDX 1.6 subset)
+referencing==0.37.0          # $ref resolution for the CycloneDX schema bundle
+jsonschema-specifications==2025.9.1
+openpyxl==3.1.5              # reads CryptoAPI-Bench_details.xlsx (evaluation only)
