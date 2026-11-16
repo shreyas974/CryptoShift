@@ -195,7 +195,7 @@ function FlatGraph({ graph, plan, selected, onSelect, cycleEdges, hl }: { graph:
         <span className="small muted">Same data and selection as the figure · arrows point from a service to what it depends on</span>
       </div>
       <div style={{ overflowX: "auto" }}>
-        <svg className="flat-graph" viewBox={`0 0 ${width} ${height}`} width={width} height={height} style={{ maxWidth: "none" }} role="img" aria-label="Layered dependency graph">
+        <svg className="flat-graph" viewBox={`0 0 ${width} ${height}`} width={width} height={height} style={{ maxWidth: "none" }} role="group" aria-label="Layered dependency graph: select a service to see its dependencies">
           <defs>
             <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M0 0 8 4 0 8z" fill="context-stroke" />

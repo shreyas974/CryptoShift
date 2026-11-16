@@ -12,22 +12,22 @@
   --cs-border-strong: #d4bc9e;
   --cs-text: #1c1917;
   --cs-text-2: #44403c;
-  --cs-muted: #78716c;
+  --cs-muted: #665e57;
   --cs-sidebar: #1b1715;
   --cs-sidebar-2: #28221e;
   --cs-sidebar-text: #dad2c7;
   --cs-accent: #d97706;
-  --cs-accent-strong: #b45309;
+  --cs-accent-strong: #92400e;
   --cs-accent-tint: #fef3c7;
-  --cs-green: #059669;
+  --cs-green: #047857;
   --cs-green-bg: #ecfdf5;
-  --cs-amber: #b45309;
+  --cs-amber: #92400e;
   --cs-amber-bg: #fffbeb;
   --cs-gold: #f59e0b;
   --cs-gold-bg: #fef9c3;
-  --cs-red: #e11d48;
+  --cs-red: #be123c;
   --cs-red-bg: #fff1f2;
-  --cs-blue: #2563eb;
+  --cs-blue: #1d4ed8;
   --cs-blue-bg: #eff6ff;
   --cs-grey-bg: #f5efe6;
   --cs-orange-bg: #fff4ea;
@@ -267,15 +267,16 @@ p { margin: 0; }
 .btn:active:not(:disabled) { transform: translateY(0.5px) scale(0.98); }
 .btn:disabled { opacity: 0.55; cursor: not-allowed; }
 .btn-primary {
+  /* Dark text: white on this amber is 2.2–3.2:1 (fails WCAG AA); #1c1917 is 5.5–8.1:1. */
   background: linear-gradient(135deg, #f59e0b, #d97706);
   border-color: #b45309;
-  color: #ffffff !important;
+  color: #1c1917 !important;
   font-weight: 650;
   box-shadow: 0 2px 8px rgba(217, 119, 6, 0.25);
 }
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #fbbf24, #b45309);
-  color: #ffffff !important;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #1c1917 !important;
   box-shadow: 0 6px 16px rgba(217, 119, 6, 0.35);
 }
 .btn-danger { color: var(--cs-red); border-color: rgba(225, 29, 72, 0.25); }
@@ -675,3 +676,70 @@ dl.fields { display: grid; grid-template-columns: max-content minmax(0, 1fr); ga
   border-radius: 9999px;
   transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+/* ---------- Accounts, integrity, deadlines (security rebuild) ---------- */
+.sidebar-user { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.1); display: grid; gap: 2px; }
+.sidebar-user-name { color: #fff; font-weight: 650; font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sidebar-user-role { color: #a8a29e; font-size: 12px; }
+.sidebar-signout { margin-top: 8px; justify-content: center; color: #d6cebf; border: 1px solid rgba(255, 255, 255, 0.14); }
+.profile-menu .btn { justify-content: center; }
+.gate-warning { background: var(--cs-amber-bg); color: var(--cs-amber); border: 1px solid rgba(180, 83, 9, 0.25); border-radius: 9px; padding: 8px 10px; margin: 6px 0; }
+.text-danger { color: #9f1239; }
+.stack { display: grid; gap: 4px; }
+
+.integrity { display: flex; gap: 14px; align-items: flex-start; padding: 14px 16px; border-radius: var(--cs-radius); }
+.integrity p { margin: 4px 0 0; }
+.integrity-ok { background: var(--cs-green-bg); border: 1px solid rgba(5, 150, 105, 0.25); }
+.integrity-bad { background: var(--cs-red-bg); border: 1px solid rgba(225, 29, 72, 0.3); }
+.integrity-mark { flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; color: #fff; background: var(--cs-green); }
+.integrity-bad .integrity-mark { background: var(--cs-red); }
+.integrity code { word-break: break-all; }
+
+.deadline-track { position: relative; height: 54px; margin: 8px 6px 4px; }
+.deadline-track::before { content: ""; position: absolute; left: 0; right: 0; top: 30px; height: 6px; border-radius: 99px; background: linear-gradient(90deg, var(--cs-gold-bg), #fecaca 72%, #fda4af); }
+.deadline-elapsed { position: absolute; left: 0; top: 30px; height: 6px; border-radius: 99px; background: var(--cs-accent); }
+.deadline-now, .deadline-mark { position: absolute; transform: translateX(-50%); font-size: 12px; white-space: nowrap; }
+.deadline-now { top: 0; color: var(--cs-accent-strong); font-weight: 700; }
+.deadline-now::after { content: ""; position: absolute; left: 50%; top: 22px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: var(--cs-accent); border: 3px solid #fff; box-shadow: 0 0 0 1px var(--cs-accent); }
+.deadline-mark { top: 40px; color: var(--cs-red); }
+.deadline-mark::before { content: ""; position: absolute; left: 50%; top: -12px; width: 2px; height: 12px; background: var(--cs-red); }
+.deadline-legend { list-style: none; padding: 0; margin: 14px 0 8px; display: grid; gap: 6px; font-size: 13px; }
+.deadline-legend strong { display: inline-block; min-width: 42px; color: var(--cs-red); }
+
+.team-add { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--cs-border); display: grid; gap: 8px; }
+.team-add-grid { display: grid; grid-template-columns: 1fr 1fr auto 1fr auto; gap: 8px; }
+.team-add input { min-width: 0; width: 100%; height: 36px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--cs-border-strong); background: var(--cs-surface); }
+
+/* The breadcrumb repeats the active sidebar item; drop it before it squeezes the search box. */
+.crumbs { min-width: 0; white-space: nowrap; }
+@media (max-width: 1180px) {
+  .crumbs { display: none; }
+  .team-add-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 640px) {
+  .team-add-grid { grid-template-columns: 1fr; }
+  .deadline-now { font-size: 11px; }
+}
+
+/* Patch picker + detail layouts. Kept in CSS (not inline styles) so the breakpoints below can stack them. */
+.split-picker { grid-template-columns: minmax(250px, 0.8fr) minmax(0, 1.45fr); }
+.ax-part-btn { flex-wrap: wrap; }
+.ax-part-btn .mono { overflow-wrap: anywhere; }
+@media (max-width: 1280px) {
+  .split-picker { grid-template-columns: minmax(0, 1fr); }
+  .split-picker .ax-parts { max-height: 260px; }
+}
+
+/* Grid/flex children default to min-width:auto, so a wide table, code line or SVG stretched its whole card
+   past the viewport instead of scrolling inside its own overflow container. */
+.main-col, .content, .content > *, .card, .grid > *, .split > *, .ax-grid > *, .ax-detail { min-width: 0; }
+.ax-detail table { display: block; overflow-x: auto; }
+/* A <select> is as wide as its longest option (finding labels include full file paths). */
+select, .select { max-width: 100%; min-width: 0; }
+.ax-toolbar, .ax-toolbar > * { min-width: 0; max-width: 100%; }
+.ax-toolbar label { flex-wrap: wrap; }
+/* Migration waves: one column per wave on wide screens, wrapping to fit on narrow ones. */
+.wave-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+
+/* WCAG 2.2 target size (2.5.8): disclosure summaries were 23.8px tall. */
+summary { min-height: 28px; padding-block: 4px; cursor: pointer; }

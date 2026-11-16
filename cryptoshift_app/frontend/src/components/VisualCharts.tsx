@@ -199,7 +199,7 @@ export function WaveVisualizer({
 }) {
   return (
     <div style={{ display: "grid", gap: 14 }}>
-      <div style={{ display: "grid", gridTemplateColumns: `repeat(${waves.length + (cycles.length ? 1 : 0)}, minmax(0, 1fr))`, gap: 12 }}>
+      <div className="wave-grid">
         {waves.map((wave, idx) => (
           <div
             key={idx}

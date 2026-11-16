@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useApi, mutate, ApiError } from "../api/client";
-import type { AuditEntry, FindingsResponse, Graph, Patch, Plan, Repository } from "../api/types";
+import type { AuditList, Finding, FindingsResponse, Graph, Patch, Plan, Repository } from "../api/types";
 import { useApp } from "../components/Shell";
 import { Async, Badge, BasisBadge, Card, Empty, Field, PageHeader, RiskBadge, SearchBox, VerdictBadge, fmtTime } from "../components/ui";
 import { AssetFigure } from "../figures/asset/AssetFigure";
@@ -21,7 +21,7 @@ export function Overview() {
   const findings = useFindings();
   const patches = useApi<Patch[]>(repoId ? `/api/repositories/${repoId}/patches` : null);
   const plan = useApi<Plan>(repoId ? `/api/repositories/${repoId}/plan` : null);
-  const audit = useApi<AuditEntry[]>("/api/audit");
+  const audit = useApi<AuditList>("/api/audit?limit=5");
 
   if (!repoId) return <NoRepo />;
 
@@ -33,7 +33,7 @@ export function Overview() {
           <div style={{ flex: "1 1 560px" }}>
             <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 14, flexWrap: "wrap" }}>
               <span className="pill-badge pill-badge-sun">PQC-01 Banking Architecture</span>
-              <span className="badge badge-green" style={{ fontSize: 12 }}>● Live Monorepo Connected</span>
+              <span className="badge badge-green" style={{ fontSize: 12 }}>Bundled sample repository</span>
               <span className="badge badge-amber" style={{ fontSize: 12 }}>NIST FIPS 203/204 Target</span>
             </div>
             <h1>Verification-Gated Cryptographic Migration</h1>
@@ -302,7 +302,7 @@ export function Overview() {
 
                   <Card title="Recent Security Audit Ledger" actions={<Link to="/reports" className="btn btn-small">Audit Log</Link>}>
                     <ul className="list small">
-                      {(audit.data ?? []).slice(0, 5).map((a) => (
+                      {(audit.data?.entries ?? []).map((a) => (
                         <li key={a.id} style={{ justifyContent: "space-between" }}>
                           <span>
                             <strong>{a.action}</strong> <span className="muted">{a.detail}</span>
@@ -526,6 +526,7 @@ export function Inventory() {
                             {f.role.value ?? <em className="muted">unknown</em>} <BasisBadge basis={f.role.basis} />
                           </td>
                           <td className="hide-sm">{f.service?.name ?? <em className="muted">unmapped</em>}</td>
+                          <td><DeadlineCell finding={f} /></td>
                           <td><RiskBadge risk={f.risk} /></td>
                           <td className="hide-sm"><VerdictBadge verdict={f.verification.status} /></td>
                           <td>
@@ -557,6 +558,55 @@ export function Inventory() {
   );
 }
 
+// ---------------- NIST transition deadlines ----------------
+function DeadlineCell({ finding }: { finding: Finding }) {
+  const d = finding.deadline;
+  if (!d || d.status === "none") return <span className="small muted">None</span>;
+  return (
+    <span className="small" title={d.source ?? undefined}>
+      <Badge tone={d.status === "scheduled" ? "amber" : "red"}>{d.status === "scheduled" ? `${d.yearsLeft} yr left` : d.status}</Badge>
+      <div className="muted">{d.label}</div>
+    </span>
+  );
+}
+
+/** Where today sits between now and the 2030 / 2035 NIST cut-offs, and how many findings each one catches. */
+function DeadlineTimeline({ findings }: { findings: Finding[] }) {
+  const year = new Date().getFullYear();
+  const start = Math.min(year, 2024);
+  const end = 2036;
+  const pos = (y: number) => `${((y - start) / (end - start)) * 100}%`;
+  const pk = findings.filter((f) => f.deadline?.deprecatedAfter === 2030).length;
+  const sha = findings.filter((f) => f.deadline && f.deadline.deprecatedAfter === null && f.deadline.disallowedAfter === 2030).length;
+  const marks = [
+    { y: 2030, label: "2030", text: `Quantum-vulnerable public-key algorithms deprecated · ${pk} finding${pk === 1 ? "" : "s"}${sha ? ` · SHA-1 retired · ${sha}` : ""}` },
+    { y: 2035, label: "2035", text: `RSA, ECDSA, ECDH, EdDSA disallowed · ${pk} finding${pk === 1 ? "" : "s"}` },
+  ];
+  return (
+    <Card title="Time left to migrate (NIST IR 8547)">
+      <div className="deadline-track" role="img" aria-label={`Today is ${year}. ${marks.map((m) => `${m.label}: ${m.text}`).join(". ")}.`}>
+        <div className="deadline-elapsed" style={{ width: pos(year) }} />
+        <span className="deadline-now" style={{ left: pos(year) }}>
+          Today · {year}
+        </span>
+        {marks.map((m) => (
+          <span key={m.y} className="deadline-mark" style={{ left: pos(m.y) }}>
+            <strong>{m.label}</strong>
+          </span>
+        ))}
+      </div>
+      <ul className="deadline-legend">
+        {marks.map((m) => (
+          <li key={m.y}>
+            <strong>{m.label}</strong> {m.text}
+          </li>
+        ))}
+      </ul>
+      <p className="small muted">Systems that must keep data secret for years are exposed sooner: traffic recorded today can be decrypted once a large quantum computer exists (harvest now, decrypt later).</p>
+    </Card>
+  );
+}
+
 // ---------------- Risk Assessment ----------------
 export function Risk() {
   const res = useFindings();
@@ -584,6 +634,7 @@ export function Risk() {
                   </Card>
                 ))}
               </div>
+              <DeadlineTimeline findings={d.findings} />
               <Card title="Factor Scoring Breakdown">
                 <div className="table-wrap">
                   <table>
@@ -591,6 +642,7 @@ export function Risk() {
                       <tr>
                         <th>Finding</th>
                         <th>Scored Factors</th>
+                        <th>NIST deadline</th>
                         <th>Composite Risk</th>
                       </tr>
                     </thead>

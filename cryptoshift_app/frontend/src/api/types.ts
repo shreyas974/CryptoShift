@@ -7,11 +7,40 @@ export interface Field<T> {
 
 export interface Health {
   ok: boolean;
+  version: string;
+  startedAt: string;
+}
+
+export interface SystemInfo {
+  version: string;
   startedAt: string;
   python: string | null;
-  proposer: string;
-  sarvamAvailable?: boolean;
   node: string;
+  proposer: string;
+  sarvamConfigured: boolean;
+  maxConcurrentRuns: number;
+}
+
+export type Role = "viewer" | "engineer" | "reviewer" | "admin";
+
+export interface User {
+  id: string;
+  username: string;
+  displayName: string;
+  role: Role;
+  disabled: boolean;
+  createdAt: string;
+  lastLoginAt: string | null;
+  mustChangePassword: boolean;
+}
+
+export interface Deadline {
+  status: "none" | "scheduled" | "deprecated" | "disallowed";
+  label: string;
+  deprecatedAfter: number | null;
+  disallowedAfter: number | null;
+  yearsLeft: number | null;
+  source: string | null;
 }
 
 export interface Repository {
@@ -31,7 +60,7 @@ export interface RiskFactor {
 }
 
 export type CheckStatus = "queued" | "running" | "passed" | "failed" | "blocked" | "unavailable" | "not_applicable" | "not_run";
-export type Verdict = "verified_candidate" | "failed" | "incomplete" | "error" | null;
+export type Verdict = "verified_candidate" | "failed" | "incomplete" | "error" | "interrupted" | null;
 
 export interface Finding {
   id: string;
@@ -57,10 +86,11 @@ export interface Finding {
   risk: { score: number; band: "critical" | "high" | "medium" | "low"; factors: RiskFactor[] };
   recommendation: { action: string; target: string; standard: string | null; text: string; blockedBy: string | null };
   missingEvidence: string[];
+  deadline?: Deadline;
   dependencies: { upstream: string[]; downstream: string[] };
   patch: { id: string; status: PatchStatus; after: string } | null;
   proposalBlocked: string | null;
-  verification: { status: "no_patch" | "not_run" | "running" | "verified_candidate" | "failed" | "incomplete" | "error"; label: string };
+  verification: { status: "no_patch" | "not_run" | "running" | "verified_candidate" | "failed" | "incomplete" | "error" | "interrupted"; label: string };
 }
 
 export interface FindingsResponse {
@@ -141,6 +171,7 @@ export interface RunSummary {
   finishedAt: string | null;
   patchHash: string;
   checks: Check[];
+  startedBy?: string | null;
 }
 
 export interface TracePeer {
@@ -177,7 +208,7 @@ export interface Patch {
   hash: string;
   status: PatchStatus;
   createdAt: string;
-  decisions: { decision: string; reviewer: string; note: string; at: string; runId: string | null }[];
+  decisions: { decision: string; reviewer: string; username?: string; note: string; at: string; runId: string | null }[];
   release: { at: string; by: string; checkpointId: string } | null;
   latestRun: RunSummary | null;
 }
@@ -211,8 +242,24 @@ export interface TraceRecord {
 
 export interface AuditEntry {
   id: string;
+  seq: number;
   at: string;
   actor: string;
   action: string;
   detail: string;
+  legacy: boolean;
+}
+
+export interface AuditList {
+  total: number;
+  entries: AuditEntry[];
+}
+
+export interface AuditVerification {
+  ok: boolean;
+  entries: number;
+  head?: string;
+  brokenAt: number | null;
+  reason: string | null;
+  checkedAt: string;
 }

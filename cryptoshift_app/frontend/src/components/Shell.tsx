@@ -1,13 +1,12 @@
 import * as React from "react";
 import { NavLink, Outlet, useLocation, useNavigate, Link } from "react-router-dom";
 import { useApi, mutate } from "../api/client";
-import type { AuditEntry, Health, Repository, FindingsResponse } from "../api/types";
+import type { AuditList, Health, Repository, FindingsResponse } from "../api/types";
+import { useAuth, ROLE_LABEL } from "../auth/Auth";
 
 interface AppContextValue {
   repoId: string | null;
   setRepoId: (id: string) => void;
-  reviewer: string;
-  setReviewer: (name: string) => void;
   repos: Repository[];
   openSearch: () => void;
 }
@@ -15,8 +14,6 @@ interface AppContextValue {
 const AppContext = React.createContext<AppContextValue>({
   repoId: null,
   setRepoId: () => {},
-  reviewer: "",
-  setReviewer: () => {},
   repos: [],
   openSearch: () => {},
 });
@@ -72,11 +69,10 @@ export function Shell() {
   const repos = useApi<Repository[]>("/api/repositories");
   const health = useApi<Health>("/api/health", 10000);
   const [repoId, setRepo] = React.useState<string | null>(() => read("cs.repo"));
-  const [reviewer, setReviewerState] = React.useState<string>(() => read("cs.reviewer") ?? "");
+  const { user, signOut } = useAuth();
   const [navOpen, setNavOpen] = React.useState(false);
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [notificationsOpen, setNotificationsOpen] = React.useState(false);
-  const [onboardingOpen, setOnboardingOpen] = React.useState(false);
   const location = useLocation();
 
   React.useEffect(() => {
@@ -104,11 +100,6 @@ export function Shell() {
     setRepoId: (id) => {
       setRepo(id);
       write("cs.repo", id);
-    },
-    reviewer,
-    setReviewer: (name) => {
-      setReviewerState(name);
-      write("cs.reviewer", name);
     },
     repos: repos.data ?? [],
     openSearch: () => setSearchOpen(true),
@@ -155,15 +146,15 @@ export function Shell() {
               <br />
               <strong>Humans approve.</strong>
             </p>
-            <div style={{ marginTop: 12 }}>
-              <button
-                className="btn btn-small btn-ghost"
-                style={{ width: "100%", justifyContent: "center", color: "#d6cebf", border: "1px solid rgba(255,255,255,0.12)" }}
-                onClick={() => setOnboardingOpen(true)}
-              >
-                {reviewer ? `Reviewer: ${reviewer.split(" ")[0]}` : "Identify Reviewer"}
-              </button>
-            </div>
+            {user ? (
+              <div className="sidebar-user">
+                <span className="sidebar-user-name">{user.displayName}</span>
+                <span className="sidebar-user-role">{ROLE_LABEL[user.role]} · @{user.username}</span>
+                <button className="btn btn-small btn-ghost sidebar-signout" onClick={() => void signOut()}>
+                  Sign out
+                </button>
+              </div>
+            ) : null}
           </div>
         </nav>
         <div className="main-col">
@@ -175,7 +166,6 @@ export function Shell() {
             onMenu={() => setNavOpen((o) => !o)}
             onOpenSearch={() => setSearchOpen(true)}
             onToggleNotifications={() => setNotificationsOpen((o) => !o)}
-            onOpenOnboarding={() => setOnboardingOpen(true)}
           />
           <main id="main" className="content" tabIndex={-1}>
             {repos.error && !repos.data ? (
@@ -190,7 +180,6 @@ export function Shell() {
 
       {searchOpen ? <GlobalSearchModal repoId={repoId} onClose={() => setSearchOpen(false)} /> : null}
       {notificationsOpen ? <NotificationsDrawer onClose={() => setNotificationsOpen(false)} /> : null}
-      {onboardingOpen ? <ReviewerOnboardingModal reviewer={reviewer} onSave={(name) => { value.setReviewer(name); setOnboardingOpen(false); }} onClose={() => setOnboardingOpen(false)} /> : null}
     </AppContext.Provider>
   );
 }
@@ -203,7 +192,6 @@ function TopBar({
   onMenu,
   onOpenSearch,
   onToggleNotifications,
-  onOpenOnboarding,
 }: {
   crumbs: { to: string; label: string }[];
   online: boolean;
@@ -212,13 +200,13 @@ function TopBar({
   onMenu: () => void;
   onOpenSearch: () => void;
   onToggleNotifications: () => void;
-  onOpenOnboarding: () => void;
 }) {
-  const { repoId, setRepoId, repos, reviewer } = useApp();
+  const { repoId, setRepoId, repos } = useApp();
+  const { user, can, signOut } = useAuth();
   const [busy, setBusy] = React.useState(false);
   const [profileOpen, setProfileOpen] = React.useState(false);
-  const audit = useApi<AuditEntry[]>("/api/audit", 5000);
-  const recentCount = audit.data?.length ?? 0;
+  const audit = useApi<AuditList>("/api/audit?limit=1", 10000);
+  const recentCount = audit.data?.total ?? 0;
 
   return (
     <header className="topbar">
@@ -262,6 +250,7 @@ function TopBar({
         </button>
       </div>
 
+      {can("engineer") ? (
       <button
         className="btn"
         disabled={!online || !repoId || busy}
@@ -276,6 +265,7 @@ function TopBar({
       >
         {busy ? "Scanning…" : "Rescan"}
       </button>
+      ) : null}
 
       {/* Activity / Notification Bell */}
       <button
@@ -304,30 +294,30 @@ function TopBar({
         ) : null}
       </button>
 
-      <span className={online ? "conn conn-on" : "conn conn-off"} title={online ? `Backend connected · ${health?.python ?? "Python not found: tests cannot run"}` : `Backend offline${healthError ? ": " + healthError : ""}`} role="status">
+      <span className={online ? "conn conn-on" : "conn conn-off"} title={online ? `Server connected · version ${health?.version ?? "?"}` : `Server offline${healthError ? ": " + healthError : ""}`} role="status">
         <span className="conn-dot" aria-hidden="true" />
         {online ? "Connected" : "Offline"}
       </span>
 
       <div className="profile">
-        <button className="avatar" aria-haspopup="true" aria-expanded={profileOpen} onClick={() => setProfileOpen((o) => !o)} aria-label="Reviewer profile">
-          {(reviewer || "?").slice(0, 1).toUpperCase()}
+        <button className="avatar" aria-haspopup="true" aria-expanded={profileOpen} onClick={() => setProfileOpen((o) => !o)} aria-label="Account menu">
+          {(user?.displayName || user?.username || "?").slice(0, 1).toUpperCase()}
         </button>
-        {profileOpen ? (
+        {profileOpen && user ? (
           <div className="profile-menu" role="menu">
-            <p>{reviewer ? <>Reviewing as <strong>{reviewer}</strong></> : "No reviewer name set"}</p>
-            <button
-              className="btn btn-primary btn-small"
-              onClick={() => {
-                setProfileOpen(false);
-                onOpenOnboarding();
-              }}
-            >
-              {reviewer ? "Switch / Edit Reviewer" : "Sign In / Set Reviewer"}
-            </button>
-            <Link role="menuitem" to="/settings" onClick={() => setProfileOpen(false)} style={{ fontSize: 12.5, color: "var(--cs-muted)" }}>
-              All settings & diagnostics
+            <p>
+              <strong>{user.displayName}</strong>
+              <br />
+              <span className="small muted">
+                @{user.username} · {ROLE_LABEL[user.role]}
+              </span>
+            </p>
+            <Link role="menuitem" to="/settings" onClick={() => setProfileOpen(false)} className="btn btn-small">
+              Account &amp; security
             </Link>
+            <button role="menuitem" className="btn btn-small btn-ghost" onClick={() => void signOut()}>
+              Sign out
+            </button>
           </div>
         ) : null}
       </div>
@@ -424,78 +414,10 @@ function GlobalSearchModal({ repoId, onClose }: { repoId: string | null; onClose
   );
 }
 
-// ---------------- Reviewer Onboarding Modal ----------------
-function ReviewerOnboardingModal({
-  reviewer,
-  onSave,
-  onClose,
-}: {
-  reviewer: string;
-  onSave: (name: string) => void;
-  onClose: () => void;
-}) {
-  const [name, setName] = React.useState(reviewer);
-  const [role, setRole] = React.useState("Cryptographic Security Auditor");
-  const [cert, setCert] = React.useState("PQC-Reviewer-SecKey");
-
-  return (
-    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-label="Reviewer Onboarding">
-      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <h3>Named Reviewer Identity</h3>
-          <button className="btn btn-ghost btn-small" onClick={onClose}>✕</button>
-        </div>
-        <p style={{ fontSize: 13.5, color: "var(--cs-text-2)", marginBottom: 16 }}>
-          Under PQC-01 regulatory compliance, every patch approval, rejection, and release requires a verified human actor. All decisions are immutably logged into the audit ledger.
-        </p>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (name.trim()) onSave(name.trim());
-          }}
-        >
-          <div className="form-row">
-            <label htmlFor="reviewer-name" style={{ fontWeight: 600, fontSize: 13 }}>Full Name / Signer</label>
-            <input
-              id="reviewer-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Dr. Aris Thorne"
-              required
-            />
-          </div>
-          <div className="form-row">
-            <label htmlFor="reviewer-role" style={{ fontWeight: 600, fontSize: 13 }}>Reviewer Role</label>
-            <select id="reviewer-role" value={role} onChange={(e) => setRole(e.target.value)} className="select">
-              <option value="Cryptographic Security Auditor">Cryptographic Security Auditor</option>
-              <option value="SecOps Lead Engineer">SecOps Lead Engineer</option>
-              <option value="Banking Infrastructure Architect">Banking Infrastructure Architect</option>
-              <option value="Compliance & Risk Officer">Compliance & Risk Officer</option>
-            </select>
-          </div>
-          <div className="form-row">
-            <label htmlFor="reviewer-cert" style={{ fontWeight: 600, fontSize: 13 }}>Attestation Token / Key</label>
-            <input
-              id="reviewer-cert"
-              value={cert}
-              onChange={(e) => setCert(e.target.value)}
-              placeholder="Hardware Token or Hardware Key ID"
-            />
-          </div>
-          <div className="kv" style={{ marginTop: 20, justifyContent: "flex-end" }}>
-            <button type="button" className="btn" onClick={onClose}>Cancel</button>
-            <button type="submit" className="btn btn-primary" disabled={!name.trim()}>Set Reviewer</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
-
 // ---------------- Notifications / Activity Stream Drawer ----------------
 function NotificationsDrawer({ onClose }: { onClose: () => void }) {
-  const audit = useApi<AuditEntry[]>("/api/audit", 4000);
-  const events = audit.data ?? [];
+  const audit = useApi<AuditList>("/api/audit?limit=15", 5000);
+  const events = audit.data?.entries ?? [];
 
   return (
     <>
