@@ -1,0 +1,26 @@
+# CryptoShift web app: API + built UI in one container.
+#   docker build -f docker/Dockerfile.web -t cryptoshift-web .
+#   docker run --rm -p 127.0.0.1:8787:8787 -v cryptoshift-data:/data --read-only --tmpfs /tmp cryptoshift-web
+# The first start prints a one-time setup code: `docker logs <container>`.
+FROM node:22-bookworm-slim AS build
+WORKDIR /app/cryptoshift_app
+COPY cryptoshift_app/frontend/package.json cryptoshift_app/frontend/package-lock.json frontend/
+RUN npm --prefix frontend ci --no-audit --no-fund
+COPY cryptoshift_app/ ./
+RUN npm --prefix frontend run build
+
+FROM node:22-bookworm-slim
+# Python runs the sample repository's tests during verification.
+RUN apt-get update && apt-get install -y --no-install-recommends python3 && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY --from=build /app/cryptoshift_app/package.json ./
+COPY --from=build /app/cryptoshift_app/backend/src ./backend/src
+COPY --from=build /app/cryptoshift_app/sample-repos ./sample-repos
+COPY --from=build /app/cryptoshift_app/frontend/dist ./frontend/dist
+ENV NODE_ENV=production HOST=0.0.0.0 PORT=8787 CRYPTOSHIFT_DATA_DIR=/data CRYPTOSHIFT_PYTHON=python3
+RUN mkdir -p /data && chown node:node /data
+USER node
+VOLUME ["/data"]
+EXPOSE 8787
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s CMD node -e "fetch('http://127.0.0.1:8787/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+CMD ["node", "backend/src/server.js"]

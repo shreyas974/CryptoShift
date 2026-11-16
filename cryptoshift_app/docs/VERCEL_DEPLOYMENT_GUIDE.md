@@ -1,5 +1,15 @@
 # Deploying CryptoShift to Vercel
 
+> **Demo deployments only.** On Vercel, CryptoShift keeps its data in `/tmp`, which is temporary per instance.
+> Accounts, sessions, decisions and the audit log disappear when an instance is recycled, and separate
+> instances do not share sessions. Set `CRYPTOSHIFT_SETUP_TOKEN` (16+ random characters) as a project secret so
+> that you can create the first administrator, then remove it. For real use, deploy `docker/Dockerfile.web`
+> with a persistent volume. See [SECURITY.md](../SECURITY.md).
+>
+> **Hybrid (Option 2) must stay same-origin.** The API sends no CORS headers and its session cookie is
+> `SameSite=Strict`, so a UI calling the API on another domain (`VITE_API_BASE=https://api.example.com`) is refused
+> by design. Proxy `/api/*` to the backend with a Vercel rewrite instead, so the browser only ever talks to one origin.
+
 CryptoShift is fully prepared for deployment on **Vercel**. You can deploy it using either:
 1. **Option 1: All-in-One Full-Stack on Vercel (Fastest & Simplest)** — Both the React sunlit glass UI and the Node.js API run serverlessly on Vercel.
 2. **Option 2: Hybrid Enterprise Deployment (Best for Production Banking)** — Deploy the React frontend to Vercel's global Edge CDN, while running the Python/Node backend on a persistent container platform (e.g. Railway, Render, or AWS ECS) where native Python test vectors run continuously.
