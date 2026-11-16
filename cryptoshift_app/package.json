@@ -12,6 +12,6 @@
     "build": "npm --prefix frontend run build",
     "start": "npm run build && node backend/src/server.js",
     "typecheck": "npm --prefix frontend run typecheck",
-    "test": "node tests/api.test.mjs"
+    "test": "node --test tests/unit.test.mjs && node tests/api.test.mjs"
   }
 }

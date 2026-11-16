@@ -25,10 +25,13 @@ export function pythonCommand() {
 
 function run(cmd, args, cwd, timeoutMs = 60000) {
   return new Promise((resolve) => {
-    const child = spawn(cmd, args, { cwd, env: { ...process.env, PYTHONDONTWRITEBYTECODE: "1", PYTHONPATH: cwd } });
+    // Minimal environment: the code under test never sees the server's secrets (API keys etc.).
+    const env = { PATH: process.env.PATH ?? "", PYTHONDONTWRITEBYTECODE: "1", PYTHONPATH: cwd, PYTHONHASHSEED: "0", LANG: "C.UTF-8" };
+    for (const k of ["SYSTEMROOT", "TEMP", "TMP", "HOME"]) if (process.env[k]) env[k] = process.env[k];
+    const child = spawn(cmd, args, { cwd, env });
     let stdout = "";
     let stderr = "";
-    const timer = setTimeout(() => child.kill(), timeoutMs);
+    const timer = setTimeout(() => child.kill("SIGKILL"), timeoutMs);
     child.stdout.on("data", (d) => (stdout += d));
     child.stderr.on("data", (d) => (stderr += d));
     child.on("close", (code) => {
@@ -57,11 +60,15 @@ function parseUnittest(output) {
   return { ran, failing, reasons, ok: /\nOK/.test(output) || /^OK/m.test(output) };
 }
 
-export function startRun(patchId, actor) {
+export const MAX_CONCURRENT_RUNS = Number(process.env.CRYPTOSHIFT_MAX_RUNS ?? 2);
+
+export function startRun(patchId, user) {
   const patch = db().patches[patchId];
   if (!patch) return { error: 404, message: "Patch not found" };
-  const running = Object.values(db().runs).find((r) => r.patchId === patchId && r.status === "running");
+  const active = Object.values(db().runs).filter((r) => r.status === "running");
+  const running = active.find((r) => r.patchId === patchId);
   if (running) return { run: running };
+  if (active.length >= MAX_CONCURRENT_RUNS) return { error: 429, message: `${active.length} verification runs are already in progress. Try again when one finishes.` };
   const runRecord = {
     id: shortId(`${patchId}:run:${Date.now()}`),
     patchId,
@@ -74,10 +81,11 @@ export function startRun(patchId, actor) {
     python: pythonCommand()?.version ?? null,
     checks: CHECKS.map((c) => ({ ...c, status: "queued", detail: "", output: "", startedAt: null, finishedAt: null })),
     traces: null,
+    startedBy: user ? { id: user.id, username: user.username } : null,
   };
   db().runs[runRecord.id] = runRecord;
   save();
-  audit("verification.started", `${patch.file}:${patch.line}`, actor || "system");
+  audit("verification.started", `${patch.file}:${patch.line}`, user?.username ?? "system");
   execute(runRecord, patch).catch((error) => {
     runRecord.status = "complete";
     runRecord.verdict = "error";

@@ -3,28 +3,20 @@
 // proposals are labelled with the engine that produced them.
 import fs from "node:fs";
 import path from "node:path";
-import { db, save, audit, sha256, shortId } from "./store.js";
-import { readFile, repoDir } from "./repos.js";
+import { db, save, audit, sha256, shortId, ROOT } from "./store.js";
+import { readFile, resolveInRepo } from "./repos.js";
 
+// The key comes from the environment or from the project's own .env (never from the client).
 export function getSarvamKey() {
   if (process.env.SARVAM_API_KEY) return process.env.SARVAM_API_KEY;
-  try {
-    const candidatePaths = [
-      path.resolve(process.cwd(), "..", ".env"),
-      path.resolve(process.cwd(), ".env"),
-      path.resolve(process.cwd(), "..", "..", ".env"),
-    ];
-    for (const p of candidatePaths) {
-      if (fs.existsSync(p)) {
-        const text = fs.readFileSync(p, "utf-8");
-        const match = text.match(/^\s*SARVAM_API_KEY\s*=\s*(.+)$/m);
-        if (match) {
-          process.env.SARVAM_API_KEY = match[1].trim();
-          return process.env.SARVAM_API_KEY;
-        }
-      }
+  for (const p of [path.join(ROOT, ".env"), path.join(ROOT, "..", ".env")]) {
+    try {
+      const match = fs.readFileSync(p, "utf-8").match(/^\s*SARVAM_API_KEY\s*=\s*(.+)$/m);
+      if (match) return (process.env.SARVAM_API_KEY = match[1].trim().replace(/^["']|["']$/g, ""));
+    } catch {
+      /* no .env here */
     }
-  } catch {}
+  }
   return null;
 }
 
@@ -50,8 +42,7 @@ export async function askSarvam(prompt) {
     });
     clearTimeout(timer);
     if (!res.ok) {
-      const errText = await res.text();
-      throw new Error(`HTTP ${res.status}: ${errText}`);
+      throw new Error(`the service answered HTTP ${res.status}`);
     }
     const data = await res.json();
     return data.choices?.[0]?.message?.content?.trim() || "";
@@ -153,34 +144,38 @@ export function latestRun(patchId) {
     .sort((a, b) => b.startedAt.localeCompare(a.startedAt))[0] ?? null;
 }
 
-export function decide(patchId, { decision, reviewer, note, actor, reason }) {
+// Human decision. The reviewer is the signed-in user (never a name supplied by the client), and
+// four-eyes applies: whoever started the verification run cannot approve the same patch.
+export function decide(patchId, { decision, note }, user) {
   const patch = db().patches[patchId];
   if (!patch) return { error: 404, message: "Patch not found" };
-  const effectiveReviewer = (reviewer || actor || "").trim();
-  const effectiveNote = note ?? reason ?? "";
-  if (!effectiveReviewer) return { error: 400, message: "A named reviewer is required" };
+  if (!user) return { error: 401, message: "Sign in to record a decision" };
   if (!["approve", "reject", "request_changes"].includes(decision)) return { error: 400, message: "Unknown decision" };
+  const effectiveNote = String(note ?? "").trim().slice(0, 1000);
+  if (decision !== "approve" && !effectiveNote) return { error: 400, message: "Explain the decision so the engineer knows what to change" };
   if (patch.status !== "proposed") return { error: 409, message: `Patch is ${patch.status}; decisions are only taken on proposed patches` };
+  const run = latestRun(patchId);
   if (decision === "approve") {
-    const run = latestRun(patchId);
     if (!run || run.status !== "complete") return { error: 409, message: "Approval requires a completed verification run" };
     if (run.verdict !== "verified_candidate") return { error: 409, message: `Approval blocked: latest verification verdict is ${run.verdict}` };
     if (run.patchHash !== patch.hash) return { error: 409, message: "Verification ran against a different patch revision" };
+    if (run.startedBy?.id === user.id) return { error: 403, message: "Four-eyes rule: you started this verification run, so a different reviewer must approve it" };
   }
-  const record = { decision, reviewer: effectiveReviewer, note: effectiveNote, at: new Date().toISOString(), runId: latestRun(patchId)?.id ?? null };
+  const record = { decision, reviewer: user.displayName, reviewerId: user.id, username: user.username, note: effectiveNote, at: new Date().toISOString(), runId: run?.id ?? null };
   patch.decisions.push(record);
   if (decision === "approve") patch.status = "approved";
   if (decision === "reject") patch.status = "rejected";
   save();
-  audit(`patch.${decision}`, `${patch.file}:${patch.line}${effectiveNote ? " — " + effectiveNote : ""}`, record.reviewer);
+  audit(`patch.${decision}`, `${patch.file}:${patch.line}${effectiveNote ? " — " + effectiveNote : ""}`, user.username);
   return { patch };
 }
 
-export function release(patchId, actor) {
+export function release(patchId, user) {
+  const actor = user?.username;
   const patch = db().patches[patchId];
   if (!patch) return { error: 404, message: "Patch not found" };
   if (patch.status !== "approved") return { error: 409, message: "Only human-approved patches can be released" };
-  const full = path.join(repoDir(patch.repo), patch.file);
+  const full = resolveInRepo(patch.repo, patch.file);
   const original = fs.readFileSync(full, "utf8");
   let next;
   try {
@@ -209,11 +204,12 @@ export function release(patchId, actor) {
   return { patch, checkpoint };
 }
 
-export function rollback(checkpointId, actor) {
+export function rollback(checkpointId, user) {
+  const actor = user?.username;
   const checkpoint = db().checkpoints[checkpointId];
   if (!checkpoint) return { error: 404, message: "Checkpoint not found" };
   if (checkpoint.status !== "active") return { error: 409, message: "Checkpoint already restored" };
-  const full = path.join(repoDir(checkpoint.repo), checkpoint.file);
+  const full = resolveInRepo(checkpoint.repo, checkpoint.file);
   const current = fs.readFileSync(full, "utf8");
   if (sha256(current) !== checkpoint.releasedHash) return { error: 409, message: "File changed after release; refusing to overwrite. Resolve manually." };
   fs.writeFileSync(full, checkpoint.original);

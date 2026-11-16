@@ -4,6 +4,7 @@
 import { walk, readFile, manifestOf, serviceOf, repoDir } from "./repos.js";
 import { shortId, db, save, audit } from "./store.js";
 import { buildGraph } from "./graph.js";
+import { deadlineFor } from "./standards.js";
 
 const SKIP = [/^tests\//, /^tools\//, /^shared\/bankcrypto\/primitives\.py$/];
 
@@ -152,7 +153,7 @@ function missingEvidence(finding) {
   return out;
 }
 
-export function scanRepository(repoId) {
+export function scanRepository(repoId, actor = "system") {
   const manifest = manifestOf(repoId);
   const all = walk(repoDir(repoId)).filter((rel) => rel.endsWith(".py") && !SKIP.some((re) => re.test(rel)));
   const raw = [];
@@ -211,6 +212,7 @@ export function scanRepository(repoId) {
     finding.risk = scoreRisk(finding, graph);
     finding.recommendation = recommendationFor(finding);
     finding.missingEvidence = missingEvidence(finding);
+    finding.deadline = deadlineFor(finding);
     finding.dependencies = finding.service
       ? { upstream: graph.dependenciesOf(finding.service.id), downstream: graph.dependentsOf(finding.service.id) }
       : { upstream: [], downstream: [] };
@@ -227,7 +229,7 @@ export function scanRepository(repoId) {
   };
   db().scans[repoId] = scan;
   save();
-  audit("scan.completed", `${repoId}: ${raw.length} findings in ${all.length} files`);
+  audit("scan.completed", `${repoId}: ${raw.length} findings in ${all.length} files`, actor);
   return scan;
 }
 

@@ -56,10 +56,23 @@ export function walk(dir, base = dir, out = []) {
   return out;
 }
 
+// Repository ids come from URLs: only names that exist in the workspace directory are accepted.
+export const isRepo = (id) => typeof id === "string" && /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(id) && listRepos().some((r) => r.id === id);
+
+/** Resolve a repository-relative path, refusing anything that leaves the repository (.., absolute paths, symlinks). */
+export function resolveInRepo(id, rel) {
+  const base = fs.realpathSync(repoDir(id));
+  const full = path.resolve(base, String(rel));
+  const inside = (p) => {
+    const r = path.relative(base, p);
+    return r !== "" && !r.startsWith("..") && !path.isAbsolute(r);
+  };
+  if (!inside(full) || !inside(fs.realpathSync(full))) throw new Error("path escapes repository");
+  return full;
+}
+
 export function readFile(id, rel) {
-  const full = path.join(repoDir(id), rel);
-  if (!full.startsWith(repoDir(id))) throw new Error("path escapes repository");
-  return fs.readFileSync(full, "utf8");
+  return fs.readFileSync(resolveInRepo(id, rel), "utf8");
 }
 
 export function serviceOf(manifest, rel) {
